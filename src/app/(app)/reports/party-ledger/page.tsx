@@ -22,9 +22,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
 
-function fmt(fils: bigint) {
-  return (Number(fils) / 100).toFixed(2);
-}
+const fmt = (n: bigint) => (Number(n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default async function PartyLedgerPage({
   searchParams,
@@ -51,7 +49,7 @@ await requireModule("reports");
         <form action="/reports/party-ledger" method="get" className="flex items-center gap-2">
           <Select name="party" defaultValue={selected?.id ?? ""}>
             <SelectTrigger className="w-96">
-              <SelectValue placeholder="â€”" />
+              <SelectValue placeholder="\u2014" />
             </SelectTrigger>
             <SelectContent className="max-h-80">
               {parties.map((p) => (
@@ -101,8 +99,8 @@ await requireModule("reports");
                         {r.docNo}
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.debit ? fmt(r.debit) : "â€”"}</TableCell>
-                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.credit ? fmt(r.credit) : "â€”"}</TableCell>
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.debit ? fmt(r.debit) : "\u2014"}</TableCell>
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.credit ? fmt(r.credit) : "\u2014"}</TableCell>
                     <TableCell className="text-end tabular-nums">{fmt(r.balance)}</TableCell>
                   </TableRow>
                 ))}

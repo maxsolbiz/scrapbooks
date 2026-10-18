@@ -14,6 +14,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
 
+const fmt = (n: bigint) => (Number(n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export default async function BalanceSheetPage() {
 await requireModule("reports");
   const locale = await getServerLocale();
@@ -27,12 +29,12 @@ await requireModule("reports");
       <Card>
         <CardContent>
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>â€”</TableHead>
-                <TableHead className="text-end">AED</TableHead>
-              </TableRow>
-            </TableHeader>
+<TableHeader>
+            <TableRow>
+              <TableHead>\u2014</TableHead>
+              <TableHead className="text-end">AED</TableHead>
+            </TableRow>
+          </TableHeader>
             <TableBody>
               <TableRow>
                 <TableCell colSpan={2} className="bg-muted/50 font-semibold">
@@ -46,14 +48,14 @@ await requireModule("reports");
                     {r.account.nameEn}
                   </TableCell>
                   <TableCell className="text-end tabular-nums">
-                    {(Number(r.amount) / 100).toFixed(2)}
+                    {fmt(r.amount)}
                   </TableCell>
                 </TableRow>
               ))}
               <TableRow>
                 <TableCell className="font-semibold ps-6">{t.nav.subtotal}</TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">
-                  {(Number(bs.assetsTotal) / 100).toFixed(2)}
+                  {fmt(bs.assetsTotal)}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -68,7 +70,7 @@ await requireModule("reports");
                     {r.account.nameEn}
                   </TableCell>
                   <TableCell className="text-end tabular-nums">
-                    {(Number(r.amount) / 100).toFixed(2)}
+                    {fmt(r.amount)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -84,7 +86,7 @@ await requireModule("reports");
                     {r.account.nameEn}
                   </TableCell>
                   <TableCell className="text-end tabular-nums">
-                    {(Number(r.amount) / 100).toFixed(2)}
+                    {fmt(r.amount)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -97,7 +99,7 @@ await requireModule("reports");
               <TableRow>
                 <TableCell className="font-semibold ps-6">{t.nav.subtotal}</TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">
-                  {(Number(bs.liabilitiesTotal + bs.equityTotal + bs.earnedEquity) / 100).toFixed(2)}
+                  {fmt(bs.liabilitiesTotal + bs.equityTotal + bs.earnedEquity)}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -110,7 +112,7 @@ await requireModule("reports");
                   </Badge>
                 </TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">
-                  {(Number(bs.grandTotal) / 100).toFixed(2)}
+                  {fmt(bs.grandTotal)}
                 </TableCell>
               </TableRow>
             </TableFooter>

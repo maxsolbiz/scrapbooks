@@ -28,10 +28,11 @@ await requireModule("reports");
   }
   const pl = await profitAndLoss(active);
 
+  const fmt = (n: bigint) => (Number(n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const row = (label: string, amount: bigint, strong = false) => (
     <TableRow key={label} className={strong ? "font-semibold" : undefined}>
       <TableCell className={strong ? "font-semibold" : undefined}>{label}</TableCell>
-      <TableCell className="text-end tabular-nums">{(Number(amount) / 100).toFixed(2)}</TableCell>
+      <TableCell className="text-end tabular-nums">{fmt(amount)}</TableCell>
     </TableRow>
   );
 
@@ -60,7 +61,7 @@ await requireModule("reports");
               <TableRow>
                 <TableCell className="font-semibold">{t.nav.netProfit}</TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">
-                  {(Number(pl.net) / 100).toFixed(2)}
+                  {fmt(pl.net)}
                 </TableCell>
               </TableRow>
             </TableFooter>

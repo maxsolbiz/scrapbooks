@@ -22,9 +22,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
 
-function fmt(fils: bigint) {
-  return (Number(fils) / 100).toFixed(2);
-}
+const fmt = (n: bigint) => (Number(n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default async function AccountLedgerPage({
   searchParams,
@@ -97,10 +95,10 @@ await requireModule("reports");
                     <TableCell className="hidden font-mono text-xs sm:table-cell">{row.entryNo}</TableCell>
                     <TableCell className="text-xs">{row.narration}</TableCell>
                     <TableCell className="hidden text-end tabular-nums sm:table-cell">
-                      {row.debit ? fmt(row.debit) : "â€”"}
+                      {row.debit ? fmt(row.debit) : "\u2014"}
                     </TableCell>
                     <TableCell className="hidden text-end tabular-nums sm:table-cell">
-                      {row.credit ? fmt(row.credit) : "â€”"}
+                      {row.credit ? fmt(row.credit) : "\u2014"}
                     </TableCell>
                     <TableCell className="text-end tabular-nums">{fmt(row.balance)}</TableCell>
                   </TableRow>

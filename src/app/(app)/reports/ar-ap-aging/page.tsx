@@ -15,9 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
 
-function fmt(fils: bigint) {
-  return (Number(fils) / 100).toFixed(2);
-}
+const fmt = (n: bigint) => (Number(n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default async function AgingPage({
   searchParams,
@@ -53,7 +51,7 @@ await requireModule("reports");
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {dir === "SALES" ? t.payments.receipt : t.payments.payment} â€” {t.nav.reportsSub}
+        {dir === "SALES" ? t.payments.receipt : t.payments.payment} \u2014 {t.nav.reportsSub}
       </p>
       <Card>
         <CardContent>
@@ -77,10 +75,10 @@ await requireModule("reports");
                   <TableCell>{r.partyName}</TableCell>
                   <TableCell className="hidden sm:table-cell">{r.invoiceDate}</TableCell>
                   <TableCell className="text-end tabular-nums">{fmt(r.outstanding)}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d0_30 ? fmt(r.d0_30) : "â€”"}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d31_60 ? fmt(r.d31_60) : "â€”"}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d61_90 ? fmt(r.d61_90) : "â€”"}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d90plus ? fmt(r.d90plus) : "â€”"}</TableCell>
+<TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d0_30 ? fmt(r.d0_30) : "\u2014"}</TableCell>
+<TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d31_60 ? fmt(r.d31_60) : "\u2014"}</TableCell>
+<TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d61_90 ? fmt(r.d61_90) : "\u2014"}</TableCell>
+<TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d90plus ? fmt(r.d90plus) : "\u2014"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

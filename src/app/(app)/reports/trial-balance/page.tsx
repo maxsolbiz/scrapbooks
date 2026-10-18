@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function TrialBalancePage() {
   await requireUser();
@@ -24,12 +25,7 @@ export default async function TrialBalancePage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.trialBalance}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t.nav.asOf} {asOf.toISOString().slice(0, 10)}
-        </p>
-      </div>
+      <PageHeader title={t.nav.trialBalance} description={`${t.nav.asOf} ${asOf.toISOString().slice(0, 10)}`} />
       <Card>
         <CardContent>
           <Table>

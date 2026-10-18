@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function ProfitLossPage() {
   await requireUser();
@@ -36,12 +37,10 @@ export default async function ProfitLossPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.profitLoss}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t.nav.period} {active.starts.toISOString().slice(0, 10)} → {active.ends.toISOString().slice(0, 10)}
-        </p>
-      </div>
+      <PageHeader
+        title={t.nav.profitLoss}
+        description={`${t.nav.period} ${active.starts.toISOString().slice(0, 10)} → ${active.ends.toISOString().slice(0, 10)}`}
+      />
       <Card>
         <CardContent>
           <Table>

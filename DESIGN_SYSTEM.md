@@ -47,7 +47,7 @@
 - [ ] **P1.5 Arabic font application**: for `dir=rtl` set body font-family to Noto Kufi Arabic
       with Geist fallback for Latin digits/codes (test both locales after change).
 
-**Status: PENDING**
+**Status: COMPLETED** (2026-10-18)
 
 ## Phase 2 — Shell & Chrome (`AppShell.tsx`, new HeaderBar)
 

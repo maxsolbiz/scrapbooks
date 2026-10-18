@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function PaymentsPage() {
   await requireUser();
@@ -38,12 +39,11 @@ export default async function PaymentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.payments}</h1>
-        <Button asChild>
+        <PageHeader title={t.nav.payments} actions={<Button asChild>
           <Link href="/payments/new">
             <Plus className="size-4" /> {t.payments.new}
           </Link>
-        </Button>
+        </Button>} />
       </div>
 
       <Card>

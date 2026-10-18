@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireUser, canEdit } from "@/lib/guard";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsClient } from "./SettingsClient";
 
 export default async function SettingsPage() {
@@ -19,7 +20,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{user.role === "ADMIN" ? "Settings" : "Company"}</h1>
+      <PageHeader title={user.role === "ADMIN" ? "Settings" : "Company"} description={company.nameEn} />
       <SettingsClient
         company={{
           nameEn: company.nameEn,

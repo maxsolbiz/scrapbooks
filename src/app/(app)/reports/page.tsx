@@ -3,6 +3,7 @@ import { ChartColumnBig } from "lucide-react";
 import { requireUser } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const REPORTS = [
   { href: "/reports/trial-balance", key: "trialBalance" },
@@ -20,7 +21,7 @@ export default async function ReportsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{t.nav.reports}</h1>
+      <PageHeader title={t.nav.reports} description={t.nav.reportsSub} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {REPORTS.map((r) => (
           <Link key={r.href} href={r.href}>

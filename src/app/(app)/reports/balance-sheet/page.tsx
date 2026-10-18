@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function BalanceSheetPage() {
   await requireUser();
@@ -22,12 +23,7 @@ export default async function BalanceSheetPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.balanceSheet}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t.nav.asOf} {asOf.toISOString().slice(0, 10)}
-        </p>
-      </div>
+      <PageHeader title={t.nav.balanceSheet} description={`${t.nav.asOf} ${asOf.toISOString().slice(0, 10)}`} />
       <Card>
         <CardContent>
           <Table>

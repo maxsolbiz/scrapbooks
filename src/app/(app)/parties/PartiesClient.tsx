@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/layout/PageHeader";
 import type { Dictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -139,12 +140,14 @@ export function PartiesClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.parties}</h1>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" /> {t.parties.new}
-        </Button>
-      </div>
+      <PageHeader
+        title={t.nav.parties}
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="size-4" /> {t.parties.new}
+          </Button>
+        }
+      />
 
       <div className="rounded-md border">
         <Table>

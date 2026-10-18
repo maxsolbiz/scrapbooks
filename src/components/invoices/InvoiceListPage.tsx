@@ -7,6 +7,7 @@ import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   Table,
   TableBody,
@@ -41,14 +42,16 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <Button asChild>
-          <Link href={`${path}/new`}>
-            <Plus className="size-4" /> {t.invoices.new}
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        title={title}
+        actions={
+          <Button asChild>
+            <Link href={`${path}/new`}>
+              <Plus className="size-4" /> {t.invoices.new}
+            </Link>
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent>

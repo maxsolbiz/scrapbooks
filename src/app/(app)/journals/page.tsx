@@ -6,6 +6,7 @@ import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   Table,
   TableBody,
@@ -37,14 +38,16 @@ export default async function JournalsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.journals}</h1>
-        <Button asChild>
-          <Link href="/journals/new">
-            <Plus className="size-4" /> {t.journals.new}
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        title={t.nav.journals}
+        actions={
+          <Button asChild>
+            <Link href="/journals/new">
+              <Plus className="size-4" /> {t.journals.new}
+            </Link>
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent>

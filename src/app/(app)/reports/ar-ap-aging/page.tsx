@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 function fmt(fils: bigint) {
   return (Number(fils) / 100).toFixed(2);
@@ -41,7 +42,7 @@ export default async function AgingPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.arApAging}</h1>
+        <PageHeader title={t.nav.arApAging} className="mb-0" />
         <div className="flex gap-2">
           <Link href="/reports/ar-ap-aging?direction=SALES">
             <Badge variant={dir === "SALES" ? "default" : "outline"}>AR</Badge>

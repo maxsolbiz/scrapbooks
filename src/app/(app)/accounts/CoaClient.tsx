@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -114,12 +115,14 @@ export function CoaClient({ tree, dict }: { tree: FlatAccount[]; dict: Dictionar
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.accounts}</h1>
-        <Button onClick={() => openCreate()}>
-          <Plus className="size-4" /> {t.accounts.new}
-        </Button>
-      </div>
+      <PageHeader
+        title={t.nav.accounts}
+        actions={
+          <Button onClick={() => openCreate()}>
+            <Plus className="size-4" /> {t.accounts.new}
+          </Button>
+        }
+      />
 
       <div className="rounded-md border">
         <Table>

@@ -20,6 +20,7 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 function fmt(fils: bigint) {
   return (Number(fils) / 100).toFixed(2);
@@ -46,7 +47,7 @@ export default async function PartyLedgerPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.partyLedger}</h1>
+        <PageHeader title={t.nav.partyLedger} className="mb-0" />
         <form action="/reports/party-ledger" method="get" className="flex items-center gap-2">
           <Select name="party" defaultValue={selected?.id ?? ""}>
             <SelectTrigger className="w-96">

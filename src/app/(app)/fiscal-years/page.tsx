@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function FiscalYearsPage() {
   await requireUser();
@@ -21,7 +22,7 @@ export default async function FiscalYearsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{t.nav.fiscalYears}</h1>
+      <PageHeader title={t.nav.fiscalYears} />
       <Card>
         <CardContent>
           <Table>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Kufi_Arabic } from "next/font/google";
 import { getServerLocale, getDictionary, isRtl } from "@/lib/i18n";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 const notoKufiArabic = Noto_Kufi_Arabic({
-  variable: "--font-arabic",
+  variable: "--font-noto-kufi",
   subsets: ["arabic"],
 });
 
@@ -40,7 +41,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <LocaleProvider dict={dict} locale={locale}>
-          {children}
+          <ThemeProvider>{children}</ThemeProvider>
         </LocaleProvider>
       </body>
     </html>

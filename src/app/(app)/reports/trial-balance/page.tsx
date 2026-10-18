@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function TrialBalancePage() {
-await requireModule("reports");
+  await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const asOf = new Date();
@@ -22,6 +22,8 @@ await requireModule("reports");
 
   const debitGrand = rows.reduce((acc, r) => acc + (r.debitTotal > r.creditTotal ? r.debitTotal - r.creditTotal : 0n), 0n);
   const creditGrand = rows.reduce((acc, r) => acc + (r.creditTotal > r.debitTotal ? r.creditTotal - r.debitTotal : 0n), 0n);
+
+  const fmt = (n: bigint) => (Number(n) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div className="space-y-4">
@@ -45,10 +47,10 @@ await requireModule("reports");
                     <TableCell className="font-mono text-xs">{r.code}</TableCell>
                     <TableCell>{r.nameEn}</TableCell>
                     <TableCell className="text-end tabular-nums">
-                      {balancingDebit > 0n ? (Number(balancingDebit) / 100).toFixed(2) : "â€”"}
+                      {balancingDebit > 0n ? fmt(balancingDebit) : "\u2014"}
                     </TableCell>
                     <TableCell className="text-end tabular-nums">
-                      {balancingDebit < 0n ? (Number(-balancingDebit) / 100).toFixed(2) : "â€”"}
+                      {balancingDebit < 0n ? fmt(-balancingDebit) : "\u2014"}
                     </TableCell>
                   </TableRow>
                 );
@@ -58,10 +60,10 @@ await requireModule("reports");
               <TableRow>
                 <TableCell colSpan={2} className="font-semibold">{t.nav.total}</TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">
-                  {(Number(debitGrand) / 100).toFixed(2)}
+                  {fmt(debitGrand)}
                 </TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">
-                  {(Number(creditGrand) / 100).toFixed(2)}
+                  {fmt(creditGrand)}
                 </TableCell>
               </TableRow>
             </TableFooter>

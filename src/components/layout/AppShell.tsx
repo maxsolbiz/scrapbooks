@@ -14,6 +14,7 @@ import {
   LogOut,
   Package,
   Users,
+  ChartColumnBig,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/components/i18n/LocaleProvider";
@@ -38,6 +39,7 @@ const NAV: { href: string; key: keyof Dictionary["nav"]; icon: React.ElementType
   { href: "/sales-invoices", key: "sales", icon: FileBarChart2 },
   { href: "/purchase-invoices", key: "purchases", icon: FileText },
   { href: "/payments", key: "payments", icon: Banknote },
+  { href: "/reports", key: "reports", icon: ChartColumnBig },
   { href: "/parties", key: "parties", icon: Building2 },
   { href: "/items", key: "items", icon: Package },
   { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange },

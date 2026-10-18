@@ -1,0 +1,21 @@
+
+> scrapbooks@0.1.0 dev
+> next dev -p 3210
+
+▲ Next.js 16.4.2 (Turbopack)
+- Local:         http://localhost:3210
+- Network:       http://192.168.1.161:3210
+- Environments: .env
+✓ Ready in 10.3s
+✓ Running next.config.ts took 1136ms
+
+  Turbopack has seen frequent file updates and is waiting for the filesystem to settle (0.5s elapsed so far; last modified: "\\\\?\\D:\\Arslan\\scrapbooks\\node_modules\\next\\dist\\esm\\client\\components\\http-access-fallback").
+  Turbopack has seen frequent file updates and is waiting for the filesystem to settle (1.5s elapsed so far; last modified: "\\\\?\\D:\\Arslan\\scrapbooks\\node_modules\\next\\dist\\client\\request").
+○ Compiling /login ...
+  Turbopack has seen frequent file updates and is waiting for the filesystem to settle (0.5s elapsed so far; last modified: "\\\\?\\D:\\Arslan\\scrapbooks\\node_modules\\@jridgewell\\trace-mapping\\dist").
+ GET /login 200 in 1550ms (next.js: 1098ms, application-code: 452ms)
+  Turbopack has seen frequent file updates and is waiting for the filesystem to settle (0.5s elapsed so far; last modified: "\\\\?\\D:\\Arslan\\scrapbooks\\node_modules\\@radix-ui\\react-focus-guards\\dist").
+ GET /dashboard 307 in 1245ms (next.js: 227ms, application-code: 1018ms)
+ GET /dashboard 307 in 248ms (next.js: 2ms, application-code: 246ms)
+ GET /login 200 in 64ms (next.js: 1.9ms, application-code: 62ms)
+ GET / 307 in 114ms (next.js: 12ms, application-code: 102ms)

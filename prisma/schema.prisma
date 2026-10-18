@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Users & Auth ─────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  ACCOUNTANT
+  VIEWER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(VIEWER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdEntries       JournalEntry[]  @relation("JournalEntryCreator")
+  createdInvoices      Invoice[]       @relation("InvoiceCreator")
+  createdPayments      Payment[]       @relation("PaymentCreator")
+}
+
+// ─── Company settings (singleton) ─────────────────────────────────────────────
+
+model CompanySettings {
+  id            String  @id @default("settings")
+  nameEn        String  @default("ScrapBooks Trading")
+  nameAr        String  @default("شركة سكراب بوكس للتجارة")
+  trn           String  @default("")
+  addressEn     String  @default("")
+  addressAr     String  @default("")
+  phone         String  @default("")
+  email         String  @default("")
+  bankDetailsEn String  @default("")
+  bankDetailsAr String  @default("")
+  currencyCode  String  @default("AED")
+  defaultVatRate Decimal @default(0.05) @db.Decimal(5, 4)
+}
+
+// ─── Chart of Accounts ────────────────────────────────────────────────────────
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+enum Side {
+  DEBIT
+  CREDIT
+}
+
+enum CashFlowClass {
+  NONE
+  OPERATING
+  INVESTING
+  FINANCING
+}
+
+model Account {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  nameEn         String
+  nameAr         String
+  type           AccountType
+  normalBalance  Side          // pre-declared, used by reporting logic
+  parentId       String?
+  parent         Account?      @relation("AccountTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Account[]     @relation("AccountTree")
+  isGroup        Boolean       @default(false) // group (header) accounts cannot be posted to
+  cashFlowClass  CashFlowClass @default(NONE)
+  isActive       Boolean       @default(true)
+  sortOrder      Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  lines          JournalLine[]
+}
+
+// ─── Fiscal calendar ─────────────────────────────────────────────────────────
+
+enum FiscalStatus {
+  OPEN
+  CLOSED
+}
+
+model FiscalYear {
+  id             String       @id @default(cuid())
+  name           String       @unique
+  starts         DateTime
+  ends           DateTime
+  status         FiscalStatus @default(OPEN)
+  openingEntryId String?      @unique
+  createdAt      DateTime     @default(now())
+
+  entries        JournalEntry[]
+}
+
+// ─── Double-entry journal (immutable once POSTED) ─────────────────────────────
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum EntrySource {
+  MANUAL
+  SALES_INVOICE
+  PURCHASE_INVOICE
+  PAYMENT
+  RECEIPT
+  OPENING_BALANCE
+  YEAR_END_CLOSE
+}
+
+model JournalEntry {
+  id            String      @id @default(cuid())
+  entryNo       String      @unique
+  date          DateTime
+  narration     String?     @db.Text
+  narrationAr   String?     @db.Text
+  status        JournalStatus @default(DRAFT)
+  sourceType    EntrySource @default(MANUAL)
+  sourceId      String?     // id of Invoice / Payment that produced this entry
+  fiscalYearId  String?
+  fiscalYear    FiscalYear? @relation(fields: [fiscalYearId], references: [id], onDelete: SetNull)
+  createdById   String
+  createdBy     User        @relation("JournalEntryCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  postedAt      DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  lines         JournalLine[]
+  invoiceFor    Invoice?      @relation("InvoiceToJournalEntry")
+  paymentFor    Payment?      @relation("PaymentToJournalEntry")
+
+  @@index([date])
+  @@index([status])
+  @@index([sourceType, sourceId])
+}
+
+model JournalLine {
+  id            String  @id @default(cuid())
+  entryId       String
+  entry         JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId     String
+  account       Account @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  debit         BigInt           @default(0)
+  credit        BigInt           @default(0)
+  partyId       String? // party attribution for sub-ledger reporting
+  party         Party?  @relation(fields: [partyId], references: [id], onDelete: Restrict)
+  description   String? @db.Text
+
+  @@index([accountId])
+  @@index([partyId])
+}
+
+// ─── Serial number counters (race-safe numbering) ─────────────────────────────
+
+model Serial {
+  key   String @id
+  value Int    @default(0)
+}
+
+// ─── Parties (customers / vendors) ────────────────────────────────────────────
+
+enum PartyType {
+  CUSTOMER
+  VENDOR
+  BOTH
+}
+
+model Party {
+  id           String     @id @default(cuid())
+  code         String     @unique
+  type         PartyType
+  nameEn       String
+  nameAr       String
+  trn          String?
+  phone        String?
+  email        String?
+  addressEn    String?    @db.Text
+  addressAr    String?    @db.Text
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  invoices     Invoice[]
+  payments     Payment[]
+  lines        JournalLine[]
+}
+
+// ─── Items (scrap types) ─────────────────────────────────────────────────────
+
+enum UnitType {
+  KG
+  TON
+  PCS
+  BAG
+  OTHER
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  code        String?  @unique
+  nameEn      String
+  nameAr      String
+  unit        UnitType @default(KG)
+  defaultRate BigInt?  // fils per unit
+  vatRate     Decimal  @default(0.05) @db.Decimal(5, 4)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoiceLines InvoiceLine[]
+}
+
+// ─── Invoices (daybooks that auto-post journal entries) ──────────────────────
+
+enum InvoiceDirection {
+  SALES
+  PURCHASE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+model Invoice {
+  id              String           @id @default(cuid())
+  invoiceNo       String           @unique
+  direction       InvoiceDirection
+  date            DateTime
+  partyId         String
+  party           Party            @relation(fields: [partyId], references: [id], onDelete: Restrict)
+  status          InvoiceStatus    @default(DRAFT)
+  trnSnapshot     String?
+  subtotalFils    BigInt           @default(0)
+  vatFils         BigInt           @default(0)
+  totalFils       BigInt           @default(0)
+  notes           String?          @db.Text
+  notesAr         String?          @db.Text
+  journalEntryId  String?          @unique
+  journalEntry    JournalEntry?    @relation("InvoiceToJournalEntry", fields: [journalEntryId], references: [id], onDelete: SetNull)
+  createdById     String
+  createdBy       User             @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  lines           InvoiceLine[]
+  allocations     PaymentAllocation[]
+
+  @@index([date])
+  @@index([partyId])
+  @@index([direction, status])
+}
+
+model InvoiceLine {
+  id             String        @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemId         String?
+  item           Item?         @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  description    String        @db.Text
+  descriptionAr  String?       @db.Text
+  qty            Decimal       @db.Decimal(18, 3)
+  unit           UnitType
+  rateFils       BigInt
+  vatRate        Decimal       @db.Decimal(5, 4)
+  lineValueFils  BigInt
+  lineVatFils    BigInt
+  lineTotalFils  BigInt
+
+  @@index([invoiceId])
+}
+
+// ─── Payments / receipts ─────────────────────────────────────────────────────
+
+enum PaymentType {
+  RECEIPT // money in from a customer
+  PAYMENT // money out to a vendor
+  CONTRA  // between own cash & bank accounts
+}
+
+enum PaymentMethod {
+  CASH
+  BANK
+}
+
+enum PaymentStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  paymentNo      String        @unique
+  type           PaymentType
+  method         PaymentMethod
+  date           DateTime
+  partyId        String?
+  party          Party?        @relation(fields: [partyId], references: [id], onDelete: Restrict)
+  status         PaymentStatus @default(DRAFT)
+  amountFils     BigInt
+  reference      String? // cheque no / transfer ref
+  referenceAr    String?
+  notes          String?       @db.Text
+  journalEntryId String?       @unique
+  journalEntry   JournalEntry? @relation("PaymentToJournalEntry", fields: [journalEntryId], references: [id], onDelete: SetNull)
+  createdById    String
+  createdBy      User          @relation("PaymentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  allocations    PaymentAllocation[]
+
+  @@index([date])
+  @@index([partyId])
+  @@index([type, status])
+}
+
+model PaymentAllocation {
+  id          String   @id @default(cuid())
+  paymentId   String
+  payment     Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  amountFils  BigInt
+
+  @@index([invoiceId])
+  @@index([paymentId])
+}

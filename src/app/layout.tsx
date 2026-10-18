@@ -18,6 +18,8 @@ const geistMono = Geist_Mono({
 const notoKufiArabic = Noto_Kufi_Arabic({
   variable: "--font-noto-kufi",
   subsets: ["arabic"],
+  preload: false,
+  display: "swap",
 });
 
 export const metadata: Metadata = {

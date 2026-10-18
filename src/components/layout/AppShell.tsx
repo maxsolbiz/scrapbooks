@@ -37,7 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavItem = { href: string; key: keyof Dictionary["nav"]; icon: React.ElementType };
+type NavItem = { href: string; key: keyof Dictionary["nav"]; icon: React.ElementType; prefetch?: boolean };
 type NavGroup = { labelKey: string; items: NavItem[] };
 
 const GROUPS: NavGroup[] = [
@@ -52,7 +52,7 @@ const GROUPS: NavGroup[] = [
   {
     labelKey: "BOOKS",
     items: [
-      { href: "/accounts", key: "accounts", icon: BookText },
+      { href: "/accounts", key: "accounts", icon: BookText, prefetch: false },
       { href: "/journals", key: "journals", icon: LayoutDashboard },
     ],
   },
@@ -65,13 +65,13 @@ const GROUPS: NavGroup[] = [
   },
   {
     labelKey: "INSIGHTS",
-    items: [{ href: "/reports", key: "reports", icon: ChartColumnBig }],
+    items: [{ href: "/reports", key: "reports", icon: ChartColumnBig, prefetch: false }],
   },
   {
     labelKey: "ADMIN",
     items: [
-      { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange },
-      { href: "/settings", key: "settings", icon: Settings },
+      { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange, prefetch: false },
+      { href: "/settings", key: "settings", icon: Settings, prefetch: false },
     ],
   },
 ];
@@ -212,6 +212,7 @@ export function AppShell({
                       )}
                       <Link
                         href={item.href}
+                        prefetch={item.prefetch === false ? false : undefined}
                         className={cn(
                           "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
                           active

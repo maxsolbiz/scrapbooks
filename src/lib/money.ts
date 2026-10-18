@@ -5,6 +5,7 @@
 
 export const FILS_PER_UNIT = 100;
 
+/** Format fils as a locale-aware decimal string with thousands separators. */
 export function filsToDecimalString(fils: bigint, decimals = 2): string {
   const negative = fils < 0n;
   const abs = negative ? -fils : fils;
@@ -12,7 +13,9 @@ export function filsToDecimalString(fils: bigint, decimals = 2): string {
   const part = abs % BigInt(FILS_PER_UNIT);
   const padded = part.toString().padStart(2, "0").slice(0, decimals);
   const sign = negative ? "-" : "";
-  return `${sign}${whole.toString()}.${padded}`;
+  // Use Intl.NumberFormat for thousands separators
+  const wholeFormatted = new Intl.NumberFormat("en-US").format(whole);
+  return `${sign}${wholeFormatted}.${padded}`;
 }
 
 /** Parse a user-entered decimal string into fils without float arithmetic. */
@@ -32,20 +35,22 @@ export function decimalStringToFils(value: string): bigint {
   return negative ? -fils : fils;
 }
 
+/** Format fils as AED with thousands separators and exactly 2 decimals. */
 export function formatAED(fils: bigint, withCurrency = false): string {
-  const str = filsToDecimalString(fils);
-  const formatted = new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(parseFloat(str));
+  const formatted = filsToDecimalString(fils);
   return withCurrency ? `AED ${formatted}` : formatted;
 }
 
+/** Multiply rate (fils) by qty (decimal string) without floats. */
 export function multiplyFilsByDecimal(rateFils: bigint, qty: string | number): bigint {
-  // qty is a decimal string like "12.5" — multiply without floats using 3 dp
   const qtyStr = String(qty).trim();
   if (!/^\d+(\.\d+)?$/.test(qtyStr)) throw new Error(`Invalid quantity: ${qtyStr}`);
   const [whole, part = ""] = qtyStr.split(".");
   const qtyThousandths = BigInt(whole) * 1000n + BigInt((part + "000").slice(0, 3));
   return (rateFils * qtyThousandths) / 1000n;
+}
+
+/** Local fmt helper for inline use: bigint -> formatted string with commas. */
+export function fmt(fils: bigint): string {
+  return formatAED(fils);
 }

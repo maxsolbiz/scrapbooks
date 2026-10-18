@@ -59,9 +59,11 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+import { formatAED } from "@/lib/money";
+
 function filsToDisplay(fils: string | null): string {
   if (!fils) return "";
-  return (Number(fils) / 100).toFixed(2);
+  return formatAED(BigInt(fils));
 }
 
 export function ItemsClient({ rows, dict, canWrite }: { rows: ItemRow[]; dict: Dictionary; canWrite: boolean }) {
@@ -146,7 +148,7 @@ export function ItemsClient({ rows, dict, canWrite }: { rows: ItemRow[]; dict: D
                 </TableCell>
                 <TableCell className="text-xs">{it.unit}</TableCell>
                 <TableCell className="text-end tabular-nums">
-                  {it.defaultRate ? Number(it.defaultRate) / 100 : "—"}
+                  {it.defaultRate ? filsToDisplay(it.defaultRate) : "—"}
                 </TableCell>
                 <TableCell className="text-end tabular-nums">
                   {(Number(it.vatRate) * 100).toFixed(0)}%

@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { formatAED } from "@/lib/money";
 
 export default async function PaymentsPage() {
   const user: SessionUser = await requireModule("payments");
@@ -79,7 +80,7 @@ export default async function PaymentsPage() {
                   <TableCell className="hidden text-xs sm:table-cell">{p.type}</TableCell>
                   <TableCell>{p.party ? p.party.nameEn : "—"}</TableCell>
                   <TableCell className="text-end tabular-nums">
-                    {(Number(p.amountFils) / 100).toFixed(2)}
+                    {formatAED(p.amountFils)}
                   </TableCell>
                   <TableCell>
                     <Badge

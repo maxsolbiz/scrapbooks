@@ -93,7 +93,7 @@ await requireModule("reports");
               <TableRow>
                 <TableCell className="ps-6">{t.nav.earnedEquity}</TableCell>
                 <TableCell className="text-end tabular-nums">
-                  {(Number(bs.earnedEquity) / 100).toFixed(2)}
+                  {fmt(bs.earnedEquity)}
                 </TableCell>
               </TableRow>
               <TableRow>

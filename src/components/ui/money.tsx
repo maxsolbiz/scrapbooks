@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { formatAED } from "@/lib/money";
 
 export function Money({
   fils,
@@ -10,10 +11,10 @@ export function Money({
   className?: string;
 }) {
   const value = typeof fils === "bigint" ? fils : BigInt(Math.round(Number(fils)));
-  const amount = (Number(value) / 100).toFixed(2);
+  const formatted = formatAED(value);
   return (
     <span className={cn("font-mono tabular-nums", className)} dir="ltr">
-      {aed ? `AED ${amount}` : amount}
+      {aed ? `AED ${formatted}` : formatted}
     </span>
   );
 }

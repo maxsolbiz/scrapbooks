@@ -31,7 +31,8 @@ export interface OpenInvoice {
   invoiceNo: string;
   direction: string;
   partyId: string;
-  outstanding: string;
+  outstanding: string; // plain numeric string for the action
+  outstandingFormatted: string; // formatted for display
 }
 
 export function PaymentForm({
@@ -231,7 +232,7 @@ export function PaymentForm({
                               <SelectItem key={o.invoiceId} value={o.invoiceId}>
                                 <span className="font-mono text-xs">{o.invoiceNo}</span>
                                 {" — "}
-                                <span className="tabular-nums">{o.outstanding}</span>
+                                <span className="tabular-nums">{o.outstandingFormatted}</span>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -246,7 +247,7 @@ export function PaymentForm({
                           dir="ltr"
                         />
                         <span className="text-xs text-muted-foreground">
-                          {inv ? `AED ${inv.outstanding}` : ""}
+                          {inv ? `AED ${inv.outstandingFormatted}` : ""}
                         </span>
                         <Button variant="ghost" size="sm" onClick={() => setAllocs((prev) => prev.filter((_, i) => i !== idx))}>
                           <Trash2 className="size-4 text-destructive" />

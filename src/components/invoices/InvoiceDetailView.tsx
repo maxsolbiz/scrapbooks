@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VoidInvoiceButton } from "./VoidInvoiceButton";
+import { formatAED } from "@/lib/money";
 
 export async function InvoiceDetailView({
   invoiceId,
@@ -107,13 +108,13 @@ export async function InvoiceDetailView({
                 <TableCell className="text-end tabular-nums">{Number(l.qty)}</TableCell>
                 <TableCell className="hidden text-xs sm:table-cell">{l.unit}</TableCell>
                 <TableCell className="text-end tabular-nums">
-                  {(Number(l.rateFils) / 100).toFixed(2)}
+                  {formatAED(l.rateFils)}
                 </TableCell>
                 <TableCell className="hidden text-end tabular-nums sm:table-cell">
                   {(Number(l.vatRate) * 100).toFixed(0)}%
                 </TableCell>
                 <TableCell className="text-end tabular-nums">
-                  {(Number(l.lineTotalFils) / 100).toFixed(2)}
+                  {formatAED(l.lineTotalFils)}
                 </TableCell>
               </TableRow>
             ))}
@@ -125,15 +126,15 @@ export async function InvoiceDetailView({
         <div className="w-64 space-y-1 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t.common.subtotal}</span>
-            <span className="tabular-nums">{(Number(invoice.subtotalFils) / 100).toFixed(2)}</span>
+            <span className="tabular-nums">{formatAED(invoice.subtotalFils)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t.common.vat}</span>
-            <span className="tabular-nums">{(Number(invoice.vatFils) / 100).toFixed(2)}</span>
+            <span className="tabular-nums">{formatAED(invoice.vatFils)}</span>
           </div>
           <div className="flex justify-between border-t pt-1 font-semibold">
             <span>{t.common.grandTotal} (AED)</span>
-            <span className="tabular-nums">{(Number(invoice.totalFils) / 100).toFixed(2)}</span>
+            <span className="tabular-nums">{formatAED(invoice.totalFils)}</span>
           </div>
         </div>
       </div>
@@ -141,7 +142,7 @@ export async function InvoiceDetailView({
       {invoice.allocations.length > 0 && (
         <div className="text-sm text-muted-foreground">
           {invoice.allocations
-            .map((a) => `${a.payment.paymentNo} — ${(Number(a.amountFils) / 100).toFixed(2)} AED`)
+            .map((a) => `${a.payment.paymentNo} — ${formatAED(a.amountFils)} AED`)
             .join(" · ")}
         </div>
       )}

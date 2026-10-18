@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VoidPaymentButton } from "./VoidPaymentButton";
+import { formatAED } from "@/lib/money";
 
 export default async function PaymentDetailPage({
   params,
@@ -71,7 +72,7 @@ export default async function PaymentDetailPage({
       <div className="w-64 space-y-1 text-sm">
         <div className="flex justify-between font-semibold border-t pt-1">
           <span>{t.common.amount} (AED)</span>
-          <span className="tabular-nums">{(Number(payment.amountFils) / 100).toFixed(2)}</span>
+          <span className="tabular-nums">{formatAED(payment.amountFils)}</span>
         </div>
       </div>
 
@@ -93,7 +94,7 @@ export default async function PaymentDetailPage({
                     </Link>
                   </TableCell>
                   <TableCell className="text-end tabular-nums">
-                    {(Number(a.amountFils) / 100).toFixed(2)}
+                    {formatAED(a.amountFils)}
                   </TableCell>
                 </TableRow>
               ))}

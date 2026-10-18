@@ -8,8 +8,10 @@ const UNITS: Record<string, { en: string; ar: string }> = {
   OTHER: { en: "unit", ar: "وحدة" },
 };
 
+import { formatAED } from "@/lib/money";
+
 function money(fils: bigint) {
-  return (Number(fils) / 100).toFixed(2);
+  return formatAED(fils);
 }
 
 export interface InvoicePrintData {

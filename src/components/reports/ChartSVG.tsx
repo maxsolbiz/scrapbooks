@@ -4,6 +4,8 @@ interface MonthDatum {
   expense: bigint;
 }
 
+import { formatAED } from "@/lib/money";
+
 export function BarsChart({
   data,
   height = 140,
@@ -26,8 +28,9 @@ export function BarsChart({
   const scale = (maxHeight: number, v: bigint) => (Math.max(Number(v), 0) / max) * maxHeight;
   const baseY = height - 16;
 
-  function fmt(v: bigint | number) {
-    return (Number(v) / 100).toFixed(2);
+  function fmt(v: bigint | number): string {
+    const fils = typeof v === "bigint" ? v : BigInt(Math.round(Number(v) * 100));
+    return formatAED(fils);
   }
   return (
     <svg

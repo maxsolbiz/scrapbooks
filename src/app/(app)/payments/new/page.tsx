@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { PaymentForm } from "../PaymentForm";
+import { formatAED } from "@/lib/money";
 
 export default async function NewPaymentPage() {
   await requireModule("payments", "write");
@@ -27,13 +28,16 @@ export default async function NewPaymentPage() {
       const allocated = inv.allocations
         .filter((a) => a.payment.status !== "VOID")
         .reduce((acc, a) => acc + a.amountFils, 0n);
-      const outstanding = (Number(inv.totalFils) - Number(allocated)) / 100;
+      const outstandingFils = inv.totalFils - allocated;
       return {
         invoiceId: inv.id,
         invoiceNo: inv.invoiceNo,
         direction: inv.direction,
         partyId: inv.partyId,
-        outstanding: outstanding.toFixed(2),
+        // plain numeric string for the action
+        outstanding: formatAED(outstandingFils).replace(/,/g, ""),
+        // formatted for display
+        outstandingFormatted: formatAED(outstandingFils),
       };
     })
     .filter((o) => Number(o.outstanding) > 0);

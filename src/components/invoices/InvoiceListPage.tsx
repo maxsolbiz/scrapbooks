@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatAED } from "@/lib/money";
 
 export async function InvoiceListPage({ direction }: { direction: InvoiceDirection }) {
   const moduleKey: ModuleKey = direction === "SALES" ? "sales-invoices" : "purchase-invoices";
@@ -95,13 +96,13 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
                     </span>
                   </TableCell>
                   <TableCell className="hidden text-end tabular-nums sm:table-cell">
-                    {(Number(inv.subtotalFils) / 100).toFixed(2)}
+                    {formatAED(inv.subtotalFils)}
                   </TableCell>
                   <TableCell className="hidden text-end tabular-nums sm:table-cell">
-                    {(Number(inv.vatFils) / 100).toFixed(2)}
+                    {formatAED(inv.vatFils)}
                   </TableCell>
                   <TableCell className="text-end tabular-nums font-medium">
-                    {(Number(inv.totalFils) / 100).toFixed(2)}
+                    {formatAED(inv.totalFils)}
                   </TableCell>
                   <TableCell>
                     <Badge

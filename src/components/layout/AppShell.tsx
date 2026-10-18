@@ -20,6 +20,7 @@ import {
   MoreHorizontal,
   Package,
   Settings,
+  ShieldCheck,
   Sun,
   Users,
 } from "lucide-react";
@@ -72,8 +73,9 @@ const GROUPS: NavGroup[] = [
   {
     labelKey: "ADMIN",
     items: [
-      { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange, prefetch: false },
+      { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange },
       { href: "/settings", key: "settings", icon: Settings, prefetch: false },
+      { href: "/audit", key: "audit", icon: ShieldCheck, prefetch: false },
     ],
   },
 ];
@@ -227,6 +229,8 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const isAdmin = user.role === "ADMIN";
+  const groups = isAdmin ? GROUPS : GROUPS.filter((g) => g.labelKey !== "ADMIN");
 
   function switchLocale(next: Locale) {
     startTransition(async () => {
@@ -255,7 +259,7 @@ export function AppShell({
           </span>
         </Link>
         <nav className="flex-1 overflow-y-auto py-3">
-          {GROUPS.map((group) => (
+          {groups.map((group) => (
             <div key={group.labelKey} className="mb-4 px-2">
               <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/45">
                 {group.labelKey}

@@ -346,3 +346,18 @@ model PaymentAllocation {
   @@index([invoiceId])
   @@index([paymentId])
 }
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  userEmail  String
+  action     String
+  entityType String?
+  entityId   String?
+  detail     String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userEmail])
+  @@index([action])
+}

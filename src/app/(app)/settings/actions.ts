@@ -5,6 +5,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { canEdit, requireUser } from "@/lib/guard";
+import { logAudit } from "@/lib/audit";
 import type { Role } from "@/generated/prisma/enums";
 
 export type SettingsActionResult =
@@ -37,6 +38,7 @@ export async function saveCompanyAction(
     update: parsed.data,
     create: { id: "settings", ...parsed.data },
   });
+  await logAudit(user, "COMPANY_UPDATE", "CompanySettings", "settings");
   revalidatePath("/settings");
   return { ok: true };
 }
@@ -65,6 +67,13 @@ export async function saveUserAction(input: z.input<typeof userSchema>): Promise
     data.passwordHash = await bcrypt.hash(v.newPassword, 10);
   }
   await prisma.user.update({ where: { id: v.id }, data });
+  await logAudit(
+    user,
+    "USER_UPDATE",
+    "User",
+    v.id,
+    `role=${v.role} active=${v.isActive}${v.newPassword ? " password-reset" : ""}`,
+  );
   revalidatePath("/settings");
   return { ok: true };
 }

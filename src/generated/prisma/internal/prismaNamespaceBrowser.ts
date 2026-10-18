@@ -63,7 +63,8 @@ export const ModelName = {
   Invoice: 'Invoice',
   InvoiceLine: 'InvoiceLine',
   Payment: 'Payment',
-  PaymentAllocation: 'PaymentAllocation'
+  PaymentAllocation: 'PaymentAllocation',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -290,6 +291,20 @@ export const PaymentAllocationScalarFieldEnum = {
 } as const
 
 export type PaymentAllocationScalarFieldEnum = (typeof PaymentAllocationScalarFieldEnum)[keyof typeof PaymentAllocationScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  userEmail: 'userEmail',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  detail: 'detail',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireUser, canEdit } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 
 export async function InvoiceListPage({ direction }: { direction: InvoiceDirection }) {
-  await requireUser();
+  const user = await requireUser();
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const path = direction === "SALES" ? "/sales-invoices" : "/purchase-invoices";
@@ -45,11 +45,13 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
       <PageHeader
         title={title}
         actions={
-          <Button asChild>
-            <Link href={`${path}/new`}>
-              <Plus className="size-4" /> {t.invoices.new}
-            </Link>
-          </Button>
+          canEdit(user) ? (
+            <Button asChild>
+              <Link href={`${path}/new`}>
+                <Plus className="size-4" /> {t.invoices.new}
+              </Link>
+            </Button>
+          ) : undefined
         }
       />
 

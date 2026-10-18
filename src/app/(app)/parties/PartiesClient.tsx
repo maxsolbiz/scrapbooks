@@ -67,9 +67,11 @@ type FormValues = z.infer<typeof schema>;
 export function PartiesClient({
   rows,
   dict,
+  canWrite,
 }: {
   rows: PartyRow[];
   dict: Dictionary;
+  canWrite: boolean;
 }) {
   const t = dict;
   const router = useRouter();
@@ -143,9 +145,11 @@ export function PartiesClient({
       <PageHeader
         title={t.nav.parties}
         actions={
-          <Button onClick={openCreate}>
-            <Plus className="size-4" /> {t.parties.new}
-          </Button>
+          canWrite ? (
+            <Button onClick={openCreate}>
+              <Plus className="size-4" /> {t.parties.new}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -179,9 +183,11 @@ export function PartiesClient({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
-                    <Pencil className="size-4" />
-                  </Button>
+                  {canWrite ? (
+                    <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
+                      <Pencil className="size-4" />
+                    </Button>
+                  ) : null}
                 </TableCell>
               </TableRow>
             ))}

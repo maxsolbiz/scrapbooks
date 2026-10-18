@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireEditor } from "@/lib/guard";
+import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
 import { createInvoice, voidInvoice } from "@/lib/invoices";
 import type { InvoiceDirection, UnitType } from "@/generated/prisma/client";
@@ -65,6 +66,7 @@ export async function createInvoiceAction(
         })),
       }),
     );
+    await logAudit(user, "INVOICE_CREATE", "Invoice", invoice.id, `${direction} ${invoice.invoiceNo}`);
     revalidatePath(direction === "SALES" ? "/sales-invoices" : "/purchase-invoices");
     revalidatePath("/dashboard");
     return { ok: true, data: { id: invoice.id, invoiceNo: invoice.invoiceNo } };
@@ -77,9 +79,10 @@ export async function voidInvoiceAction(
   invoiceId: string,
   direction: InvoiceDirection,
 ): Promise<ActionResult> {
-  await requireEditor();
+  const user = await requireEditor();
   try {
     await prisma.$transaction(async (tx) => voidInvoice(tx, invoiceId));
+    await logAudit(user, "INVOICE_VOID", "Invoice", invoiceId, `Voided ${direction} invoice`);
     revalidatePath(direction === "SALES" ? "/sales-invoices" : "/purchase-invoices");
     revalidatePath("/dashboard");
     return { ok: true };

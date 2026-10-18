@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireUser, canEdit } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 
 export default async function JournalsPage() {
-  await requireUser();
+  const user = await requireUser();
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const ar = locale === "ar";
@@ -41,11 +41,13 @@ export default async function JournalsPage() {
       <PageHeader
         title={t.nav.journals}
         actions={
-          <Button asChild>
-            <Link href="/journals/new">
-              <Plus className="size-4" /> {t.journals.new}
-            </Link>
-          </Button>
+          canEdit(user) ? (
+            <Button asChild>
+              <Link href="/journals/new">
+                <Plus className="size-4" /> {t.journals.new}
+              </Link>
+            </Button>
+          ) : undefined
         }
       />
 

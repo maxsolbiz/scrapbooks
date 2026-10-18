@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireUser, canEdit } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function PaymentsPage() {
-  await requireUser();
+  const user = await requireUser();
   const locale = await getServerLocale();
   const t = getDictionary(locale);
 
@@ -39,11 +39,11 @@ export default async function PaymentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <PageHeader title={t.nav.payments} actions={<Button asChild>
+        <PageHeader title={t.nav.payments} actions={canEdit(user) ? <Button asChild>
           <Link href="/payments/new">
             <Plus className="size-4" /> {t.payments.new}
           </Link>
-        </Button>} />
+        </Button> : undefined} />
       </div>
 
       <Card>

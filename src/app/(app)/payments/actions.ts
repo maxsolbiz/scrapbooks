@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireEditor } from "@/lib/guard";
+import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
 import { createPayment, voidPayment } from "@/lib/payments";
 import type { PaymentMethod, PaymentType } from "@/generated/prisma/enums";
@@ -52,6 +53,7 @@ export async function createPaymentAction(
         })),
       }),
     );
+    await logAudit(user, "PAYMENT_CREATE", "Payment", payment.id, `${v.type} ${payment.paymentNo}`);
     revalidatePath("/payments");
     revalidatePath("/dashboard");
     return { ok: true, data: { id: payment.id } };
@@ -61,9 +63,10 @@ export async function createPaymentAction(
 }
 
 export async function voidPaymentAction(paymentId: string): Promise<ActionResult> {
-  await requireEditor();
+  const user = await requireEditor();
   try {
     await prisma.$transaction(async (tx) => voidPayment(tx, paymentId));
+    await logAudit(user, "PAYMENT_VOID", "Payment", paymentId, "Voided payment");
     revalidatePath("/payments");
     revalidatePath("/dashboard");
     return { ok: true };

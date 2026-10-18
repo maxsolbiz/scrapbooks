@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireEditor } from "@/lib/guard";
+import { logAudit } from "@/lib/audit";
 import { postJournalEntry, assertBalanced } from "@/lib/accounting";
 import type { EntrySource } from "@/generated/prisma/enums";
 
@@ -69,6 +70,7 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
         })),
       }),
     );
+    await logAudit(user, "JOURNAL_CREATE", "JournalEntry", entry.id, "Posted manual journal entry");
     revalidatePath("/journals");
     revalidatePath("/dashboard");
     return { ok: true, data: { id: entry.id } };
@@ -78,12 +80,13 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
 }
 
 export async function voidJournal(entryId: string): Promise<ActionResult> {
-  await requireEditor();
+  const user = await requireEditor();
   try {
     await prisma.journalEntry.update({
       where: { id: entryId },
       data: { status: "VOID" },
     });
+    await logAudit(user, "JOURNAL_VOID", "JournalEntry", entryId, "Voided journal entry");
     revalidatePath("/journals");
     revalidatePath(`/journals/${entryId}`);
     revalidatePath("/dashboard");

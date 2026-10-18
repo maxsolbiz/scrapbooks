@@ -45,6 +45,7 @@ const en = {
     settings: "Settings",
     users: "Users",
     fiscalYears: "Fiscal Years",
+    audit: "Audit Log",
     logout: "Sign out",
   },
   auth: {
@@ -59,6 +60,15 @@ const en = {
     title: "You're offline",
     body: "ScrapBooks needs an internet connection to keep your books accurate. Reconnect and try again.",
     install: "Install app",
+  },
+  audit: {
+    title: "Audit Log",
+    description: "Sensitive actions recorded automatically",
+    when: "When",
+    who: "User",
+    action: "Action",
+    entity: "Entity",
+    detail: "Details",
   },
   common: {
     save: "Save",
@@ -229,6 +239,7 @@ const ar: typeof en = {
     settings: "الإعدادات",
     users: "المستخدمون",
     fiscalYears: "السنوات المالية",
+    audit: "سجل التدقيق",
     logout: "تسجيل الخروج",
   },
   auth: {
@@ -243,6 +254,15 @@ const ar: typeof en = {
     title: "أنت غير متصل بالإنترنت",
     body: "يحتاج سكراب بوكس إلى اتصال بالإنترنت لضمان دقة دفاترك. أعد الاتصال وحاول مرة أخرى.",
     install: "تثبيت التطبيق",
+  },
+  audit: {
+    title: "سجل التدقيق",
+    description: "الإجراءات الحساسة المسجلة تلقائياً",
+    when: "الوقت",
+    who: "المستخدم",
+    action: "الإجراء",
+    entity: "الكيان",
+    detail: "التفاصيل",
   },
   common: {
     save: "حفظ",

@@ -64,7 +64,7 @@ function filsToDisplay(fils: string | null): string {
   return (Number(fils) / 100).toFixed(2);
 }
 
-export function ItemsClient({ rows, dict }: { rows: ItemRow[]; dict: Dictionary }) {
+export function ItemsClient({ rows, dict, canWrite }: { rows: ItemRow[]; dict: Dictionary; canWrite: boolean }) {
   const t = dict;
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -113,9 +113,11 @@ export function ItemsClient({ rows, dict }: { rows: ItemRow[]; dict: Dictionary 
       <PageHeader
         title={t.nav.items}
         actions={
-          <Button onClick={openCreate}>
-            <Plus className="size-4" /> {t.items.new}
-          </Button>
+          canWrite ? (
+            <Button onClick={openCreate}>
+              <Plus className="size-4" /> {t.items.new}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -155,9 +157,11 @@ export function ItemsClient({ rows, dict }: { rows: ItemRow[]; dict: Dictionary 
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(it)}>
-                    <Pencil className="size-4" />
-                  </Button>
+                  {canWrite ? (
+                    <Button variant="ghost" size="sm" onClick={() => openEdit(it)}>
+                      <Pencil className="size-4" />
+                    </Button>
+                  ) : null}
                 </TableCell>
               </TableRow>
             ))}

@@ -22,6 +22,13 @@ export async function requireEditor(): Promise<SessionUser> {
   return user;
 }
 
+/** Only ADMIN passes; everyone else is redirected to /dashboard. */
+export async function requireAdmin(): Promise<SessionUser> {
+  const user = await requireUser();
+  if (user.role !== "ADMIN") redirect("/dashboard");
+  return user;
+}
+
 export function canEdit(user: SessionUser): boolean {
   return user.role === "ADMIN" || user.role === "ACCOUNTANT";
 }

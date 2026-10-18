@@ -1,0 +1,100 @@
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/guard";
+import { getServerLocale, getDictionary } from "@/lib/i18n";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+export default async function JournalsPage() {
+  await requireUser();
+  const locale = await getServerLocale();
+  const t = getDictionary(locale);
+  const ar = locale === "ar";
+
+  const entries = await prisma.journalEntry.findMany({
+    orderBy: { date: "desc" },
+    take: 100,
+    select: {
+      id: true,
+      entryNo: true,
+      date: true,
+      narration: true,
+      narrationAr: true,
+      status: true,
+      sourceType: true,
+    },
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">{t.nav.journals}</h1>
+        <Button asChild>
+          <Link href="/journals/new">
+            <Plus className="size-4" /> {t.journals.new}
+          </Link>
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t.journals.entryNo}</TableHead>
+                <TableHead>{t.common.date}</TableHead>
+                <TableHead>{t.common.narration}</TableHead>
+                <TableHead>{t.journals.source}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {entries.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    {t.common.empty}
+                  </TableCell>
+                </TableRow>
+              )}
+              {entries.map((e) => (
+                <TableRow key={e.id}>
+                  <TableCell className="font-mono text-xs">
+                    <Link href={`/journals/${e.id}`} className="hover:underline">
+                      {e.entryNo}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{e.date.toISOString().slice(0, 10)}</TableCell>
+                  <TableCell className="max-w-72 truncate">
+                    {ar ? (e.narrationAr ?? e.narration) : (e.narration ?? "—")}
+                  </TableCell>
+                  <TableCell className="text-xs">{e.sourceType}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        e.status === "POSTED" ? "default" : e.status === "DRAFT" ? "secondary" : "outline"
+                      }
+                    >
+                      {e.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export const dynamic = "force-dynamic";

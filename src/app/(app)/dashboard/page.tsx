@@ -148,7 +148,7 @@ export default async function DashboardPage() {
     { label: t.dashboard.bankBalance, icon: Landmark, value: bankBal?.balance ?? 0n, href: "/reports/account-ledger?account=" + (bank?.id ?? ""), tone: "pos" },
     { label: t.dashboard.receivables, icon: Building2, value: arBal?.debit ?? 0n, href: "/reports/ar-ap-aging?direction=SALES", tone: "warn" },
     { label: t.dashboard.payables, icon: Scale, value: apBal?.credit ?? 0n, href: "/reports/ar-ap-aging?direction=PURCHASE", tone: "neg" },
-    { label: "VAT " + t.payments.method, icon: ShieldCheck, value: vatBal?.credit ?? 0n, href: "/reports/trial-balance", tone: "neut" },
+    { label: t.dashboard.vatPayable, icon: ShieldCheck, value: vatBal?.credit ?? 0n, href: "/reports/trial-balance", tone: "neut" },
   ] as const;
 
   return (
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
             </div>
             <div className="text-right">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                {t.nav.netProfit === "Net profit" ? "Net profit (AED)" : t.nav.netProfit}
+                {t.dashboard.netProfit} (AED)
               </p>
               <p
                 className={
@@ -195,10 +195,10 @@ export default async function DashboardPage() {
             <BarsChart data={chartData} />
             <div className="mt-2 flex gap-4 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
-                <span className="size-2 rounded-sm" style={{ background: "var(--chart-1)" }} /> Revenue
+                <span className="size-2 rounded-sm" style={{ background: "var(--chart-1)" }} /> {t.dashboard.revenue}
               </span>
               <span className="flex items-center gap-1">
-                <span className="size-2 rounded-sm" style={{ background: "var(--chart-3)" }} /> Expenses
+                <span className="size-2 rounded-sm" style={{ background: "var(--chart-3)" }} /> {t.dashboard.expenses}
               </span>
             </div>
           </CardContent>

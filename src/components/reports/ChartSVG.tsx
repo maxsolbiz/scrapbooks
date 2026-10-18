@@ -41,26 +41,28 @@ export function BarsChart({
         const x = padL + i * (barGroupWidth + gap);
         const revH = scale(baseY - 18, d.revenue);
         const expH = scale(baseY - 18, d.expense);
-        const island = 0n;
-        void island;
         return (
           <g key={d.label}>
-            <rect
-              x={x}
-              y={baseY - revH}
-              width={14}
-              height={Math.max(revH, 1)}
-              rx="2"
-              fill="var(--chart-1)"
-            />
-            <rect
-              x={x + 18}
-              y={baseY - expH}
-              width={14}
-              height={Math.max(expH, 1)}
-              rx="2"
-              fill="var(--chart-3)"
-            />
+            {d.revenue > 0n && (
+              <rect
+                x={x}
+                y={baseY - revH}
+                width={14}
+                height={Math.max(revH, 2)}
+                rx="2"
+                fill="var(--chart-1)"
+              />
+            )}
+            {d.expense > 0n && (
+              <rect
+                x={x + 18}
+                y={baseY - expH}
+                width={14}
+                height={Math.max(expH, 2)}
+                rx="2"
+                fill="var(--chart-3)"
+              />
+            )}
             <text x={x + barGroupWidth / 2} y={height - 4} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.5">
               {d.label}
             </text>
@@ -83,52 +85,45 @@ export function SparkLine({
   if (usable.length < 2 || usable.every((p) => p.balance === 0n)) {
     return <EmptyChart height={height} />;
   }
+  const W = 600;
   const values = usable.map((p) => Number(p.balance));
   const min = Math.min(0, ...values);
   const max = Math.max(...values, 1);
-  const w = 100;
-  const top = 8;
-  const bottom = height - 28;
+  const top = 10;
+  const bottom = height - 24;
   const span = Math.max(max - min, 1);
   const coords = usable.map((p, i) => {
-    const x = min === max ? 0 : (i / Math.max(usable.length - 1, 1)) * w;
+    const x = (i / Math.max(usable.length - 1, 1)) * (W - 16) + 8;
     const y = bottom - ((Number(p.balance) - min) / span) * (bottom - top);
     return { x, y, p };
   });
   const path = coords
-    .map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(2)},${c.y.toFixed(2)}`)
+    .map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(1)},${c.y.toFixed(1)}`)
     .join(" ");
-  const area = `${path} L${w},${bottom} L0,${bottom} Z`;
+  const area = `${path} L${coords[coords.length - 1].x.toFixed(1)},${bottom} L${coords[0].x.toFixed(1)},${bottom} Z`;
   return (
-    <svg
-      viewBox={`0 0 ${w} ${height}`}
-      className="w-full"
-      style={{ maxHeight: height }}
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="Cash balance trend"
-    >
-      <path d={area} fill="var(--chart-1)" opacity="0.12" />
-      <path d={path} fill="none" stroke="var(--chart-1)" strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
-      {coords.map((c) => (
-        <circle key={c.p.label} cx={c.x} cy={c.y} r="1.4" fill="var(--chart-1)" />
-      ))}
-      {coords
-        .filter((_, i) => i === 0 || i === coords.length - 1)
-        .map((c) => (
-          <text
-            key={c.p.label}
-            x={Math.min(Math.max(c.x, 8), w - 8)}
-            y={height - 10}
-            textAnchor={c.x < 10 ? "start" : c.x > w - 10 ? "end" : "middle"}
-            fontSize="9"
-            fill="currentColor"
-            opacity="0.5"
-          >
-            {c.p.label}
-          </text>
+    <div>
+      <svg
+        viewBox={`0 0 ${W} ${height}`}
+        className="w-full"
+        style={{ maxHeight: height, height: "auto" }}
+        role="img"
+        aria-label="Cash balance trend"
+      >
+        <path d={area} fill="var(--chart-1)" opacity="0.12" />
+        <path d={path} fill="none" stroke="var(--chart-1)" strokeWidth="2" />
+        {coords.map((c) => (
+          <circle key={c.p.label} cx={c.x} cy={c.y} r="3" fill="var(--chart-1)" />
         ))}
-    </svg>
+      </svg>
+      <div className="flex justify-between px-1 text-[10px] text-muted-foreground">
+        {usable.map((p, i) => (
+          <span key={p.label} className={i % 2 === 1 && usable.length > 8 ? "hidden sm:inline" : ""}>
+            {p.label}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 

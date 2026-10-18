@@ -40,7 +40,7 @@ await requireModule("reports");
     <div className="space-y-4">
       <PageHeader
         title={t.nav.profitLoss}
-        description={`${t.nav.period} ${active.starts.toISOString().slice(0, 10)} â†’ ${active.ends.toISOString().slice(0, 10)}`}
+        description={`${t.nav.period} ${active.starts.toISOString().slice(0, 10)} \u2192 ${active.ends.toISOString().slice(0, 10)}`}
       />
       <Card>
         <CardContent>

@@ -51,7 +51,7 @@ await requireModule("reports");
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {dir === "SALES" ? t.payments.receipt : t.payments.payment} \u2014 {t.nav.reportsSub}
+        {dir === "SALES" ? t.payments.receipt : t.payments.payment} {"\u2014"} {t.nav.reportsSub}
       </p>
       <Card>
         <CardContent>

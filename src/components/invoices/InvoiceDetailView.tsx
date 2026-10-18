@@ -69,6 +69,11 @@ export async function InvoiceDetailView({
           <Button asChild variant="outline">
             <Link href={path}>{t.common.back}</Link>
           </Button>
+          {invoice.status === "POSTED" && (
+            <Button asChild variant="outline">
+              <Link href={`${path}/${invoice.id}/print`}>Print / طباعة</Link>
+            </Button>
+          )}
           {invoice.journalEntryId && (
             <Button asChild variant="outline">
               <Link href={`/journals/${invoice.journalEntryId}`}>{t.journals.viewEntry}</Link>

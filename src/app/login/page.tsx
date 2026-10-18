@@ -21,6 +21,7 @@ export default function LoginPage() {
   const t = useT();
   const router = useRouter();
   const [error, setError] = useState(false);
+  const [lockedOut, setLockedOut] = useState(false);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -29,11 +30,16 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof schema>) {
     setError(false);
+    setLockedOut(false);
     const res = await signIn("credentials", {
       email: values.email,
       password: values.password,
       redirect: false,
     });
+    if (res?.code === "rate_limited") {
+      setLockedOut(true);
+      return;
+    }
     if (res?.error) {
       setError(true);
       return;
@@ -65,7 +71,8 @@ export default function LoginPage() {
                 <p className="text-xs text-destructive">{t.common.required}</p>
               )}
             </div>
-            {error && <p className="text-sm text-destructive text-center">{t.auth.error}</p>}
+            {lockedOut && <p className="text-sm text-destructive text-center">{t.auth.lockedOut}</p>}
+            {!lockedOut && error && <p className="text-sm text-destructive text-center">{t.auth.error}</p>}
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               {t.auth.signIn}
             </Button>

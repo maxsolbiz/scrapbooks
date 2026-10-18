@@ -52,6 +52,7 @@ const en = {
     email: "Email",
     password: "Password",
     error: "Invalid email or password",
+    lockedOut: "Too many failed attempts. Please wait a few minutes and try again.",
     title: "Sign in to ScrapBooks",
   },
   common: {
@@ -230,6 +231,7 @@ const ar: typeof en = {
     email: "البريد الإلكتروني",
     password: "كلمة المرور",
     error: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    lockedOut: "محاولات فاشلة كثيرة. يرجى الانتظار بضع دقائق ثم المحاولة مجدداً.",
     title: "تسجيل الدخول إلى سكراب بوكس",
   },
   common: {

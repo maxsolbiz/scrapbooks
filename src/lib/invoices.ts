@@ -1,0 +1,195 @@
+import type { Prisma, InvoiceDirection, UnitType } from "@/generated/prisma/client";
+import type { Tx } from "@/lib/tx";
+import type { EntrySource } from "@/generated/prisma/enums";
+import { postJournalEntry, voidJournalEntry } from "@/lib/accounting";
+import { multiplyFilsByDecimal } from "@/lib/money";
+
+export interface InvoiceLineInput {
+  itemId?: string;
+  description: string;
+  descriptionAr?: string;
+  qty: string; // decimal string
+  unit: UnitType;
+  rateFils: bigint;
+  vatRate: number; // fraction, e.g. 0.05
+}
+
+export interface CreateInvoiceInput {
+  direction: InvoiceDirection;
+  date: Date;
+  partyId: string;
+  notes?: string;
+  notesAr?: string;
+  lines: InvoiceLineInput[];
+  createdById: string;
+  tx: Tx;
+}
+
+const AR_CODE = "1130";
+const AP_CODE = "2100";
+const VAT_CODE = "2150";
+const SALES_INCOME_CODE = "4100";
+const PURCHASE_EXPENSE_CODE = "5100";
+
+function roundFils(value: bigint, vatRate: number): bigint {
+  // vatRate scaled by 10^8 integer math: value * vatRate / 1
+  const RATE_SCALE = 100_000_000n;
+  const scaled = BigInt(Math.round(vatRate * Number(RATE_SCALE)));
+  return (value * scaled) / RATE_SCALE;
+}
+
+export async function createInvoice(input: CreateInvoiceInput) {
+  const { tx, direction, date, partyId, createdById, lines } = input;
+
+  if (!lines.length) throw new Error("An invoice needs at least one line");
+
+  const party = await tx.party.findUnique({ where: { id: partyId } });
+  if (!party) throw new Error("Party not found");
+  const typeOk =
+    party.type === "BOTH" ||
+    (direction === "SALES"
+      ? party.type === "CUSTOMER"
+      : party.type === "VENDOR");
+  if (!typeOk) {
+    throw new Error(
+      direction === "SALES"
+        ? "Party is not a customer"
+        : "Party is not a vendor",
+    );
+  }
+
+  const fiscalYear = await tx.fiscalYear.findFirst({
+    where: { starts: { lte: date }, ends: { gte: date } },
+  });
+  if (!fiscalYear) throw new Error(`No fiscal year covers ${date.toISOString().slice(0, 10)}`);
+  if (fiscalYear.status !== "OPEN") throw new Error("Fiscal year is closed");
+
+  // compute line amounts (never trust client totals)
+  let subtotal = 0n;
+  let vatTotal = 0n;
+  const computed = lines.map((line) => {
+    const value = multiplyFilsByDecimal(line.rateFils, line.qty);
+    const vat = roundFils(value, line.vatRate);
+    subtotal += value;
+    vatTotal += vat;
+    return { ...line, lineValue: value, lineVat: vat, lineTotal: value + vat };
+  });
+  const total = subtotal + vatTotal;
+
+  const prefix = direction === "SALES" ? "INV" : "PINV";
+  const serial = await tx.serial.upsert({
+    where: { key: `${fiscalYear.name}:${prefix}` },
+    update: { value: { increment: 1 } },
+    create: { key: `${fiscalYear.name}:${prefix}`, value: 1 },
+  });
+  const invoiceNo = `${prefix}-${fiscalYear.name}-${String(serial.value).padStart(4, "0")}`;
+
+  const invoice = await tx.invoice.create({
+    data: {
+      invoiceNo,
+      direction,
+      date,
+      partyId,
+      status: "POSTED",
+      trnSnapshot: party.trn,
+      subtotalFils: subtotal,
+      vatFils: vatTotal,
+      totalFils: total,
+      notes: input.notes || null,
+      notesAr: input.notesAr || null,
+      createdById,
+      lines: {
+        create: computed.map((c) => ({
+          itemId: c.itemId || null,
+          description: c.description,
+          descriptionAr: c.descriptionAr || null,
+          qty: c.qty,
+          unit: c.unit,
+          rateFils: c.rateFils,
+          vatRate: c.vatRate,
+          lineValueFils: c.lineValue,
+          lineVatFils: c.lineVat,
+          lineTotalFils: c.lineTotal,
+        })),
+      },
+    },
+  });
+
+  // --- post the journal ---
+  const ar = await tx.account.findUnique({ where: { code: AR_CODE } });
+  const ap = await tx.account.findUnique({ where: { code: AP_CODE } });
+  const vatAcc = await tx.account.findUnique({ where: { code: VAT_CODE } });
+  const income = await tx.account.findUnique({ where: { code: SALES_INCOME_CODE } });
+  const expense = await tx.account.findUnique({ where: { code: PURCHASE_EXPENSE_CODE } });
+  if (!ar || !ap || !vatAcc || !income || !expense) {
+    throw new Error("One or more required control accounts are missing (11xx/21xx/41xx/51xx)");
+  }
+
+  const sourceType: EntrySource =
+    direction === "SALES" ? "SALES_INVOICE" : "PURCHASE_INVOICE";
+
+  if (direction === "SALES") {
+    const je = await postJournalEntry({
+      tx,
+      date,
+      narration: `Sales invoice ${invoiceNo} — ${party.nameEn}`,
+      narrationAr: `فاتورة بيع ${invoiceNo} — ${party.nameAr}`,
+      sourceType,
+      sourceId: invoice.id,
+      createdById,
+      lines: [
+        { accountId: ar.id, debit: total, partyId },
+        { accountId: income.id, credit: subtotal },
+        { accountId: vatAcc.id, credit: vatTotal },
+      ],
+    });
+    await tx.invoice.update({
+      where: { id: invoice.id },
+      data: { journalEntryId: je.id },
+    });
+  } else {
+    const je = await postJournalEntry({
+      tx,
+      date,
+      narration: `Purchase invoice ${invoiceNo} — ${party.nameEn}`,
+      narrationAr: `فاتورة شراء ${invoiceNo} — ${party.nameAr}`,
+      sourceType,
+      sourceId: invoice.id,
+      createdById,
+      lines: [
+        { accountId: expense.id, debit: subtotal },
+        { accountId: vatAcc.id, debit: vatTotal },
+        { accountId: ap.id, credit: total, partyId },
+      ],
+    });
+    await tx.invoice.update({
+      where: { id: invoice.id },
+      data: { journalEntryId: je.id },
+    });
+  }
+
+  return invoice;
+}
+
+export async function voidInvoice(
+  tx: Tx,
+  invoiceId: string,
+): Promise<void> {
+  const invoice = await tx.invoice.findUnique({
+    where: { id: invoiceId },
+    include: { allocations: true },
+  });
+  if (!invoice) throw new Error("Invoice not found");
+  if (invoice.status === "VOID") return;
+  if (invoice.allocations.length > 0) {
+    throw new Error("Invoice has payment allocations — remove them first");
+  }
+  await tx.invoice.update({ where: { id: invoiceId }, data: { status: "VOID" } });
+  if (invoice.journalEntryId) {
+    await voidJournalEntry(invoice.journalEntryId, tx);
+  }
+}
+
+export function invoiceWhereFilter(direction: InvoiceDirection): Prisma.InvoiceWhereInput {
+  return { direction };
+}

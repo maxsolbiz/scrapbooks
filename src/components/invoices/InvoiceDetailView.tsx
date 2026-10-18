@@ -80,7 +80,7 @@ export async function InvoiceDetailView({
             </Button>
           )}
           {canEdit(user) && invoice.status === "POSTED" && (
-            <VoidInvoiceButton invoiceId={invoice.id} direction={direction} label={t.invoices.voidInvoice} />
+            <VoidInvoiceButton invoiceId={invoice.id} direction={direction} label={t.invoices.voidInvoice} confirmText={t.invoices.voidConfirm} />
           )}
         </div>
       </div>

@@ -51,54 +51,54 @@
 
 ## Phase 2 — Shell & Chrome (`AppShell.tsx`, new HeaderBar)
 
-- [ ] **P2.1 Sidebar groups** — section labels:
+- [x] **P2.1 Sidebar groups** — section labels:
       OPERATE (Sales Invoices, Purchase Invoices, Payments) ·
       BOOKS (Chart of Accounts, Journal Vouchers) ·
       PEOPLE & CATALOG (Parties, Items) ·
       INSIGHTS (Reports) ·
       ADMIN (Fiscal Years, Settings)
-- [ ] **P2.2 Active state**: emerald-tinted pill + 3px left rail indicator; refined hover; section dividers.
-- [ ] **P2.3 Sidebar visual**: dark surface both modes (uses sidebar tokens), collapse toggle (chevron),
+- [x] **P2.2 Active state**: emerald-tinted pill + 3px left rail indicator; refined hover; section dividers.
+- [x] **P2.3 Sidebar visual**: dark surface both modes (uses sidebar tokens), collapse toggle (chevron),
       app logo/wordmark header with `appSub` tagline, users section remains bottom.
-- [ ] **P2.4 Topbar**: breadcrumb (module/page via route segments + dict), locale switcher,
+- [x] **P2.4 Topbar**: breadcrumb (module/page via route segments + dict), locale switcher,
       dark-mode toggle (sun/moon), existing user dropdown (kept).
-- [ ] **P2.5 Shared `PageHeader`** (title / description / actions slot) — applied to ALL module pages
+- [x] **P2.5 Shared `PageHeader`** (title / description / actions slot) — applied to ALL module pages
       (dashboard, accounts, journals(+new/detail), sales+purchase lists/new/detail, payments(+new/detail),
       parties, items, reports (+6 report pages), fiscal-years, settings).
 
-**Status: PENDING**
+**Status: COMPLETED**
 
 ## Phase 3 — Component Polish
 
-- [ ] **P3.1 `StatusBadge`** (`src/components/ui/status-badge.tsx`): dot + localized label;
+- [x] **P3.1 `StatusBadge`** (`src/components/ui/status-badge.tsx`): dot + localized label;
       maps INVOICE/JOURNAL/PAYMENT/FISCAL statuses → DRAFT amber, POSTED emerald, VOID/CLOSED red outline.
       Replaced raw `<Badge>{status}</Badge>` in all list/detail pages.
-- [ ] **P3.2 `Money` component** (`src/components/ui/money.tsx`): renders fils (bigint|string) as
+- [x] **P3.2 `Money` component** (`src/components/ui/money.tsx`): renders fils (bigint|string) as
       Geist Mono tabular right-aligned; optional `aed` suffix; used across tables & detail pages.
-- [ ] **P3.3 Table polish**: sticky `<TableHeader>` (top-0 bg-card), `hover:bg-muted/50` rows, tighter
+- [x] **P3.3 Table polish**: sticky `<TableHeader>` (top-0 bg-card), `hover:bg-muted/50` rows, tighter
       compact paddings, consistent right-aligned numerics via `Money`.
-- [ ] **P3.4 `ConfirmDialog`** (`src/components/ui/confirm-dialog.tsx`): shadcn AlertDialog wrapper;
+- [x] **P3.4 `ConfirmDialog`** (`src/components/ui/confirm-dialog.tsx`): shadcn AlertDialog wrapper;
       replaced ALL `window.confirm` (VoidInvoiceButton, VoidJournalButton, VoidPaymentButton).
-- [ ] **P3.5 KPI cards** (dashboard): small caps 11px label + icon watermark, 24px tabular value,
+- [x] **P3.5 KPI cards** (dashboard): small caps 11px label + icon watermark, 24px tabular value,
       trend chip (delta vs prior period) on revenue/cash cards.
-- [ ] **P3.6 Form consistency**: unified field spacing (space-y-1.5 pattern), focus ring token
+- [x] **P3.6 Form consistency**: unified field spacing (space-y-1.5 pattern), focus ring token
       (`--ring` emerald), helper/error text style consistent.
-- [ ] **P3.7 `loading.tsx` skeletons** for list routes: dashboard, journals(+detail), sales+purchase
+- [x] **P3.7 `loading.tsx` skeletons** for list routes: dashboard, journals(+detail), sales+purchase
       invoices(+detail), payments(+detail), parties, items, accounts, reports/*, fiscal-years, settings.
 
-**Status: PENDING**
+**Status: COMPLETED**
 
 ## Phase 4 — Dashboard as Showcase
 
-- [ ] **P4.1 KPI row**: Cash · Bank · AR · AP · VAT Payable · Net Profit (FY) — six cards,
+- [x] **P4.1 KPI row**: Cash · Bank · AR · AP · VAT Payable · Net Profit (FY) — six cards,
       server-rendered balances via `accountBalance()`, links to related pages.
-- [ ] **P4.2 Native SVG mini-charts** (server-rendered, zero client JS):
+- [x] **P4.2 Native SVG mini-charts** (server-rendered, zero client JS):
       - Monthly revenue vs expense — grouped bars from posted ledger data (INCOME/EXPENSE per month)
       - Cash balance trend — sparkline (end-of-month running balance, 12 months)
       - SVG built in a small shared component `src/components/reports/ChartSVG.tsx` family.
-- [ ] **P4.3 Recent activity feed**: unified latest journals/invoices/payments rows with links.
+- [x] **P4.3 Recent activity feed**: unified latest journals/invoices/payments rows with links.
 
-**Status: PENDING**
+**Status: COMPLETED**
 
 ## Phase 5 — Finishing & Deployment
 
@@ -109,7 +109,7 @@
 - [ ] **P5.5 Deploy**: VPS `git -C /root/scrapbooks pull` from /root/scrapbooks.git bare bridge →
       `npm ci` (if lockfile changed) → `next build` → `pm2 restart scrapbooks` → smoke-test via curl 200.
 
-**Status: PENDING**
+
 
 ---
 
@@ -162,3 +162,4 @@
   stale build-info false positives.
 - The `vps` git remote is `ssh://scrapbooks-vps/root/scrapbooks.git`; push there then pull on server
   (GitHub deploy key was not possible — gh token had only READ on maxsolbiz/scrapbooks).
+

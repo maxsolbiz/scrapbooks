@@ -1,32 +1,34 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Ban } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { voidPaymentAction } from "../actions";
 
 export function VoidPaymentButton({ paymentId, label }: { paymentId: string; label: string }) {
-  const [pending, setPending] = useState(false);
   const router = useRouter();
 
-  async function doVoid() {
-    if (!window.confirm(label)) return;
-    setPending(true);
-    const res = await voidPaymentAction(paymentId);
-    setPending(false);
-    if (!res.ok) {
-      toast.error(res.error);
-      return;
-    }
-    toast.success(label);
-    router.refresh();
-  }
-
   return (
-    <Button variant="destructive" disabled={pending} onClick={doVoid}>
-      <Ban className="size-4" /> {label}
-    </Button>
+    <ConfirmDialog
+      trigger={
+        <Button variant="destructive">
+          <Ban className="size-4" /> {label}
+        </Button>
+      }
+      title={label}
+      description={"This will void the payment voucher and its journal entry. This action is recorded and can be audited."}
+      confirmLabel={label}
+      onConfirm={async () => {
+        const res = await voidPaymentAction(paymentId);
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+        toast.success(label);
+        router.refresh();
+      }}
+    />
   );
 }

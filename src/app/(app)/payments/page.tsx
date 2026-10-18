@@ -53,7 +53,7 @@ export default async function PaymentsPage() {
               <TableRow>
                 <TableHead>{t.common.code}</TableHead>
                 <TableHead>{t.common.date}</TableHead>
-                <TableHead>{t.common.type}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t.common.type}</TableHead>
                 <TableHead>{t.nav.parties}</TableHead>
                 <TableHead className="text-end">{t.common.amount}</TableHead>
                 <TableHead>{t.common.status}</TableHead>
@@ -75,7 +75,7 @@ export default async function PaymentsPage() {
                     </Link>
                   </TableCell>
                   <TableCell>{p.date.toISOString().slice(0, 10)}</TableCell>
-                  <TableCell className="text-xs">{p.type}</TableCell>
+                  <TableCell className="hidden text-xs sm:table-cell">{p.type}</TableCell>
                   <TableCell>{p.party ? p.party.nameEn : "—"}</TableCell>
                   <TableCell className="text-end tabular-nums">
                     {(Number(p.amountFils) / 100).toFixed(2)}

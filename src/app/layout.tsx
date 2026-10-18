@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Kufi_Arabic } from "next/font/google";
 import { getServerLocale, getDictionary, isRtl } from "@/lib/i18n";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ServiceWorkerRegister } from "@/components/pwa/PwaRegister";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,6 +28,16 @@ export const metadata: Metadata = {
   description: "Double-entry accounting for scrap trading businesses",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#006546" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d1f1a" },
+  ],
+};
+
 export default async function RootLayout({
   children,
 }: LayoutProps<"/">) {
@@ -45,6 +56,7 @@ export default async function RootLayout({
         <LocaleProvider dict={dict} locale={locale}>
           <ThemeProvider>{children}</ThemeProvider>
         </LocaleProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

@@ -74,10 +74,10 @@ export default async function PartyLedgerPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>{t.common.date}</TableHead>
-                  <TableHead>{t.common.type}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{t.common.type}</TableHead>
                   <TableHead>{t.payments.reference}</TableHead>
-                  <TableHead className="text-end">{t.common.debit}</TableHead>
-                  <TableHead className="text-end">{t.common.credit}</TableHead>
+                  <TableHead className="hidden text-end sm:table-cell">{t.common.debit}</TableHead>
+                  <TableHead className="hidden text-end sm:table-cell">{t.common.credit}</TableHead>
                   <TableHead className="text-end">{t.nav.runningBalance}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -92,7 +92,7 @@ export default async function PartyLedgerPage({
                 {rows.map((r, i) => (
                   <TableRow key={i}>
                     <TableCell>{r.date}</TableCell>
-                    <TableCell className="text-xs">{r.kind}</TableCell>
+                    <TableCell className="hidden text-xs sm:table-cell">{r.kind}</TableCell>
                     <TableCell>
                       <Link
                         href={r.kind === "INVOICE" ? `/sales-invoices/${r.docId}` : `/payments/${r.docId}`}
@@ -101,8 +101,8 @@ export default async function PartyLedgerPage({
                         {r.docNo}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-end tabular-nums">{r.debit ? fmt(r.debit) : "—"}</TableCell>
-                    <TableCell className="text-end tabular-nums">{r.credit ? fmt(r.credit) : "—"}</TableCell>
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.debit ? fmt(r.debit) : "—"}</TableCell>
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.credit ? fmt(r.credit) : "—"}</TableCell>
                     <TableCell className="text-end tabular-nums">{fmt(r.balance)}</TableCell>
                   </TableRow>
                 ))}

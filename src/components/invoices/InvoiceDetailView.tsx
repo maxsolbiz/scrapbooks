@@ -91,9 +91,9 @@ export async function InvoiceDetailView({
             <TableRow>
               <TableHead>{t.common.description}</TableHead>
               <TableHead className="text-end">{t.invoices.qty}</TableHead>
-              <TableHead className="w-16">{t.items.unit}</TableHead>
+              <TableHead className="hidden w-16 sm:table-cell">{t.items.unit}</TableHead>
               <TableHead className="text-end">{t.invoices.rate}</TableHead>
-              <TableHead className="text-end">{t.items.vat}</TableHead>
+              <TableHead className="hidden text-end sm:table-cell">{t.items.vat}</TableHead>
               <TableHead className="text-end">{t.invoices.lineTotal}</TableHead>
             </TableRow>
           </TableHeader>
@@ -102,11 +102,11 @@ export async function InvoiceDetailView({
               <TableRow key={l.id}>
                 <TableCell>{l.description}</TableCell>
                 <TableCell className="text-end tabular-nums">{Number(l.qty)}</TableCell>
-                <TableCell className="text-xs">{l.unit}</TableCell>
+                <TableCell className="hidden text-xs sm:table-cell">{l.unit}</TableCell>
                 <TableCell className="text-end tabular-nums">
                   {(Number(l.rateFils) / 100).toFixed(2)}
                 </TableCell>
-                <TableCell className="text-end tabular-nums">
+                <TableCell className="hidden text-end tabular-nums sm:table-cell">
                   {(Number(l.vatRate) * 100).toFixed(0)}%
                 </TableCell>
                 <TableCell className="text-end tabular-nums">

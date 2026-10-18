@@ -233,9 +233,9 @@ export default async function DashboardPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t.common.code}</TableHead>
-                <TableHead>{t.common.date}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t.common.date}</TableHead>
                 <TableHead>{t.common.description}</TableHead>
-                <TableHead>{t.common.type}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t.common.type}</TableHead>
                 <TableHead>{t.common.status}</TableHead>
               </TableRow>
             </TableHeader>
@@ -254,11 +254,11 @@ export default async function DashboardPage() {
                       {entry.entryNo}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-xs">{entry.date.toISOString().slice(0, 10)}</TableCell>
+                  <TableCell className="hidden text-xs sm:table-cell">{entry.date.toISOString().slice(0, 10)}</TableCell>
                   <TableCell className="max-w-64 truncate text-xs">
                     {entry.narration ?? "—"}
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{entry.sourceType}</TableCell>
+                  <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">{entry.sourceType}</TableCell>
                   <TableCell>
                     <StatusBadge status={entry.status} />
                   </TableCell>

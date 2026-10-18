@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   LogOut,
   Moon,
+  MoreHorizontal,
   Package,
   Settings,
   Sun,
@@ -28,6 +29,7 @@ import type { Dictionary, Locale } from "@/lib/i18n";
 import { setLocale } from "@/app/actions/ui";
 import { signOutAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
+import { InstallAppButton } from "@/components/pwa/PwaRegister";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,6 +83,13 @@ const ALL_ITEMS: NavItem[] = [
   ...GROUPS.flatMap((g) => g.items),
 ];
 
+const MOBILE_TABS: NavItem[] = [
+  { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
+  { href: "/sales-invoices", key: "sales", icon: FileBarChart2 },
+  { href: "/payments", key: "payments", icon: Banknote },
+  { href: "/more", key: "reports", icon: ChevronDown },
+];
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -123,6 +132,57 @@ function LocaleSwitcher({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function MobileTabBar({ pathname }: { pathname: string }) {
+  const t = useT();
+  function Tab({ item }: { item: NavItem }) {
+    const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+    const Icon = item.icon;
+    return (
+      <Link
+        href={item.href}
+        prefetch={item.prefetch === false ? false : undefined}
+        className={cn(
+          "flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] font-medium transition-colors",
+          active ? "text-sidebar-primary" : "text-muted-foreground",
+        )}
+      >
+        <Icon className="size-5" />
+        <span className="max-w-20 truncate">{item.href === "/more" ? "More" : t.nav[item.key]}</span>
+      </Link>
+    );
+  }
+  const moreItems = ALL_ITEMS.filter(
+    (i) => i.href !== "/dashboard" && i.href !== "/sales-invoices" && i.href !== "/payments",
+  );
+  return (
+    <nav
+      aria-label="Mobile navigation"
+      className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
+      {MOBILE_TABS.slice(0, 3).map((tab) => (
+        <Tab key={tab.href} item={tab} />
+      ))}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] font-medium text-muted-foreground">
+            <MoreHorizontal className="size-5" />
+            <span>More</span>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="top" align="end" className="w-52">
+          {moreItems.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link href={item.href} prefetch={item.prefetch === false ? false : undefined}>
+                <item.icon className="size-4" /> {t.nav[item.key]}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </nav>
   );
 }
 
@@ -263,6 +323,7 @@ export function AppShell({
           </div>
 
           <div className="ms-auto flex items-center gap-1.5">
+            <InstallAppButton />
             <LocaleSwitcher locale={locale} pending={pending} onSelect={switchLocale} />
             <ThemeToggle />
             <DropdownMenu>
@@ -294,9 +355,10 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 min-w-0">
+        <main className="flex-1 p-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 min-w-0">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
+        <MobileTabBar pathname={pathname} />
       </div>
     </div>
   );

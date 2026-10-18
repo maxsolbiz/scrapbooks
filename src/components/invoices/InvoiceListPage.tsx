@@ -61,8 +61,8 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
                 <TableHead>{t.common.code}</TableHead>
                 <TableHead>{t.common.date}</TableHead>
                 <TableHead>{t.nav.parties}</TableHead>
-                <TableHead className="text-end">{t.common.subtotal}</TableHead>
-                <TableHead className="text-end">{t.common.vat}</TableHead>
+                <TableHead className="hidden text-end sm:table-cell">{t.common.subtotal}</TableHead>
+                <TableHead className="hidden text-end sm:table-cell">{t.common.vat}</TableHead>
                 <TableHead className="text-end">{t.common.total}</TableHead>
                 <TableHead>{t.common.status}</TableHead>
               </TableRow>
@@ -89,10 +89,10 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
                       {inv.party.nameAr}
                     </span>
                   </TableCell>
-                  <TableCell className="text-end tabular-nums">
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">
                     {(Number(inv.subtotalFils) / 100).toFixed(2)}
                   </TableCell>
-                  <TableCell className="text-end tabular-nums">
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">
                     {(Number(inv.vatFils) / 100).toFixed(2)}
                   </TableCell>
                   <TableCell className="text-end tabular-nums font-medium">

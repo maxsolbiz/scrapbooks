@@ -57,7 +57,7 @@ export default async function JournalsPage() {
                 <TableHead>{t.journals.entryNo}</TableHead>
                 <TableHead>{t.common.date}</TableHead>
                 <TableHead>{t.common.narration}</TableHead>
-                <TableHead>{t.journals.source}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t.journals.source}</TableHead>
                 <TableHead>{t.common.status}</TableHead>
               </TableRow>
             </TableHeader>
@@ -80,7 +80,7 @@ export default async function JournalsPage() {
                   <TableCell className="max-w-72 truncate">
                     {ar ? (e.narrationAr ?? e.narration) : (e.narration ?? "—")}
                   </TableCell>
-                  <TableCell className="text-xs">{e.sourceType}</TableCell>
+                  <TableCell className="hidden text-xs sm:table-cell">{e.sourceType}</TableCell>
                   <TableCell>
                     <Badge
                       variant={

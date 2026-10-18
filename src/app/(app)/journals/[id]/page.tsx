@@ -81,7 +81,7 @@ export default async function JournalDetailPage({
             <TableRow>
               <TableHead>{t.common.code}</TableHead>
               <TableHead>{t.common.name}</TableHead>
-              <TableHead>Party</TableHead>
+              <TableHead className="hidden sm:table-cell">Party</TableHead>
               <TableHead className="text-end">{t.common.debit}</TableHead>
               <TableHead className="text-end">{t.common.credit}</TableHead>
             </TableRow>
@@ -96,7 +96,7 @@ export default async function JournalDetailPage({
                     {l.account.nameAr}
                   </span>
                 </TableCell>
-                <TableCell className="text-xs">
+                <TableCell className="hidden text-xs sm:table-cell">
                   {l.party ? `${l.party.nameEn} (${l.party.code})` : "—"}
                 </TableCell>
                 <TableCell className="text-end tabular-nums">

@@ -62,25 +62,25 @@ export default async function AgingPage({
               <TableRow>
                 <TableHead>{t.payments.invoice}</TableHead>
                 <TableHead>{t.nav.parties}</TableHead>
-                <TableHead>{t.common.date}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t.common.date}</TableHead>
                 <TableHead className="text-end">{t.nav.outstanding}</TableHead>
-                <TableHead className="text-end">1-30</TableHead>
-                <TableHead className="text-end">31-60</TableHead>
-                <TableHead className="text-end">61-90</TableHead>
-                <TableHead className="text-end">90+</TableHead>
+                <TableHead className="hidden text-end sm:table-cell">1-30</TableHead>
+                <TableHead className="hidden text-end sm:table-cell">31-60</TableHead>
+                <TableHead className="hidden text-end sm:table-cell">61-90</TableHead>
+                <TableHead className="hidden text-end sm:table-cell">90+</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((r) => (
                 <TableRow key={r.invoiceNo}>
-                  <TableCell className="font-mono text-xs">{r.invoiceNo}</TableCell>
+                  <TableCell className="hidden font-mono text-xs sm:table-cell">{r.invoiceNo}</TableCell>
                   <TableCell>{r.partyName}</TableCell>
-                  <TableCell>{r.invoiceDate}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{r.invoiceDate}</TableCell>
                   <TableCell className="text-end tabular-nums">{fmt(r.outstanding)}</TableCell>
-                  <TableCell className="text-end tabular-nums">{r.d0_30 ? fmt(r.d0_30) : "—"}</TableCell>
-                  <TableCell className="text-end tabular-nums">{r.d31_60 ? fmt(r.d31_60) : "—"}</TableCell>
-                  <TableCell className="text-end tabular-nums">{r.d61_90 ? fmt(r.d61_90) : "—"}</TableCell>
-                  <TableCell className="text-end tabular-nums">{r.d90plus ? fmt(r.d90plus) : "—"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d0_30 ? fmt(r.d0_30) : "—"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d31_60 ? fmt(r.d31_60) : "—"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d61_90 ? fmt(r.d61_90) : "—"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d90plus ? fmt(r.d90plus) : "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -88,10 +88,10 @@ export default async function AgingPage({
               <TableRow>
                 <TableCell colSpan={3} className="font-semibold">{t.nav.total}</TableCell>
                 <TableCell className="text-end tabular-nums font-semibold">{fmt(tOut)}</TableCell>
-                <TableCell className="text-end tabular-nums font-semibold">{fmt(t030)}</TableCell>
-                <TableCell className="text-end tabular-nums font-semibold">{fmt(t3160)}</TableCell>
-                <TableCell className="text-end tabular-nums font-semibold">{fmt(t6190)}</TableCell>
-                <TableCell className="text-end tabular-nums font-semibold">{fmt(t90p)}</TableCell>
+                <TableCell className="hidden text-end tabular-nums font-semibold sm:table-cell">{fmt(t030)}</TableCell>
+                <TableCell className="hidden text-end tabular-nums font-semibold sm:table-cell">{fmt(t3160)}</TableCell>
+                <TableCell className="hidden text-end tabular-nums font-semibold sm:table-cell">{fmt(t6190)}</TableCell>
+                <TableCell className="hidden text-end tabular-nums font-semibold sm:table-cell">{fmt(t90p)}</TableCell>
               </TableRow>
             </TableFooter>
           </Table>

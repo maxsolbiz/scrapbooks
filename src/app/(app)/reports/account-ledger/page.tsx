@@ -75,31 +75,31 @@ export default async function AccountLedgerPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>{t.common.date}</TableHead>
-                  <TableHead>{t.nav.journals}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{t.nav.journals}</TableHead>
                   <TableHead>{t.common.notes}</TableHead>
-                  <TableHead className="text-end">{t.common.debit}</TableHead>
-                  <TableHead className="text-end">{t.common.credit}</TableHead>
+                  <TableHead className="hidden text-end sm:table-cell">{t.common.debit}</TableHead>
+                  <TableHead className="hidden text-end sm:table-cell">{t.common.credit}</TableHead>
                   <TableHead className="text-end">{t.nav.runningBalance}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={3} className="text-xs text-muted-foreground">
-                    {t.nav.opening}
-                  </TableCell>
-                  <TableCell colSpan={3} className="text-end tabular-nums">
-                    {fmt(ledger.startingBalance)}
-                  </TableCell>
-                </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-xs text-muted-foreground">
+                      {t.nav.opening}
+                    </TableCell>
+                    <TableCell colSpan={4} className="text-end tabular-nums">
+                      {fmt(ledger.startingBalance)}
+                    </TableCell>
+                  </TableRow>
                 {ledger.rows.map((row, i) => (
                   <TableRow key={i}>
                     <TableCell>{row.date}</TableCell>
-                    <TableCell className="font-mono text-xs">{row.entryNo}</TableCell>
+                    <TableCell className="hidden font-mono text-xs sm:table-cell">{row.entryNo}</TableCell>
                     <TableCell className="text-xs">{row.narration}</TableCell>
-                    <TableCell className="text-end tabular-nums">
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">
                       {row.debit ? fmt(row.debit) : "—"}
                     </TableCell>
-                    <TableCell className="text-end tabular-nums">
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">
                       {row.credit ? fmt(row.credit) : "—"}
                     </TableCell>
                     <TableCell className="text-end tabular-nums">{fmt(row.balance)}</TableCell>

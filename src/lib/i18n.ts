@@ -55,6 +55,11 @@ const en = {
     lockedOut: "Too many failed attempts. Please wait a few minutes and try again.",
     title: "Sign in to ScrapBooks",
   },
+  offline: {
+    title: "You're offline",
+    body: "ScrapBooks needs an internet connection to keep your books accurate. Reconnect and try again.",
+    install: "Install app",
+  },
   common: {
     save: "Save",
     cancel: "Cancel",
@@ -233,6 +238,11 @@ const ar: typeof en = {
     error: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
     lockedOut: "محاولات فاشلة كثيرة. يرجى الانتظار بضع دقائق ثم المحاولة مجدداً.",
     title: "تسجيل الدخول إلى سكراب بوكس",
+  },
+  offline: {
+    title: "أنت غير متصل بالإنترنت",
+    body: "يحتاج سكراب بوكس إلى اتصال بالإنترنت لضمان دقة دفاترك. أعد الاتصال وحاول مرة أخرى.",
+    install: "تثبيت التطبيق",
   },
   common: {
     save: "حفظ",

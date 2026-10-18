@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useT, useLocale } from "@/components/i18n/LocaleProvider";
 import type { Dictionary, Locale } from "@/lib/i18n";
+import type { ModuleKey, ModulePerms } from "@/lib/permissions";
 import { setLocale } from "@/app/actions/ui";
 import { signOutAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -40,42 +41,49 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavItem = { href: string; key: keyof Dictionary["nav"]; icon: React.ElementType; prefetch?: boolean };
+type NavItem = {
+  href: string;
+  key: keyof Dictionary["nav"];
+  icon: React.ElementType;
+  prefetch?: boolean;
+  module?: ModuleKey;
+  adminOnly?: boolean;
+};
 type NavGroup = { labelKey: string; items: NavItem[] };
 
 const GROUPS: NavGroup[] = [
   {
     labelKey: "OPERATE",
     items: [
-      { href: "/sales-invoices", key: "sales", icon: FileBarChart2 },
-      { href: "/purchase-invoices", key: "purchases", icon: FileText },
-      { href: "/payments", key: "payments", icon: Banknote },
+      { href: "/sales-invoices", key: "sales", icon: FileBarChart2, module: "sales-invoices" },
+      { href: "/purchase-invoices", key: "purchases", icon: FileText, module: "purchase-invoices" },
+      { href: "/payments", key: "payments", icon: Banknote, module: "payments" },
     ],
   },
   {
     labelKey: "BOOKS",
     items: [
-      { href: "/accounts", key: "accounts", icon: BookText, prefetch: false },
-      { href: "/journals", key: "journals", icon: LayoutDashboard },
+      { href: "/accounts", key: "accounts", icon: BookText, prefetch: false, module: "accounts" },
+      { href: "/journals", key: "journals", icon: LayoutDashboard, module: "journals" },
     ],
   },
   {
     labelKey: "PEOPLE & CATALOG",
     items: [
-      { href: "/parties", key: "parties", icon: Building2 },
-      { href: "/items", key: "items", icon: Package },
+      { href: "/parties", key: "parties", icon: Building2, module: "parties" },
+      { href: "/items", key: "items", icon: Package, module: "items" },
     ],
   },
   {
     labelKey: "INSIGHTS",
-    items: [{ href: "/reports", key: "reports", icon: ChartColumnBig, prefetch: false }],
+    items: [{ href: "/reports", key: "reports", icon: ChartColumnBig, prefetch: false, module: "reports" }],
   },
   {
     labelKey: "ADMIN",
     items: [
-      { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange },
-      { href: "/settings", key: "settings", icon: Settings, prefetch: false },
-      { href: "/audit", key: "audit", icon: ShieldCheck, prefetch: false },
+      { href: "/fiscal-years", key: "fiscalYears", icon: CalendarRange, module: "fiscal-years" },
+      { href: "/settings", key: "settings", icon: Settings, prefetch: false, adminOnly: true },
+      { href: "/audit", key: "audit", icon: ShieldCheck, prefetch: false, adminOnly: true },
     ],
   },
 ];
@@ -85,12 +93,11 @@ const ALL_ITEMS: NavItem[] = [
   ...GROUPS.flatMap((g) => g.items),
 ];
 
-const MOBILE_TABS: NavItem[] = [
-  { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
-  { href: "/sales-invoices", key: "sales", icon: FileBarChart2 },
-  { href: "/payments", key: "payments", icon: Banknote },
-  { href: "/more", key: "reports", icon: ChevronDown },
-];
+function isAllowed(item: NavItem, perms: ModulePerms, isAdmin: boolean): boolean {
+  if (item.adminOnly) return isAdmin;
+  if (!item.module) return true; // dashboard
+  return perms[item.module] !== "none";
+}
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -137,7 +144,7 @@ function LocaleSwitcher({
   );
 }
 
-function MobileTabBar({ pathname }: { pathname: string }) {
+function MobileTabBar({ pathname, allowed }: { pathname: string; allowed: NavItem[] }) {
   const t = useT();
   function Tab({ item }: { item: NavItem }) {
     const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
@@ -152,38 +159,39 @@ function MobileTabBar({ pathname }: { pathname: string }) {
         )}
       >
         <Icon className="size-5" />
-        <span className="max-w-20 truncate">{item.href === "/more" ? "More" : t.nav[item.key]}</span>
+        <span className="max-w-20 truncate">{t.nav[item.key]}</span>
       </Link>
     );
   }
-  const moreItems = ALL_ITEMS.filter(
-    (i) => i.href !== "/dashboard" && i.href !== "/sales-invoices" && i.href !== "/payments",
-  );
+  const tabs = allowed.slice(0, 3);
+  const moreItems = allowed.slice(3);
   return (
     <nav
       aria-label="Mobile navigation"
       className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      {MOBILE_TABS.slice(0, 3).map((tab) => (
+      {tabs.map((tab) => (
         <Tab key={tab.href} item={tab} />
       ))}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] font-medium text-muted-foreground">
-            <MoreHorizontal className="size-5" />
-            <span>More</span>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="top" align="end" className="w-52">
-          {moreItems.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href} prefetch={item.prefetch === false ? false : undefined}>
-                <item.icon className="size-4" /> {t.nav[item.key]}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {moreItems.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex flex-1 flex-col items-center gap-0.5 py-1.5 text-[10px] font-medium text-muted-foreground">
+              <MoreHorizontal className="size-5" />
+              <span>More</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="end" className="w-52">
+            {moreItems.map((item) => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link href={item.href} prefetch={item.prefetch === false ? false : undefined}>
+                  <item.icon className="size-4" /> {t.nav[item.key]}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </nav>
   );
 }
@@ -218,10 +226,12 @@ function Breadcrumb({ pathname }: { pathname: string }) {
 export function AppShell({
   user,
   dict,
+  perms,
   children,
 }: {
   user: { name: string; email: string; role?: string };
   dict: Dictionary;
+  perms: ModulePerms;
   children: ReactNode;
 }) {
   const t = useT();
@@ -230,7 +240,12 @@ export function AppShell({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const isAdmin = user.role === "ADMIN";
-  const groups = isAdmin ? GROUPS : GROUPS.filter((g) => g.labelKey !== "ADMIN");
+  const allowed = ALL_ITEMS.filter((i) => isAllowed(i, perms, isAdmin));
+  const allowedSet = new Set(allowed.map((i) => i.href));
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    items: g.items.filter((i) => allowedSet.has(i.href)),
+  })).filter((g) => g.items.length > 0);
 
   function switchLocale(next: Locale) {
     startTransition(async () => {
@@ -313,7 +328,7 @@ export function AppShell({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
-                  {ALL_ITEMS.map((item) => (
+                  {allowed.map((item) => (
                     <DropdownMenuItem key={item.href} asChild>
                       <Link href={item.href}>{dict.nav[item.key]}</Link>
                     </DropdownMenuItem>
@@ -362,7 +377,7 @@ export function AppShell({
         <main className="flex-1 p-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 min-w-0">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
-        <MobileTabBar pathname={pathname} />
+        <MobileTabBar pathname={pathname} allowed={allowed} />
       </div>
     </div>
   );

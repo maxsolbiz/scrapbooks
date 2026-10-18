@@ -1,10 +1,10 @@
 import { listLeafAccounts } from "@/lib/accounts";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { JournalForm } from "../JournalForm";
 
 export default async function NewJournalPage() {
-  await requireEditor();
+  await requireModule("journals", "write");
   const [accounts, locale] = await Promise.all([listLeafAccounts(), getServerLocale()]);
   const dict = getDictionary(locale);
   const now = new Date();

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { accountLedger } from "@/lib/reports";
 import {
@@ -31,7 +31,7 @@ export default async function AccountLedgerPage({
 }: {
   searchParams: Promise<{ account?: string }>;
 }) {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const { account } = await searchParams;
@@ -97,10 +97,10 @@ export default async function AccountLedgerPage({
                     <TableCell className="hidden font-mono text-xs sm:table-cell">{row.entryNo}</TableCell>
                     <TableCell className="text-xs">{row.narration}</TableCell>
                     <TableCell className="hidden text-end tabular-nums sm:table-cell">
-                      {row.debit ? fmt(row.debit) : "—"}
+                      {row.debit ? fmt(row.debit) : "â€”"}
                     </TableCell>
                     <TableCell className="hidden text-end tabular-nums sm:table-cell">
-                      {row.credit ? fmt(row.credit) : "—"}
+                      {row.credit ? fmt(row.credit) : "â€”"}
                     </TableCell>
                     <TableCell className="text-end tabular-nums">{fmt(row.balance)}</TableCell>
                   </TableRow>

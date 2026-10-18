@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireModule, type SessionUser } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export default async function PaymentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireUser();
+  const user: SessionUser = await requireModule("payments");
   const { id } = await params;
   const locale = await getServerLocale();
   const t = getDictionary(locale);
@@ -62,7 +62,7 @@ export default async function PaymentDetailPage({
               <Link href={`/journals/${payment.journalEntryId}`}>{t.journals.viewEntry}</Link>
             </Button>
           )}
-          {canEdit(user) && payment.status === "POSTED" && (
+          {(await moduleCan(user, "payments", "write")) && payment.status === "POSTED" && (
             <VoidPaymentButton paymentId={payment.id} label={t.payments.voidPayment} />
           )}
         </div>

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireModule, type SessionUser } from "@/lib/guard";
+import { MODULE_PATH, type ModuleKey } from "@/lib/permissions";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
@@ -18,11 +19,13 @@ import {
 } from "@/components/ui/table";
 
 export async function InvoiceListPage({ direction }: { direction: InvoiceDirection }) {
-  const user = await requireUser();
+  const moduleKey: ModuleKey = direction === "SALES" ? "sales-invoices" : "purchase-invoices";
+  const user: SessionUser = await requireModule(moduleKey);
   const locale = await getServerLocale();
   const t = getDictionary(locale);
-  const path = direction === "SALES" ? "/sales-invoices" : "/purchase-invoices";
+  const path = MODULE_PATH[moduleKey];
   const title = direction === "SALES" ? t.nav.sales : t.nav.purchases;
+  const canWrite = await moduleCan(user, moduleKey, "write");
 
   const invoices = await prisma.invoice.findMany({
     where: { direction },
@@ -45,7 +48,7 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
       <PageHeader
         title={title}
         actions={
-          canEdit(user) ? (
+          canWrite ? (
             <Button asChild>
               <Link href={`${path}/new`}>
                 <Plus className="size-4" /> {t.invoices.new}

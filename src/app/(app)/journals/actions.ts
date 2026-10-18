@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
 import { postJournalEntry, assertBalanced } from "@/lib/accounting";
 import type { EntrySource } from "@/generated/prisma/enums";
@@ -37,7 +37,7 @@ function toFils(value: string): bigint {
 }
 
 export async function createJournal(input: z.input<typeof createSchema>): Promise<ActionResult<{ id: string }>> {
-  const user = await requireEditor();
+  const user = await requireModule("journals", "write");
   const parsed = createSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -80,7 +80,7 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
 }
 
 export async function voidJournal(entryId: string): Promise<ActionResult> {
-  const user = await requireEditor();
+  const user = await requireModule("journals", "write");
   try {
     await prisma.journalEntry.update({
       where: { id: entryId },

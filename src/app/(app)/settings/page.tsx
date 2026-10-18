@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/db";
 import { requireUser, canEdit } from "@/lib/guard";
+import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsClient } from "./SettingsClient";
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const locale = await getServerLocale();
+  const dict = getDictionary(locale);
   const company = await prisma.companySettings.upsert({
     where: { id: "settings" },
     update: {},
@@ -14,7 +17,7 @@ export default async function SettingsPage() {
     user.role === "ADMIN"
       ? await prisma.user.findMany({
           orderBy: { email: "asc" },
-          select: { id: true, name: true, email: true, role: true, isActive: true },
+          select: { id: true, name: true, email: true, role: true, isActive: true, permissions: true },
         })
       : [];
 
@@ -33,8 +36,9 @@ export default async function SettingsPage() {
           bankDetailsEn: company.bankDetailsEn,
           bankDetailsAr: company.bankDetailsAr,
         }}
-        users={users}
+        users={users.map((u) => ({ ...u, permissions: (u.permissions as unknown) ?? null }))}
         isAdmin={user.role === "ADMIN" && canEdit(user)}
+        dict={dict}
       />
     </div>
   );

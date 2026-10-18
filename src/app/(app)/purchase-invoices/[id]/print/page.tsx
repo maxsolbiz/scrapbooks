@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { InvoicePrintView } from "@/components/invoices/InvoicePrintView";
 import { PrintButton } from "@/components/invoices/PrintButton";
 
@@ -9,7 +9,7 @@ export default async function PrintInvoicePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  await requireModule("purchase-invoices");
   const { id } = await params;
   const invoice = await prisma.invoice.findFirst({
     where: { id, direction: "PURCHASE" },

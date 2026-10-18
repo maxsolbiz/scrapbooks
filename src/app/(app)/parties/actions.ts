@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 
 const partySchema = z.object({
   id: z.string().optional(),
@@ -24,7 +24,7 @@ export type ActionResult<T = undefined> =
   | { ok: false; error: string };
 
 export async function saveParty(input: z.input<typeof partySchema>): Promise<ActionResult> {
-  await requireEditor();
+  await requireModule("parties", "write");
   const parsed = partySchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };

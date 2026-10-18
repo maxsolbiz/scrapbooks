@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { profitAndLoss } from "@/lib/reports";
 import {
@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function ProfitLossPage() {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
 
@@ -39,7 +39,7 @@ export default async function ProfitLossPage() {
     <div className="space-y-4">
       <PageHeader
         title={t.nav.profitLoss}
-        description={`${t.nav.period} ${active.starts.toISOString().slice(0, 10)} → ${active.ends.toISOString().slice(0, 10)}`}
+        description={`${t.nav.period} ${active.starts.toISOString().slice(0, 10)} â†’ ${active.ends.toISOString().slice(0, 10)}`}
       />
       <Card>
         <CardContent>

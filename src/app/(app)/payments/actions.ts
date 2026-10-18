@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
 import { createPayment, voidPayment } from "@/lib/payments";
@@ -29,7 +29,7 @@ const schema = z.object({
 export async function createPaymentAction(
   input: z.input<typeof schema>,
 ): Promise<ActionResult<{ id: string }>> {
-  const user = await requireEditor();
+  const user = await requireModule("payments", "write");
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -63,7 +63,7 @@ export async function createPaymentAction(
 }
 
 export async function voidPaymentAction(paymentId: string): Promise<ActionResult> {
-  const user = await requireEditor();
+  const user = await requireModule("payments", "write");
   try {
     await prisma.$transaction(async (tx) => voidPayment(tx, paymentId));
     await logAudit(user, "PAYMENT_VOID", "Payment", paymentId, "Voided payment");

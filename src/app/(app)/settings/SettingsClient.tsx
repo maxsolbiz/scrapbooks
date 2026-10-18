@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import type { Dictionary } from "@/lib/i18n";
+import {
+  MODULE_KEYS,
+  MODULE_LABEL_KEY,
+  MODULE_LEVELS,
+  parseOverrides,
+  roleDefaults,
+  type ModuleAccess,
+  type ModuleKey,
+} from "@/lib/permissions";
 import {
   saveCompanyAction,
   saveUserAction,
@@ -38,6 +50,7 @@ export interface UserDto {
   email: string;
   role: string;
   isActive: boolean;
+  permissions: unknown;
 }
 
 function show(res: SettingsActionResult, success: string) {
@@ -48,14 +61,28 @@ function show(res: SettingsActionResult, success: string) {
   }
 }
 
+type RoleValue = "ADMIN" | "ACCOUNTANT" | "VIEWER";
+type PermsMap = Record<ModuleKey, ModuleAccess>;
+
+/** Role defaults may say "write" for read-only modules (e.g. reports); display the closest offered level. */
+function clampPerms(map: PermsMap): PermsMap {
+  const out = { ...map };
+  for (const key of MODULE_KEYS) {
+    if (!MODULE_LEVELS[key].includes(out[key])) out[key] = "read";
+  }
+  return out;
+}
+
 export function SettingsClient({
   company,
   users,
   isAdmin,
+  dict,
 }: {
   company: CompanySettingsDto;
   users: UserDto[];
   isAdmin: boolean;
+  dict: Dictionary;
 }) {
   const [c, setC] = useState<CompanySettingsDto>(company);
   const [saving, setSaving] = useState(false);
@@ -94,11 +121,11 @@ export function SettingsClient({
       {isAdmin && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Users</CardTitle>
+            <CardTitle className="text-base">{dict.nav.users}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {users.map((u) => (
-              <UserRow key={u.id} user={u} />
+              <UserRow key={u.id} user={u} dict={dict} />
             ))}
           </CardContent>
         </Card>
@@ -107,46 +134,109 @@ export function SettingsClient({
   );
 }
 
-function UserRow({ user }: { user: UserDto }) {
-  const [role, setRole] = useState(user.role as "ADMIN" | "ACCOUNTANT" | "VIEWER");
+function UserRow({ user, dict }: { user: UserDto; dict: Dictionary }) {
+  const [role, setRole] = useState<RoleValue>(user.role as RoleValue);
   const [isActive, setActive] = useState(user.isActive);
   const [pwd, setPwd] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPerms, setShowPerms] = useState(false);
+
+  const defaults = roleDefaults(role);
+  const [perms, setPerms] = useState<PermsMap>(() => clampPerms({
+    ...defaults,
+    ...parseOverrides(user.permissions),
+  }));
+
+  function applyRole(next: RoleValue) {
+    setRole(next);
+    setPerms(clampPerms(roleDefaults(next)));
+  }
+
+  function resetPerms() {
+    setPerms(clampPerms(roleDefaults(role)));
+  }
+
+  async function save() {
+    setSaving(true);
+    const defaults2 = clampPerms(roleDefaults(role));
+    const overrides: Record<string, ModuleAccess> = {};
+    for (const key of MODULE_KEYS) {
+      if (perms[key] !== defaults2[key]) overrides[key] = perms[key];
+    }
+    const res = await saveUserAction({
+      id: user.id,
+      role,
+      isActive,
+      newPassword: pwd || undefined,
+      permissions: Object.keys(overrides).length > 0 ? overrides : null,
+    });
+    setSaving(false);
+    setPwd("");
+    show(res, "Saved");
+  }
+
+  const roster = MODULE_KEYS.map((key) => ({ key, label: dict.nav[MODULE_LABEL_KEY[key]] }));
 
   return (
-    <div className="grid items-center gap-2 rounded-md border p-3 sm:grid-cols-[1fr_auto_auto_auto]">
-      <div>
-        <p className="text-sm font-medium">{user.name}</p>
-        <p className="text-xs text-muted-foreground">{user.email}</p>
+    <div className="rounded-md border">
+      <div className="grid items-center gap-2 p-3 sm:grid-cols-[1fr_auto_auto_auto]">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">{user.name}</p>
+          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+        </div>
+        <Select value={role} onValueChange={(v) => applyRole(v as RoleValue)}>
+          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ADMIN">ADMIN</SelectItem>
+            <SelectItem value="ACCOUNTANT">ACCOUNTANT</SelectItem>
+            <SelectItem value="VIEWER">VIEWER</SelectItem>
+          </SelectContent>
+        </Select>
+        <Switch checked={isActive} onCheckedChange={setActive} />
+        <Button variant="ghost" size="sm" className="w-full justify-between sm:w-36" onClick={() => setShowPerms((s) => !s)}>
+          {dict.perms.title}
+          <ChevronDown className={cn("size-4 transition-transform", showPerms && "rotate-180")} />
+        </Button>
       </div>
-      <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
-        <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ADMIN">ADMIN</SelectItem>
-          <SelectItem value="ACCOUNTANT">ACCOUNTANT</SelectItem>
-          <SelectItem value="VIEWER">VIEWER</SelectItem>
-        </SelectContent>
-      </Select>
-      <Switch checked={isActive} onCheckedChange={setActive} />
-      <div className="flex gap-2">
+
+      {showPerms && (
+        <div className="border-t p-3">
+          <div className="grid gap-2">
+            {roster.map(({ key, label }) => (
+              <div key={key} className="grid items-center gap-2 sm:grid-cols-[1fr_auto]">
+                <span className="text-sm">{label}</span>
+                <Select
+                  value={perms[key]}
+                  onValueChange={(v) => setPerms({ ...perms, [key]: v as ModuleAccess })}
+                >
+                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {MODULE_LEVELS[key].map((lv) => (
+                      <SelectItem key={lv} value={lv}>{dict.perms[lv]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <p className="text-xs text-muted-foreground">{dict.perms.hint}</p>
+              <Button variant="outline" size="sm" onClick={resetPerms}>
+                {dict.perms.reset}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-end gap-2 border-t p-3">
         <Input
           placeholder="new password"
           type="password"
-          className="w-40"
+          className="w-44"
           value={pwd}
           onChange={(e) => setPwd(e.target.value)}
         />
-        <Button
-          size="sm"
-          disabled={saving}
-          onClick={async () => {
-            setSaving(true);
-            const res = await saveUserAction({ id: user.id, role, isActive, newPassword: pwd || undefined });
-            setSaving(false);
-            setPwd("");
-            show(res, "Saved");
-          }}
-        >
+        <Button size="sm" disabled={saving} onClick={save}>
           Save
         </Button>
       </div>

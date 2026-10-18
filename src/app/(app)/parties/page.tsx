@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { PartiesClient } from "./PartiesClient";
 
 export default async function PartiesPage() {
-  const user = await requireUser();
+  const user = await requireModule("parties");
   const [rows, locale] = await Promise.all([
     prisma.party.findMany({
       orderBy: { code: "asc" },
@@ -24,5 +24,5 @@ export default async function PartiesPage() {
   ]);
   const dict = getDictionary(locale);
 
-  return <PartiesClient rows={rows} dict={dict} canWrite={canEdit(user)} />;
+  return <PartiesClient rows={rows} dict={dict} canWrite={await moduleCan(user, "parties", "write")} />;
 }

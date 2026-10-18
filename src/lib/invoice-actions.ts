@@ -3,11 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
 import { createInvoice, voidInvoice } from "@/lib/invoices";
 import type { InvoiceDirection, UnitType } from "@/generated/prisma/client";
+
+function directionModule(direction: InvoiceDirection) {
+  return direction === "SALES" ? "sales-invoices" : "purchase-invoices";
+}
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T }
@@ -35,7 +39,7 @@ export async function createInvoiceAction(
   direction: InvoiceDirection,
   input: z.input<typeof invoiceSchema>,
 ): Promise<ActionResult<{ id: string; invoiceNo: string }>> {
-  const user = await requireEditor();
+  const user = await requireModule(directionModule(direction), "write");
   const parsed = invoiceSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -79,7 +83,7 @@ export async function voidInvoiceAction(
   invoiceId: string,
   direction: InvoiceDirection,
 ): Promise<ActionResult> {
-  const user = await requireEditor();
+  const user = await requireModule(directionModule(direction), "write");
   try {
     await prisma.$transaction(async (tx) => voidInvoice(tx, invoiceId));
     await logAudit(user, "INVOICE_VOID", "Invoice", invoiceId, `Voided ${direction} invoice`);

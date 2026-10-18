@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { InvoiceForm } from "@/components/invoices/InvoiceForm";
 
 export async function NewInvoicePage({ direction }: { direction: InvoiceDirection }) {
-  await requireEditor();
+  await requireModule(direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write");
   const [partiesRaw, itemsRaw, locale] = await Promise.all([
     prisma.party.findMany({
       where: { isActive: true },

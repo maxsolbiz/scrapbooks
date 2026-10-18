@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { PaymentForm } from "../PaymentForm";
 
 export default async function NewPaymentPage() {
-  await requireEditor();
+  await requireModule("payments", "write");
   const [parties, invoices, locale] = await Promise.all([
     prisma.party.findMany({
       where: { isActive: true },

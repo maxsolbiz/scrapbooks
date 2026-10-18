@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { decimalStringToFils } from "@/lib/money";
 
 const itemSchema = z.object({
@@ -31,7 +31,7 @@ function parseVatRate(value: string): number {
 }
 
 export async function saveItem(input: z.input<typeof itemSchema>): Promise<ActionResult> {
-  await requireEditor();
+  await requireModule("items", "write");
   const parsed = itemSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };

@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { balanceSheet } from "@/lib/reports";
 import {
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function BalanceSheetPage() {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const asOf = new Date();
@@ -29,7 +29,7 @@ export default async function BalanceSheetPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>—</TableHead>
+                <TableHead>â€”</TableHead>
                 <TableHead className="text-end">AED</TableHead>
               </TableRow>
             </TableHeader>

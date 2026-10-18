@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireModule, type SessionUser } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { formatAED } from "@/lib/money";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,7 @@ export default async function JournalDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireUser();
+  const user: SessionUser = await requireModule("journals");
   const { id } = await params;
   const locale = await getServerLocale();
   const t = getDictionary(locale);
@@ -62,7 +62,7 @@ export default async function JournalDetailPage({
           <Button asChild variant="outline">
             <Link href="/journals">{t.common.back}</Link>
           </Button>
-          {canEdit(user) && entry.status === "POSTED" && (
+          {(await moduleCan(user, "journals", "write")) && entry.status === "POSTED" && (
             <VoidJournalButton entryId={entry.id} label={t.journals.voidEntry} confirmText={t.journals.voidConfirm} />
           )}
         </div>

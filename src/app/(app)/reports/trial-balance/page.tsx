@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { trialBalance } from "@/lib/reports";
 import {
@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function TrialBalancePage() {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const asOf = new Date();
@@ -45,10 +45,10 @@ export default async function TrialBalancePage() {
                     <TableCell className="font-mono text-xs">{r.code}</TableCell>
                     <TableCell>{r.nameEn}</TableCell>
                     <TableCell className="text-end tabular-nums">
-                      {balancingDebit > 0n ? (Number(balancingDebit) / 100).toFixed(2) : "—"}
+                      {balancingDebit > 0n ? (Number(balancingDebit) / 100).toFixed(2) : "â€”"}
                     </TableCell>
                     <TableCell className="text-end tabular-nums">
-                      {balancingDebit < 0n ? (Number(-balancingDebit) / 100).toFixed(2) : "—"}
+                      {balancingDebit < 0n ? (Number(-balancingDebit) / 100).toFixed(2) : "â€”"}
                     </TableCell>
                   </TableRow>
                 );

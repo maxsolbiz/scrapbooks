@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChartColumnBig } from "lucide-react";
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,7 +15,7 @@ const REPORTS = [
 ] as const;
 
 export default async function ReportsPage() {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
 

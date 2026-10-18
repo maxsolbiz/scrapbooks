@@ -70,6 +70,14 @@ const en = {
     entity: "Entity",
     detail: "Details",
   },
+  perms: {
+    title: "Module access",
+    hint: "Changes apply on top of the role's defaults.",
+    none: "No access",
+    read: "Read",
+    write: "Read / write",
+    reset: "Reset to role defaults",
+  },
   common: {
     save: "Save",
     cancel: "Cancel",
@@ -263,6 +271,14 @@ const ar: typeof en = {
     action: "الإجراء",
     entity: "الكيان",
     detail: "التفاصيل",
+  },
+  perms: {
+    title: "صلاحيات الوحدات",
+    hint: "تُطبَّق التعديلات فوق صلاحيات الدور الافتراضية.",
+    none: "بدون وصول",
+    read: "قراءة",
+    write: "قراءة / كتابة",
+    reset: "استعادة صلاحيات الدور",
   },
   common: {
     save: "حفظ",

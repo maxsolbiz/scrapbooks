@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireUser } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,9 @@ export async function InvoiceDetailView({
     },
   });
   if (!invoice) notFound();
+  const canVoid =
+    (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
+    invoice.status === "POSTED";
 
   const statusBadge = (
     <Badge
@@ -79,7 +82,7 @@ export async function InvoiceDetailView({
               <Link href={`/journals/${invoice.journalEntryId}`}>{t.journals.viewEntry}</Link>
             </Button>
           )}
-          {canEdit(user) && invoice.status === "POSTED" && (
+          {canVoid && (
             <VoidInvoiceButton invoiceId={invoice.id} direction={direction} label={t.invoices.voidInvoice} confirmText={t.invoices.voidConfirm} />
           )}
         </div>

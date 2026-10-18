@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { agingReport } from "@/lib/reports";
 import Link from "next/link";
@@ -24,7 +24,7 @@ export default async function AgingPage({
 }: {
   searchParams: Promise<{ direction?: string }>;
 }) {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const { direction } = await searchParams;
@@ -53,7 +53,7 @@ export default async function AgingPage({
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {dir === "SALES" ? t.payments.receipt : t.payments.payment} — {t.nav.reportsSub}
+        {dir === "SALES" ? t.payments.receipt : t.payments.payment} â€” {t.nav.reportsSub}
       </p>
       <Card>
         <CardContent>
@@ -77,10 +77,10 @@ export default async function AgingPage({
                   <TableCell>{r.partyName}</TableCell>
                   <TableCell className="hidden sm:table-cell">{r.invoiceDate}</TableCell>
                   <TableCell className="text-end tabular-nums">{fmt(r.outstanding)}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d0_30 ? fmt(r.d0_30) : "—"}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d31_60 ? fmt(r.d31_60) : "—"}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d61_90 ? fmt(r.d61_90) : "—"}</TableCell>
-                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d90plus ? fmt(r.d90plus) : "—"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d0_30 ? fmt(r.d0_30) : "â€”"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d31_60 ? fmt(r.d31_60) : "â€”"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d61_90 ? fmt(r.d61_90) : "â€”"}</TableCell>
+                  <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.d90plus ? fmt(r.d90plus) : "â€”"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

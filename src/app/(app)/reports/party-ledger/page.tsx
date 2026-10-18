@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { partyLedger } from "@/lib/reports";
 import {
@@ -31,7 +31,7 @@ export default async function PartyLedgerPage({
 }: {
   searchParams: Promise<{ party?: string }>;
 }) {
-  await requireUser();
+await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const { party } = await searchParams;
@@ -51,7 +51,7 @@ export default async function PartyLedgerPage({
         <form action="/reports/party-ledger" method="get" className="flex items-center gap-2">
           <Select name="party" defaultValue={selected?.id ?? ""}>
             <SelectTrigger className="w-96">
-              <SelectValue placeholder="—" />
+              <SelectValue placeholder="â€”" />
             </SelectTrigger>
             <SelectContent className="max-h-80">
               {parties.map((p) => (
@@ -101,8 +101,8 @@ export default async function PartyLedgerPage({
                         {r.docNo}
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.debit ? fmt(r.debit) : "—"}</TableCell>
-                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.credit ? fmt(r.credit) : "—"}</TableCell>
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.debit ? fmt(r.debit) : "â€”"}</TableCell>
+                    <TableCell className="hidden text-end tabular-nums sm:table-cell">{r.credit ? fmt(r.credit) : "â€”"}</TableCell>
                     <TableCell className="text-end tabular-nums">{fmt(r.balance)}</TableCell>
                   </TableRow>
                 ))}

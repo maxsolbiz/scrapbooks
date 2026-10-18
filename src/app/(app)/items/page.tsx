@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { ItemsClient } from "./ItemsClient";
 
 export default async function ItemsPage() {
-  const user = await requireUser();
+  const user = await requireModule("items");
   const [raw, locale] = await Promise.all([
     prisma.item.findMany({ orderBy: { nameEn: "asc" } }),
     getServerLocale(),
@@ -21,5 +21,5 @@ export default async function ItemsPage() {
     isActive: it.isActive,
   }));
 
-  return <ItemsClient rows={rows} dict={dict} canWrite={canEdit(user)} />;
+  return <ItemsClient rows={rows} dict={dict} canWrite={await moduleCan(user, "items", "write")} />;
 }

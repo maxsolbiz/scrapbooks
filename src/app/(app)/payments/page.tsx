@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { requireUser, canEdit } from "@/lib/guard";
+import { moduleCan, requireModule, type SessionUser } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,10 @@ import {
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default async function PaymentsPage() {
-  const user = await requireUser();
+  const user: SessionUser = await requireModule("payments");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
+  const canWrite = await moduleCan(user, "payments", "write");
 
   const payments = await prisma.payment.findMany({
     orderBy: { date: "desc" },
@@ -39,7 +40,7 @@ export default async function PaymentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <PageHeader title={t.nav.payments} actions={canEdit(user) ? <Button asChild>
+        <PageHeader title={t.nav.payments} actions={canWrite ? <Button asChild>
           <Link href="/payments/new">
             <Plus className="size-4" /> {t.payments.new}
           </Link>

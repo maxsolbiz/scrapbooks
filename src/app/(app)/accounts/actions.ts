@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireEditor } from "@/lib/guard";
+import { requireModule } from "@/lib/guard";
 import { saveAccountRecord } from "@/lib/accounts";
 
 const accountSchema = z.object({
@@ -23,7 +23,7 @@ export type ActionResult<T = undefined> =
   | { ok: false; error: string };
 
 export async function saveAccount(input: z.input<typeof accountSchema>): Promise<ActionResult> {
-  await requireEditor();
+  await requireModule("accounts", "write");
   const parsed = accountSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };

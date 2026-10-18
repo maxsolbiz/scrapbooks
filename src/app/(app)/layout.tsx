@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getAccess } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { AppShell } from "@/components/layout/AppShell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  if (!session?.user) {
+  const access = await getAccess();
+  if (!access) {
     redirect("/login");
   }
   const locale = await getServerLocale();
@@ -14,10 +14,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       user={{
-        name: session.user.name ?? session.user.email ?? "",
-        email: session.user.email ?? "",
-        role: session.user.role,
+        name: access.user.name ?? access.user.email ?? "",
+        email: access.user.email ?? "",
+        role: access.user.role ?? undefined,
       }}
+      perms={access.perms}
       dict={dict}
     >
       {children}

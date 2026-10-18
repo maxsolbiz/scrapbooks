@@ -239,7 +239,7 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const isAdmin = user.role === "ADMIN";
+  const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
   const allowed = ALL_ITEMS.filter((i) => isAllowed(i, perms, isAdmin));
   const allowedSet = new Set(allowed.map((i) => i.href));
   const groups = GROUPS.map((g) => ({

@@ -25,7 +25,7 @@ export type ModuleAccess = "none" | "read" | "write";
 export type ModuleOverrides = Partial<Record<ModuleKey, ModuleAccess>>;
 export type ModulePerms = Record<ModuleKey, ModuleAccess>;
 
-export type UserRole = "ADMIN" | "ACCOUNTANT" | "VIEWER";
+export type UserRole = "ADMIN" | "ACCOUNTANT" | "VIEWER" | "SUPER_ADMIN";
 
 /** Keys of the nav dictionary that name modules. */
 type NavLabelKey =
@@ -85,6 +85,7 @@ const ALL_WRITE: ModulePerms = MODULE_KEYS.reduce(
 const ROLE_DEFAULTS: Record<UserRole, ModulePerms> = {
   ADMIN: { ...ALL_WRITE },
   ACCOUNTANT: { ...ALL_WRITE },
+  SUPER_ADMIN: { ...ALL_WRITE },
   VIEWER: {
     ...MODULE_KEYS.reduce(
       (acc, key) => {
@@ -116,7 +117,7 @@ export function parseOverrides(raw: unknown): ModuleOverrides {
 }
 
 function normalizeRole(role?: string | null): UserRole {
-  return role === "ADMIN" || role === "ACCOUNTANT" ? role : "VIEWER";
+  return role === "ADMIN" || role === "ACCOUNTANT" || role === "SUPER_ADMIN" ? role : "VIEWER";
 }
 
 /**
@@ -129,7 +130,7 @@ export function effectiveAccess(
 ): ModulePerms {
   const r = normalizeRole(role);
   const base = { ...ROLE_DEFAULTS[r] };
-  if (r === "ADMIN") return base;
+  if (r === "ADMIN" || r === "SUPER_ADMIN") return base;
   for (const key of MODULE_KEYS) {
     const override = overrides?.[key];
     if (!override) continue;

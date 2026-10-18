@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Dictionary } from "@/lib/i18n";
 import {
   MODULE_KEYS,
@@ -29,6 +30,8 @@ import {
 import {
   saveCompanyAction,
   saveUserAction,
+  createUserAction,
+  deleteUserAction,
   type SettingsActionResult,
 } from "@/app/(app)/settings/actions";
 
@@ -61,8 +64,10 @@ function show(res: SettingsActionResult, success: string) {
   }
 }
 
-type RoleValue = "ADMIN" | "ACCOUNTANT" | "VIEWER";
+type RoleValue = "ADMIN" | "ACCOUNTANT" | "VIEWER" | "SUPER_ADMIN";
 type PermsMap = Record<ModuleKey, ModuleAccess>;
+
+const ALL_ROLE_OPTIONS: RoleValue[] = ["ADMIN", "ACCOUNTANT", "VIEWER", "SUPER_ADMIN"];
 
 /** Role defaults may say "write" for read-only modules (e.g. reports); display the closest offered level. */
 function clampPerms(map: PermsMap): PermsMap {
@@ -77,15 +82,18 @@ export function SettingsClient({
   company,
   users,
   isAdmin,
+  isSuperAdmin,
   dict,
 }: {
   company: CompanySettingsDto;
   users: UserDto[];
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   dict: Dictionary;
 }) {
   const [c, setC] = useState<CompanySettingsDto>(company);
   const [saving, setSaving] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
 
   async function saveCompany() {
     setSaving(true);
@@ -121,11 +129,24 @@ export function SettingsClient({
       {isAdmin && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">{dict.nav.users}</CardTitle>
+            <CardTitle className="text-base flex items-center justify-between gap-2">
+              {dict.nav.users}
+              <Button size="sm" variant="outline" onClick={() => setShowAddUser((s) => !s)}>
+                <UserPlus className="size-4" />
+                {dict.usersMgmt.addUser}
+              </Button>
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {showAddUser && (
+              <AddUserForm
+                isSuperAdmin={isSuperAdmin}
+                dict={dict}
+                onDone={(ok) => ok && setShowAddUser(false)}
+              />
+            )}
             {users.map((u) => (
-              <UserRow key={u.id} user={u} dict={dict} />
+              <UserRow key={u.id} user={u} isSuperAdmin={isSuperAdmin} dict={dict} />
             ))}
           </CardContent>
         </Card>
@@ -134,12 +155,14 @@ export function SettingsClient({
   );
 }
 
-function UserRow({ user, dict }: { user: UserDto; dict: Dictionary }) {
+function UserRow({ user, isSuperAdmin, dict }: { user: UserDto; isSuperAdmin: boolean; dict: Dictionary }) {
   const [role, setRole] = useState<RoleValue>(user.role as RoleValue);
   const [isActive, setActive] = useState(user.isActive);
   const [pwd, setPwd] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPerms, setShowPerms] = useState(false);
+
+  const roleOptions = ALL_ROLE_OPTIONS.filter((v) => v !== "SUPER_ADMIN" || isSuperAdmin);
 
   const defaults = roleDefaults(role);
   const [perms, setPerms] = useState<PermsMap>(() => clampPerms({
@@ -179,7 +202,10 @@ function UserRow({ user, dict }: { user: UserDto; dict: Dictionary }) {
 
   return (
     <div className="rounded-md border">
-      <div className="grid items-center gap-2 p-3 sm:grid-cols-[1fr_auto_auto_auto]">
+      <div className={cn(
+        "grid items-center gap-2 p-3 sm:grid-cols-[1fr_auto_auto_auto]",
+        isSuperAdmin && "sm:grid-cols-[1fr_auto_auto_auto_auto]",
+      )}>
         <div className="min-w-0">
           <p className="text-sm font-medium">{user.name}</p>
           <p className="text-xs text-muted-foreground truncate">{user.email}</p>
@@ -187,9 +213,9 @@ function UserRow({ user, dict }: { user: UserDto; dict: Dictionary }) {
         <Select value={role} onValueChange={(v) => applyRole(v as RoleValue)}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="ADMIN">ADMIN</SelectItem>
-            <SelectItem value="ACCOUNTANT">ACCOUNTANT</SelectItem>
-            <SelectItem value="VIEWER">VIEWER</SelectItem>
+            {roleOptions.map((v) => (
+              <SelectItem key={v} value={v}>{v}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Switch checked={isActive} onCheckedChange={setActive} />
@@ -197,6 +223,23 @@ function UserRow({ user, dict }: { user: UserDto; dict: Dictionary }) {
           {dict.perms.title}
           <ChevronDown className={cn("size-4 transition-transform", showPerms && "rotate-180")} />
         </Button>
+        {isSuperAdmin && (
+          <ConfirmDialog
+            trigger={
+              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" aria-label={dict.usersMgmt.delete}>
+                <Trash2 className="size-4" />
+              </Button>
+            }
+            title={dict.usersMgmt.deleteTitle}
+            description={`${user.name} (${user.email}) — ${dict.usersMgmt.deleteDesc}`}
+            confirmLabel={dict.usersMgmt.delete}
+            onConfirm={async () => {
+              const res = await deleteUserAction({ id: user.id });
+              show(res, "Deleted");
+              return res;
+            }}
+          />
+        )}
       </div>
 
       {showPerms && (
@@ -238,6 +281,77 @@ function UserRow({ user, dict }: { user: UserDto; dict: Dictionary }) {
         />
         <Button size="sm" disabled={saving} onClick={save}>
           Save
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AddUserForm({
+  isSuperAdmin,
+  dict,
+  onDone,
+}: {
+  isSuperAdmin: boolean;
+  dict: Dictionary;
+  onDone: (ok: boolean) => void;
+}) {
+  const um = dict.usersMgmt;
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [pwd, setPwd] = useState("");
+  const [role, setRole] = useState<RoleValue>("ACCOUNTANT");
+  const [isActive, setActive] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  async function submit() {
+    if (!name || !email || pwd.length < 8) {
+      toast.error("Name, email and a password (min 8 chars) are required");
+      return;
+    }
+    setSaving(true);
+    const res = await createUserAction({ name, email, password: pwd, role, isActive });
+    setSaving(false);
+    if (res.ok) {
+      toast.success("User created");
+      setName("");
+      setEmail("");
+      setPwd("");
+      onDone(true);
+    } else {
+      toast.error(res.error);
+    }
+  }
+
+  const roleOptions = ALL_ROLE_OPTIONS.filter((v) => v !== "SUPER_ADMIN" || isSuperAdmin);
+
+  return (
+    <div className="rounded-md border p-3 grid gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={um.name}><Input value={name} onChange={(e) => setName(e.target.value)} /></Field>
+        <Field label={um.email}><Input dir="ltr" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+        <Field label={um.password}>
+          <Input dir="ltr" type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder={um.passwordHint} />
+        </Field>
+        <Field label={um.role}>
+          <Select value={role} onValueChange={(v) => setRole(v as RoleValue)}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {roleOptions.map((v) => (
+                <SelectItem key={v} value={v}>{v}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <label className="flex items-center gap-2 text-sm">
+          <Switch checked={isActive} onCheckedChange={setActive} />
+          {um.active}
+        </label>
+        <Button size="sm" disabled={saving} onClick={submit}>
+          <Plus className="size-4" />
+          {dict.common.create}
         </Button>
       </div>
     </div>

@@ -13,6 +13,7 @@ enum Role {
   ADMIN
   ACCOUNTANT
   VIEWER
+  SUPER_ADMIN
 }
 
 model User {

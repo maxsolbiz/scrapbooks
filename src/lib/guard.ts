@@ -99,15 +99,22 @@ export async function requireEditor(): Promise<SessionUser> {
   return user;
 }
 
-/** Only ADMIN passes; everyone else is redirected to /dashboard. */
+/** ADMIN and SUPER_ADMIN pass; everyone else is redirected to /dashboard. */
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireUser();
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") redirect("/dashboard");
+  return user;
+}
+
+/** Only SUPER_ADMIN passes; everyone else is redirected to /dashboard. */
+export async function requireSuperAdmin(): Promise<SessionUser> {
+  const user = await requireUser();
+  if (user.role !== "SUPER_ADMIN") redirect("/dashboard");
   return user;
 }
 
 export function canEdit(user: SessionUser): boolean {
-  return user.role === "ADMIN" || user.role === "ACCOUNTANT";
+  return user.role === "ADMIN" || user.role === "ACCOUNTANT" || user.role === "SUPER_ADMIN";
 }
 
 // Re-exported so module pages can work with module access types.

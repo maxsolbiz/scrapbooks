@@ -6,6 +6,7 @@ import { SettingsClient } from "./SettingsClient";
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
   const locale = await getServerLocale();
   const dict = getDictionary(locale);
   const company = await prisma.companySettings.upsert({
@@ -13,17 +14,18 @@ export default async function SettingsPage() {
     update: {},
     create: { id: "settings" },
   });
-  const users =
-    user.role === "ADMIN"
-      ? await prisma.user.findMany({
-          orderBy: { email: "asc" },
-          select: { id: true, name: true, email: true, role: true, isActive: true, permissions: true },
-        })
-      : [];
+  const isAdminLevel = user.role === "ADMIN" || isSuperAdmin;
+  const users = isAdminLevel
+    ? await prisma.user.findMany({
+        where: isSuperAdmin ? undefined : { role: { not: "SUPER_ADMIN" } },
+        orderBy: { email: "asc" },
+        select: { id: true, name: true, email: true, role: true, isActive: true, permissions: true },
+      })
+    : [];
 
   return (
     <div className="space-y-4">
-      <PageHeader title={user.role === "ADMIN" ? "Settings" : "Company"} description={company.nameEn} />
+      <PageHeader title={isAdminLevel ? "Settings" : "Company"} description={company.nameEn} />
       <SettingsClient
         company={{
           nameEn: company.nameEn,
@@ -37,7 +39,8 @@ export default async function SettingsPage() {
           bankDetailsAr: company.bankDetailsAr,
         }}
         users={users.map((u) => ({ ...u, permissions: (u.permissions as unknown) ?? null }))}
-        isAdmin={user.role === "ADMIN" && canEdit(user)}
+        isAdmin={isAdminLevel && canEdit(user)}
+        isSuperAdmin={isSuperAdmin}
         dict={dict}
       />
     </div>

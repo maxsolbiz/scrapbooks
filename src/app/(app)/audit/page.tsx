@@ -14,11 +14,17 @@ import {
 
 export default async function AuditPage() {
   const user = await requireAdmin();
-  void user;
   const locale = await getServerLocale();
   const t = getDictionary(locale);
 
+  // Super-admin activity is only visible to super admins.
+  const viewerIsSuper = user.role === "SUPER_ADMIN";
+  const superEmails = viewerIsSuper ? [] : (
+    await prisma.user.findMany({ where: { role: "SUPER_ADMIN" }, select: { email: true } })
+  ).map((u) => u.email);
+
   const entries = await prisma.auditLog.findMany({
+    where: superEmails.length ? { userEmail: { notIn: superEmails } } : undefined,
     orderBy: { createdAt: "desc" },
     take: 200,
   });

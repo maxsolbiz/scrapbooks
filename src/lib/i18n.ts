@@ -97,6 +97,9 @@ const en = {
     delete: "Delete",
     deleteTitle: "Delete user?",
     deleteDesc: "Permanently removes this user. Users with accounting activity cannot be deleted.",
+    resetDemo: "Reset demo data",
+    resetDemoTitle: "Reset all demo data?",
+    resetDemoDesc: "This permanently deletes ALL transactions (invoices, payments, journals) and re-seeds the demo dataset. Cannot be undone.",
   },
   common: {
     save: "Save",
@@ -319,6 +322,9 @@ const ar: typeof en = {
     delete: "حذف",
     deleteTitle: "حذف المستخدم؟",
     deleteDesc: "حذف نهائي لهذا المستخدم. لا يمكن حذف المستخدمين الذين لديهم نشاط محاسبي.",
+    resetDemo: "إعادة تعيين البيانات التجريبية",
+    resetDemoTitle: "إعادة تعيين جميع البيانات التجريبية؟",
+    resetDemoDesc: "هذا يحذف نهائياً جميع المعاملات (الفواتير، المدفوعات، القيود) ويعيد زرع البيانات التجريبية. لا يمكن التراجع.",
   },
   common: {
     save: "حفظ",

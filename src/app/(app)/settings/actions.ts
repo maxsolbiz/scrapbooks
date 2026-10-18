@@ -7,6 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { canEdit, requireUser } from "@/lib/guard";
 import { isModuleKey } from "@/lib/permissions";
+import { resetDemoData } from "@/lib/demo-data";
 import { logAudit } from "@/lib/audit";
 import type { Role } from "@/generated/prisma/enums";
 
@@ -183,5 +184,14 @@ export async function deleteUserAction(input: z.input<typeof deleteUserSchema>):
   }
   await logAudit(user, "USER_DELETE", "User", target.id, `email=${target.email} role=${target.role}`);
   revalidatePath("/settings");
+  return { ok: true };
+}
+
+export async function resetDemoDataAction(): Promise<SettingsActionResult> {
+  const user = await requireUser();
+  if (user.role !== "SUPER_ADMIN") return { ok: false, error: "Super admin role required" };
+  await resetDemoData();
+  await logAudit(user, "DEMO_RESET", "System", "demo", "All transactional data wiped and demo dataset re-seeded");
+  revalidatePath("/", "layout");
   return { ok: true };
 }

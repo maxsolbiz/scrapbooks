@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, Plus, Trash2, UserPlus } from "lucide-react";
+import { ChevronDown, Plus, RotateCcw, Trash2, UserPlus } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ import {
   saveUserAction,
   createUserAction,
   deleteUserAction,
+  resetDemoDataAction,
   type SettingsActionResult,
 } from "@/app/(app)/settings/actions";
 
@@ -131,10 +133,37 @@ export function SettingsClient({
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center justify-between gap-2">
               {dict.nav.users}
-              <Button size="sm" variant="outline" onClick={() => setShowAddUser((s) => !s)}>
-                <UserPlus className="size-4" />
-                {dict.usersMgmt.addUser}
-              </Button>
+              <div className="flex items-center gap-2">
+                {isSuperAdmin && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="destructive">
+                        <RotateCcw className="size-4" />
+                        {dict.usersMgmt.resetDemo}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{dict.usersMgmt.resetDemoTitle}</AlertDialogTitle>
+                        <AlertDialogDescription>{dict.usersMgmt.resetDemoDesc}</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{dict.common.cancel}</AlertDialogCancel>
+                        <AlertDialogAction onClick={async () => {
+                          const res = await resetDemoDataAction();
+                          show(res, "Demo data reset");
+                        }}>
+                          {dict.usersMgmt.resetDemo}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <Button size="sm" variant="outline" onClick={() => setShowAddUser((s) => !s)}>
+                  <UserPlus className="size-4" />
+                  {dict.usersMgmt.addUser}
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">

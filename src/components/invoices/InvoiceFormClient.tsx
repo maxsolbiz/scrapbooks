@@ -97,7 +97,11 @@ export function InvoiceFormClient({
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
+    const check = () => {
+      const mobile = window.innerWidth < 640;
+      console.log("isMobile check:", mobile, "width:", window.innerWidth);
+      setIsMobile(mobile);
+    };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -218,6 +222,10 @@ export function InvoiceFormClient({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground mb-2">
+            Debug: isMobile={String(isMobile)}, width={typeof window !== 'undefined' ? window.innerWidth : 'server'}
           </div>
 
           {isMobile ? (

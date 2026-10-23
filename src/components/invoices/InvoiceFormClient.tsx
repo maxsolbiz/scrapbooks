@@ -255,50 +255,50 @@ export function InvoiceFormClient({
                           onChange={(e) => setLine(l.id, { description: e.target.value })}
                         />
                       </div>
-                      <div className="grid gap-3">
-                        <div className="space-y-1">
-                          <Label className="text-xs">{t.invoices.qty}</Label>
-                          <Input
-                            type="number" min="0" step="0.001"
-                            value={l.qty}
-                            onChange={(e) => setLine(l.id, { qty: e.target.value })}
-                            dir="ltr"
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">{t.items.unit}</Label>
-                          <Select value={l.unit} onValueChange={(v) => setLine(l.id, { unit: v })}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["KG", "TON", "PCS", "BAG", "OTHER"].map((u) => (
-                                <SelectItem key={u} value={u}>{u}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">{t.invoices.rate}</Label>
-                          <Input
-                            type="number" min="0" step="0.01"
-                            value={l.rate}
-                            onChange={(e) => setLine(l.id, { rate: e.target.value })}
-                            dir="ltr"
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">{t.items.vat}</Label>
-                          <Input
-                            value={l.vatRate}
-                            onChange={(e) => setLine(l.id, { vatRate: e.target.value })}
-                            dir="ltr"
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+  <div className="space-y-1">
+    <Label className="text-xs">{t.invoices.qty}</Label>
+    <Input
+      type="number" min="0" step="0.001"
+      value={l.qty}
+      onChange={(e) => setLine(l.id, { qty: e.target.value })}
+      dir="ltr"
+      className="w-full"
+    />
+  </div>
+  <div className="space-y-1">
+    <Label className="text-xs">{t.items.unit}</Label>
+    <Select value={l.unit} onValueChange={(v) => setLine(l.id, { unit: v })}>
+      <SelectTrigger className="w-full">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {["KG", "TON", "PCS", "BAG", "OTHER"].map((u) => (
+          <SelectItem key={u} value={u}>{u}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+  <div className="space-y-1">
+    <Label className="text-xs">{t.invoices.rate}</Label>
+    <Input
+      type="number" min="0" step="0.01"
+      value={l.rate}
+      onChange={(e) => setLine(l.id, { rate: e.target.value })}
+      dir="ltr"
+      className="w-full"
+    />
+  </div>
+  <div className="space-y-1">
+    <Label className="text-xs">{t.items.vat}</Label>
+    <Input
+      value={l.vatRate}
+      onChange={(e) => setLine(l.id, { vatRate: e.target.value })}
+      dir="ltr"
+      className="w-full"
+    />
+  </div>
+</div>
                       <div className="text-end text-sm font-medium">
                         {formatAED(lineTotal)}
                       </div>

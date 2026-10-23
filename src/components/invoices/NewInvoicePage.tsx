@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
-import { InvoiceForm } from "@/components/invoices/InvoiceForm";
+import { InvoiceFormWrapper } from "@/components/invoices/InvoiceFormWrapper";
 
 export async function NewInvoicePage({ direction }: { direction: InvoiceDirection }) {
   await requireModule(direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write");
@@ -32,7 +32,7 @@ export async function NewInvoicePage({ direction }: { direction: InvoiceDirectio
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return (
-    <InvoiceForm
+    <InvoiceFormWrapper
       direction={direction}
       parties={partiesRaw}
       items={itemsRaw.map((i) => ({

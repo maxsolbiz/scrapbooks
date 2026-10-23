@@ -94,12 +94,100 @@ export function InvoiceForm({
   );
 
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
     check();
+    setMounted(true);
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-4 max-w-6xl">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{t.invoices.new}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>{t.common.date}</Label>
+                <Input type="date" disabled />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{isSales ? t.nav.parties : t.nav.parties}</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                </Select>
+              </div>
+            </div>
+            <div className="rounded-md border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.item}</th>
+                    <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.qty}</th>
+                    <th className="w-20 px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.items.unit}</th>
+                    <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.rate}</th>
+                    <th className="w-20 px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.items.vat}</th>
+                    <th className="px-3 py-2 text-end text-xs font-medium text-muted-foreground">{t.invoices.lineTotal}</th>
+                    <th className="w-10" />
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b last:border-b-0 align-top">
+                    <td className="px-3 py-2 space-y-1">
+                      <Select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="—" />
+                        </SelectTrigger>
+                      </Select>
+                      <Input placeholder={t.common.description} disabled />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input type="number" min="0" step="0.001" disabled dir="ltr" />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </Select>
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input type="number" min="0" step="0.01" disabled dir="ltr" />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input disabled dir="ltr" />
+                    </td>
+                    <td className="px-3 py-2 text-end tabular-nums">—</td>
+                    <td className="px-1 py-2">
+                      <Button variant="ghost" size="sm" disabled>
+                        <Trash2 className="size-4 text-destructive" />
+                      </Button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <Input placeholder={t.common.notes} disabled />
+            <div className="flex justify-between">
+              <Button variant="outline" disabled>
+                <Plus className="size-4" /> {t.invoices.addLine}
+              </Button>
+              <Button disabled>
+                {t.common.post}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const [date, setDate] = useState(today);
   const [partyId, setPartyId] = useState("");

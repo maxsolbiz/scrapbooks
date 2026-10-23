@@ -221,7 +221,7 @@ export function InvoiceFormClient({
           </div>
 
           {isMobile ? (
-            <div className="space-y-3">
+            <div key="mobile" className="space-y-3">
               {lines.map((l, idx) => {
                 const value = multiply(toFils(l.rate), l.qty);
                 const lineTotal = value + vatOf(value, l.vatRate);
@@ -308,7 +308,7 @@ export function InvoiceFormClient({
               })}
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div key="desktop" className="rounded-md border">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">

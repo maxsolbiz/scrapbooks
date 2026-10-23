@@ -224,8 +224,8 @@ export function InvoiceFormClient({
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground mb-2">
-            Debug: isMobile={String(isMobile)}, width={typeof window !== 'undefined' ? window.innerWidth : 'server'}
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-3 py-2 mb-4 rounded text-sm font-mono">
+            DEBUG: isMobile={String(isMobile)} | width={typeof window !== 'undefined' ? window.innerWidth : 'server'} | lines={lines.length}
           </div>
 
           {isMobile ? (

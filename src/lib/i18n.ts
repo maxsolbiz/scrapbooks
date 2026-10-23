@@ -1,4 +1,4 @@
-﻿﻿import { cookies } from "next/headers";
+﻿import { cookies } from "next/headers";
 
 export type Locale = "en" | "ar";
 
@@ -201,6 +201,7 @@ const en = {
     qty: "Qty",
     rate: "Rate (AED)",
     item: "Item",
+    line: "Line",
     lineTotal: "Line total",
     addLine: "Add line",
     disclaimerItem: "Item quantities and rates are verified server-side at posting.",
@@ -426,6 +427,7 @@ const ar: typeof en = {
     qty: "الكمية",
     rate: "السعر",
     item: "الصنف",
+    line: "سطر",
     lineTotal: "إجمالي السطر",
     addLine: "إضافة سطر",
     disclaimerItem: "تُعاد مراجعة الكميات والأسعار عند الترحيل.",

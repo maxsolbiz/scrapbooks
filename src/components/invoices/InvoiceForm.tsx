@@ -210,54 +210,54 @@ export function InvoiceForm({
             </div>
           </div>
 
-          <div className="rounded-md border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.item}</th>
-                  <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.qty}</th>
-                  <th className="w-20 px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.items.unit}</th>
-                  <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.rate}</th>
-                  <th className="w-20 px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.items.vat}</th>
-                  <th className="px-3 py-2 text-end text-xs font-medium text-muted-foreground">{t.invoices.lineTotal}</th>
-                  <th className="w-10" />
-                </tr>
-              </thead>
-              <tbody>
-                {lines.map((l) => {
-                  const value = multiply(toFils(l.rate), l.qty);
-                  const lineTotal = value + vatOf(value, l.vatRate);
-                  return (
-                    <tr key={l.id} className="border-b last:border-b-0 align-top">
-                      <td className="px-3 py-2 space-y-1">
-                        <Select value={l.itemId} onValueChange={(v) => pickItem(l.id, v)}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="—" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-64">
-                            {items.map((i) => (
-                              <SelectItem key={i.id} value={i.id}>
-                                {i.nameEn}
-                                <span className="ms-2 text-xs text-muted-foreground">{i.nameAr}</span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          placeholder={t.common.description}
-                          value={l.description}
-                          onChange={(e) => setLine(l.id, { description: e.target.value })}
-                        />
-                      </td>
-                      <td className="px-3 py-2">
+          {/* Mobile: Card-based layout */}
+          <div className="space-y-3 sm:hidden">
+            {lines.map((l, idx) => {
+              const value = multiply(toFils(l.rate), l.qty);
+              const lineTotal = value + vatOf(value, l.vatRate);
+              return (
+                <Card key={l.id} className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-sm">{t.invoices.line} {idx + 1}</span>
+                    <Button variant="ghost" size="sm" onClick={() => removeLine(l.id)} disabled={lines.length <= 1} className="text-destructive">
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                  <div className="grid gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">{t.invoices.item}</Label>
+                      <Select value={l.itemId} onValueChange={(v) => pickItem(l.id, v)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="—" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-64">
+                          {items.map((i) => (
+                            <SelectItem key={i.id} value={i.id}>
+                              {i.nameEn}
+                              <span className="ms-2 text-xs text-muted-foreground">{i.nameAr}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder={t.common.description}
+                        value={l.description}
+                        onChange={(e) => setLine(l.id, { description: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-4">
+                      <div className="space-y-1">
+                        <Label className="text-xs">{t.invoices.qty}</Label>
                         <Input
                           type="number" min="0" step="0.001"
                           value={l.qty}
                           onChange={(e) => setLine(l.id, { qty: e.target.value })}
                           dir="ltr"
+                          className="w-full"
                         />
-                      </td>
-                      <td className="px-3 py-2">
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">{t.items.unit}</Label>
                         <Select value={l.unit} onValueChange={(v) => setLine(l.id, { unit: v })}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -268,53 +268,144 @@ export function InvoiceForm({
                             ))}
                           </SelectContent>
                         </Select>
-                      </td>
-                      <td className="px-3 py-2">
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">{t.invoices.rate}</Label>
                         <Input
                           type="number" min="0" step="0.01"
                           value={l.rate}
                           onChange={(e) => setLine(l.id, { rate: e.target.value })}
                           dir="ltr"
+                          className="w-full"
                         />
-                      </td>
-                      <td className="px-3 py-2">
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">{t.items.vat}</Label>
                         <Input
                           value={l.vatRate}
                           onChange={(e) => setLine(l.id, { vatRate: e.target.value })}
                           dir="ltr"
+                          className="w-full"
                         />
-                      </td>
-                      <td className="px-3 py-2 text-end tabular-nums">{formatAED(lineTotal)}</td>
-                      <td className="px-1 py-2">
-                        <Button variant="ghost" size="sm" onClick={() => removeLine(l.id)} disabled={lines.length <= 1}>
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot>
-                <tr className="border-t bg-muted/30">
-                  <td colSpan={4} className="px-3 py-1.5 font-medium">{t.common.subtotal}</td>
-                  <td />
-                  <td className="px-3 py-1.5 text-end tabular-nums">{formatAED(totals.subtotal)}</td>
-                  <td />
-                </tr>
-                <tr className="bg-muted/30">
-                  <td colSpan={4} className="px-3 py-1.5 font-medium">{t.common.vat}</td>
-                  <td />
-                  <td className="px-3 py-1.5 text-end tabular-nums">{formatAED(totals.vat)}</td>
-                  <td />
-                </tr>
-                <tr className="bg-muted/50 border-t">
-                  <td colSpan={4} className="px-3 py-1.5 font-semibold">{t.common.grandTotal}</td>
-                  <td />
-                  <td className="px-3 py-1.5 text-end tabular-nums font-semibold">{formatAED(totals.total)}</td>
-                  <td />
-                </tr>
-              </tfoot>
-            </table>
+                      </div>
+                    </div>
+                    <div className="text-end text-sm font-medium">
+                      {formatAED(lineTotal)}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Desktop: Table layout */}
+          <div className="hidden sm:block">
+            <div className="rounded-md border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.item}</th>
+                    <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.qty}</th>
+                    <th className="w-20 px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.items.unit}</th>
+                    <th className="px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.invoices.rate}</th>
+                    <th className="w-20 px-3 py-2 text-start text-xs font-medium text-muted-foreground">{t.items.vat}</th>
+                    <th className="px-3 py-2 text-end text-xs font-medium text-muted-foreground">{t.invoices.lineTotal}</th>
+                    <th className="w-10" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {lines.map((l) => {
+                    const value = multiply(toFils(l.rate), l.qty);
+                    const lineTotal = value + vatOf(value, l.vatRate);
+                    return (
+                      <tr key={l.id} className="border-b last:border-b-0 align-top">
+                        <td className="px-3 py-2 space-y-1">
+                          <Select value={l.itemId} onValueChange={(v) => pickItem(l.id, v)}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-64">
+                              {items.map((i) => (
+                                <SelectItem key={i.id} value={i.id}>
+                                  {i.nameEn}
+                                  <span className="ms-2 text-xs text-muted-foreground">{i.nameAr}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            placeholder={t.common.description}
+                            value={l.description}
+                            onChange={(e) => setLine(l.id, { description: e.target.value })}
+                          />
+                        </td>
+                        <td className="px-3 py-2">
+                          <Input
+                            type="number" min="0" step="0.001"
+                            value={l.qty}
+                            onChange={(e) => setLine(l.id, { qty: e.target.value })}
+                            dir="ltr"
+                          />
+                        </td>
+                        <td className="px-3 py-2">
+                          <Select value={l.unit} onValueChange={(v) => setLine(l.id, { unit: v })}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["KG", "TON", "PCS", "BAG", "OTHER"].map((u) => (
+                                <SelectItem key={u} value={u}>{u}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="px-3 py-2">
+                          <Input
+                            type="number" min="0" step="0.01"
+                            value={l.rate}
+                            onChange={(e) => setLine(l.id, { rate: e.target.value })}
+                            dir="ltr"
+                          />
+                        </td>
+                        <td className="px-3 py-2">
+                          <Input
+                            value={l.vatRate}
+                            onChange={(e) => setLine(l.id, { vatRate: e.target.value })}
+                            dir="ltr"
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-end tabular-nums">{formatAED(lineTotal)}</td>
+                        <td className="px-1 py-2">
+                          <Button variant="ghost" size="sm" onClick={() => removeLine(l.id)} disabled={lines.length <= 1}>
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t bg-muted/30">
+                    <td colSpan={4} className="px-3 py-1.5 font-medium">{t.common.subtotal}</td>
+                    <td />
+                    <td className="px-3 py-1.5 text-end tabular-nums">{formatAED(totals.subtotal)}</td>
+                    <td />
+                  </tr>
+                  <tr className="bg-muted/30">
+                    <td colSpan={4} className="px-3 py-1.5 font-medium">{t.common.vat}</td>
+                    <td />
+                    <td className="px-3 py-1.5 text-end tabular-nums">{formatAED(totals.vat)}</td>
+                    <td />
+                  </tr>
+                  <tr className="bg-muted/50 border-t">
+                    <td colSpan={4} className="px-3 py-1.5 font-semibold">{t.common.grandTotal}</td>
+                    <td />
+                    <td className="px-3 py-1.5 text-end tabular-nums font-semibold">{formatAED(totals.total)}</td>
+                    <td />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
 
           <Input

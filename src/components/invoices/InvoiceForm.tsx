@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -92,6 +92,14 @@ export function InvoiceForm({
   const eligible = parties.filter(
     (p) => p.type === "BOTH" || (isSales ? p.type === "CUSTOMER" : p.type === "VENDOR"),
   );
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const [date, setDate] = useState(today);
   const [partyId, setPartyId] = useState("");
@@ -210,96 +218,94 @@ export function InvoiceForm({
             </div>
           </div>
 
-          {/* Mobile: Card-based layout */}
-          <div className="space-y-3 sm:hidden">
-            {lines.map((l, idx) => {
-              const value = multiply(toFils(l.rate), l.qty);
-              const lineTotal = value + vatOf(value, l.vatRate);
-              return (
-                <Card key={l.id} className="p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">{t.invoices.line} {idx + 1}</span>
-                    <Button variant="ghost" size="sm" onClick={() => removeLine(l.id)} disabled={lines.length <= 1} className="text-destructive">
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                  <div className="grid gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">{t.invoices.item}</Label>
-                      <Select value={l.itemId} onValueChange={(v) => pickItem(l.id, v)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="—" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-64">
-                          {items.map((i) => (
-                            <SelectItem key={i.id} value={i.id}>
-                              {i.nameEn}
-                              <span className="ms-2 text-xs text-muted-foreground">{i.nameAr}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        placeholder={t.common.description}
-                        value={l.description}
-                        onChange={(e) => setLine(l.id, { description: e.target.value })}
-                      />
+          {isMobile ? (
+            <div className="space-y-3">
+              {lines.map((l, idx) => {
+                const value = multiply(toFils(l.rate), l.qty);
+                const lineTotal = value + vatOf(value, l.vatRate);
+                return (
+                  <Card key={l.id} className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">{t.invoices.line} {idx + 1}</span>
+                      <Button variant="ghost" size="sm" onClick={() => removeLine(l.id)} disabled={lines.length <= 1} className="text-destructive">
+                        <Trash2 className="size-4" />
+                      </Button>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-4">
+                    <div className="grid gap-3">
                       <div className="space-y-1">
-                        <Label className="text-xs">{t.invoices.qty}</Label>
-                        <Input
-                          type="number" min="0" step="0.001"
-                          value={l.qty}
-                          onChange={(e) => setLine(l.id, { qty: e.target.value })}
-                          dir="ltr"
-                          className="w-full"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">{t.items.unit}</Label>
-                        <Select value={l.unit} onValueChange={(v) => setLine(l.id, { unit: v })}>
+                        <Label className="text-xs">{t.invoices.item}</Label>
+                        <Select value={l.itemId} onValueChange={(v) => pickItem(l.id, v)}>
                           <SelectTrigger className="w-full">
-                            <SelectValue />
+                            <SelectValue placeholder="—" />
                           </SelectTrigger>
-                          <SelectContent>
-                            {["KG", "TON", "PCS", "BAG", "OTHER"].map((u) => (
-                              <SelectItem key={u} value={u}>{u}</SelectItem>
+                          <SelectContent className="max-h-64">
+                            {items.map((i) => (
+                              <SelectItem key={i.id} value={i.id}>
+                                {i.nameEn}
+                                <span className="ms-2 text-xs text-muted-foreground">{i.nameAr}</span>
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">{t.invoices.rate}</Label>
                         <Input
-                          type="number" min="0" step="0.01"
-                          value={l.rate}
-                          onChange={(e) => setLine(l.id, { rate: e.target.value })}
-                          dir="ltr"
-                          className="w-full"
+                          placeholder={t.common.description}
+                          value={l.description}
+                          onChange={(e) => setLine(l.id, { description: e.target.value })}
                         />
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">{t.items.vat}</Label>
-                        <Input
-                          value={l.vatRate}
-                          onChange={(e) => setLine(l.id, { vatRate: e.target.value })}
-                          dir="ltr"
-                          className="w-full"
-                        />
+                      <div className="grid gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t.invoices.qty}</Label>
+                          <Input
+                            type="number" min="0" step="0.001"
+                            value={l.qty}
+                            onChange={(e) => setLine(l.id, { qty: e.target.value })}
+                            dir="ltr"
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t.items.unit}</Label>
+                          <Select value={l.unit} onValueChange={(v) => setLine(l.id, { unit: v })}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["KG", "TON", "PCS", "BAG", "OTHER"].map((u) => (
+                                <SelectItem key={u} value={u}>{u}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t.invoices.rate}</Label>
+                          <Input
+                            type="number" min="0" step="0.01"
+                            value={l.rate}
+                            onChange={(e) => setLine(l.id, { rate: e.target.value })}
+                            dir="ltr"
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t.items.vat}</Label>
+                          <Input
+                            value={l.vatRate}
+                            onChange={(e) => setLine(l.id, { vatRate: e.target.value })}
+                            dir="ltr"
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-end text-sm font-medium">
+                        {formatAED(lineTotal)}
                       </div>
                     </div>
-                    <div className="text-end text-sm font-medium">
-                      {formatAED(lineTotal)}
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Desktop: Table layout */}
-          <div className="hidden sm:block">
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
             <div className="rounded-md border">
               <table className="w-full text-sm">
                 <thead>
@@ -406,7 +412,7 @@ export function InvoiceForm({
                 </tfoot>
               </table>
             </div>
-          </div>
+          )}
 
           <Input
             placeholder={t.common.notes}

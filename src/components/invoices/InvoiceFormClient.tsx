@@ -213,7 +213,7 @@ export function InvoiceFormClient({
           </div>
 
           {/* Mobile layout - shown on screens < 640px */}
-          <div className="hidden sm:block">
+          <div className="block sm:hidden">
             {lines.map((l, idx) => {
               const value = multiply(toFils(l.rate), l.qty);
               const lineTotal = value + vatOf(value, l.vatRate);
@@ -300,8 +300,8 @@ export function InvoiceFormClient({
             })}
             </div>
 
-            {/* Desktop layout - shown on screens >= 640px */}
-            <div className="block sm:hidden">
+          {/* Desktop layout - shown on screens >= 640px */}
+          <div className="hidden sm:block">
             <div className="rounded-md border">
               <table className="w-full text-sm">
                 <thead>

@@ -159,3 +159,22 @@ html[dir="rtl"] body {
     display: none !important;
   }
 }
+
+/* Full-page printing: remove app-shell chrome and paddings so invoice pages
+   fit exactly one sheet (template CSS controls @page size/margins). */
+@media print {
+  header,
+  aside,
+  nav {
+    display: none !important;
+  }
+  main,
+  main > div {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

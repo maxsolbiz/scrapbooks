@@ -145,8 +145,16 @@ export function InvoicePrintView({
 
         {/* Footer */}
         <div className="mt-4 border-t border-neutral-400 pt-2 text-[10px] text-neutral-700">
-          {company.bankDetailsEn && <p>{company.bankDetailsEn}</p>}
-          {company.bankDetailsAr && <p dir="rtl">{company.bankDetailsAr}</p>}
+          {company.bankDetailsEn
+            ? (company.bankDetailsEn.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)).map((line, i) => (
+                <p key={i}>{line}</p>
+              ))
+            : null}
+          {company.bankDetailsAr
+            ? (company.bankDetailsAr.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)).map((line, i) => (
+                <p key={`ar-${i}`} dir="rtl">{line}</p>
+              ))
+            : null}
           {isTaxInvoice && (
             <p className="mt-1">
               This is a Tax Invoice issued in compliance with UAE Federal Decree-Law No. 8 of 2017 on VAT.

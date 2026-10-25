@@ -120,8 +120,23 @@ export function SettingsClient({
           </div>
           <Field label="Address (EN)"><Input value={c.addressEn} onChange={(e) => setC({ ...c, addressEn: e.target.value })} /></Field>
           <Field label="Address (AR)"><Input dir="rtl" value={c.addressAr} onChange={(e) => setC({ ...c, addressAr: e.target.value })} /></Field>
-          <Field label="Bank details (EN)"><Input value={c.bankDetailsEn} onChange={(e) => setC({ ...c, bankDetailsEn: e.target.value })} /></Field>
-          <Field label="Bank details (AR)"><Input dir="rtl" value={c.bankDetailsAr} onChange={(e) => setC({ ...c, bankDetailsAr: e.target.value })} /></Field>
+          <Field label="Bank details (EN)">
+            <textarea
+              rows={4}
+              className="w-full min-h-16 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              value={c.bankDetailsEn}
+              onChange={(e) => setC({ ...c, bankDetailsEn: e.target.value })}
+            />
+          </Field>
+          <Field label="Bank details (AR)">
+            <textarea
+              rows={4}
+              dir="rtl"
+              className="w-full min-h-16 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              value={c.bankDetailsAr}
+              onChange={(e) => setC({ ...c, bankDetailsAr: e.target.value })}
+            />
+          </Field>
           <div className="flex justify-end">
             <Button onClick={saveCompany} disabled={saving}>Save</Button>
           </div>

@@ -47,6 +47,7 @@ interface Line {
   unit: string;
   rate: string;
   vatRate: string;
+  wbtNo: string;
 }
 
 interface PrintDetails {
@@ -108,7 +109,7 @@ export function InvoiceFormClient({
   const [date, setDate] = useState(today);
   const [partyId, setPartyId] = useState("");
   const [lines, setLines] = useState<Line[]>([
-    { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5" },
+    { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5", wbtNo: "" },
   ]);
   const [notes, setNotes] = useState("");
   const [printDetails, setPrintDetails] = useState<PrintDetails>({
@@ -159,7 +160,7 @@ export function InvoiceFormClient({
   function addLine() {
     setLines((prev) => [
       ...prev,
-      { id: `l${Date.now()}`, itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5" },
+      { id: `l${Date.now()}`, itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5", wbtNo: "" },
     ]);
   }
 
@@ -195,6 +196,7 @@ export function InvoiceFormClient({
         unit: l.unit as "KG",
         rate: l.rate,
         vatRate: l.vatRate,
+        wbtNo: l.wbtNo.trim() || undefined,
       })),
     });
     setSubmitting(false);
@@ -271,6 +273,13 @@ export function InvoiceFormClient({
                         placeholder={t.common.description}
                         value={l.description}
                         onChange={(e) => setLine(l.id, { description: e.target.value })}
+                      />
+                      <Input
+                        placeholder={t.invoices.wbtNo}
+                        value={l.wbtNo}
+                        onChange={(e) => setLine(l.id, { wbtNo: e.target.value })}
+                        dir="ltr"
+                        maxLength={60}
                       />
                     </div>
                     <div className="grid gap-3">
@@ -365,6 +374,13 @@ export function InvoiceFormClient({
                             placeholder={t.common.description}
                             value={l.description}
                             onChange={(e) => setLine(l.id, { description: e.target.value })}
+                          />
+                          <Input
+                            placeholder={t.invoices.wbtNo}
+                            value={l.wbtNo}
+                            onChange={(e) => setLine(l.id, { wbtNo: e.target.value })}
+                            dir="ltr"
+                            maxLength={60}
                           />
                         </td>
                         <td className="px-3 py-2">

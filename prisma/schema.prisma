@@ -295,6 +295,7 @@ model InvoiceLine {
   lineValueFils  BigInt
   lineVatFils    BigInt
   lineTotalFils  BigInt
+  wbtNo          String?
 
   @@index([invoiceId])
 }

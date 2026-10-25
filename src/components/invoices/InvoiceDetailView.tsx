@@ -108,7 +108,12 @@ export async function InvoiceDetailView({
           <TableBody>
             {invoice.lines.map((l) => (
               <TableRow key={l.id}>
-                <TableCell>{l.description}</TableCell>
+                <TableCell>
+                  {l.description}
+                  {l.wbtNo ? (
+                    <div className="text-xs text-muted-foreground">WBT # {l.wbtNo}</div>
+                  ) : null}
+                </TableCell>
                 <TableCell className="text-end tabular-nums">{Number(l.qty)}</TableCell>
                 <TableCell className="hidden text-xs sm:table-cell">{l.unit}</TableCell>
                 <TableCell className="text-end tabular-nums">

@@ -20,6 +20,7 @@ export interface InvoicePrintData {
       id: string;
       description: string;
       descriptionAr: string | null;
+      wbtNo: string | null;
       qty: string | number | { toString(): string };
       unit: string;
       rateFils: bigint;
@@ -104,7 +105,10 @@ export function InvoicePrintView({
             {invoice.lines.map((l, idx) => (
               <tr key={l.id}>
                 <td className="border border-neutral-400 p-1.5">{idx + 1}</td>
-                <td className="border border-neutral-400 p-1.5">{l.description}</td>
+                <td className="border border-neutral-400 p-1.5">
+                  {l.description}
+                  {l.wbtNo ? <div className="text-[10px] text-neutral-600">WBT # {l.wbtNo}</div> : null}
+                </td>
                 <td className="border border-neutral-400 p-1.5 text-right" dir="rtl">{l.descriptionAr ?? ""}</td>
                 <td className="border border-neutral-400 p-1.5 text-end tabular-nums">{String(l.qty)}</td>
                 <td className="border border-neutral-400 p-1.5 text-center">{UNITS[l.unit]?.en ?? l.unit}</td>

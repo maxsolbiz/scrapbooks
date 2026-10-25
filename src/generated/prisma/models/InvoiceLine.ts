@@ -57,6 +57,7 @@ export type InvoiceLineMinAggregateOutputType = {
   lineValueFils: bigint | null
   lineVatFils: bigint | null
   lineTotalFils: bigint | null
+  wbtNo: string | null
 }
 
 export type InvoiceLineMaxAggregateOutputType = {
@@ -72,6 +73,7 @@ export type InvoiceLineMaxAggregateOutputType = {
   lineValueFils: bigint | null
   lineVatFils: bigint | null
   lineTotalFils: bigint | null
+  wbtNo: string | null
 }
 
 export type InvoiceLineCountAggregateOutputType = {
@@ -87,6 +89,7 @@ export type InvoiceLineCountAggregateOutputType = {
   lineValueFils: number
   lineVatFils: number
   lineTotalFils: number
+  wbtNo: number
   _all: number
 }
 
@@ -122,6 +125,7 @@ export type InvoiceLineMinAggregateInputType = {
   lineValueFils?: true
   lineVatFils?: true
   lineTotalFils?: true
+  wbtNo?: true
 }
 
 export type InvoiceLineMaxAggregateInputType = {
@@ -137,6 +141,7 @@ export type InvoiceLineMaxAggregateInputType = {
   lineValueFils?: true
   lineVatFils?: true
   lineTotalFils?: true
+  wbtNo?: true
 }
 
 export type InvoiceLineCountAggregateInputType = {
@@ -152,6 +157,7 @@ export type InvoiceLineCountAggregateInputType = {
   lineValueFils?: true
   lineVatFils?: true
   lineTotalFils?: true
+  wbtNo?: true
   _all?: true
 }
 
@@ -254,6 +260,7 @@ export type InvoiceLineGroupByOutputType = {
   lineValueFils: bigint
   lineVatFils: bigint
   lineTotalFils: bigint
+  wbtNo: string | null
   _count: InvoiceLineCountAggregateOutputType | null
   _avg: InvoiceLineAvgAggregateOutputType | null
   _sum: InvoiceLineSumAggregateOutputType | null
@@ -292,6 +299,7 @@ export type InvoiceLineWhereInput = {
   lineValueFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
   lineVatFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
   lineTotalFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
+  wbtNo?: Prisma.StringNullableFilter<"InvoiceLine"> | string | null
   invoice?: Prisma.XOR<Prisma.InvoiceScalarRelationFilter, Prisma.InvoiceWhereInput>
   item?: Prisma.XOR<Prisma.ItemNullableScalarRelationFilter, Prisma.ItemWhereInput> | null
 }
@@ -309,6 +317,7 @@ export type InvoiceLineOrderByWithRelationInput = {
   lineValueFils?: Prisma.SortOrder
   lineVatFils?: Prisma.SortOrder
   lineTotalFils?: Prisma.SortOrder
+  wbtNo?: Prisma.SortOrderInput | Prisma.SortOrder
   invoice?: Prisma.InvoiceOrderByWithRelationInput
   item?: Prisma.ItemOrderByWithRelationInput
 }
@@ -329,6 +338,7 @@ export type InvoiceLineWhereUniqueInput = Prisma.AtLeast<{
   lineValueFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
   lineVatFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
   lineTotalFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
+  wbtNo?: Prisma.StringNullableFilter<"InvoiceLine"> | string | null
   invoice?: Prisma.XOR<Prisma.InvoiceScalarRelationFilter, Prisma.InvoiceWhereInput>
   item?: Prisma.XOR<Prisma.ItemNullableScalarRelationFilter, Prisma.ItemWhereInput> | null
 }, "id">
@@ -346,6 +356,7 @@ export type InvoiceLineOrderByWithAggregationInput = {
   lineValueFils?: Prisma.SortOrder
   lineVatFils?: Prisma.SortOrder
   lineTotalFils?: Prisma.SortOrder
+  wbtNo?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.InvoiceLineCountOrderByAggregateInput
   _avg?: Prisma.InvoiceLineAvgOrderByAggregateInput
   _max?: Prisma.InvoiceLineMaxOrderByAggregateInput
@@ -369,6 +380,7 @@ export type InvoiceLineScalarWhereWithAggregatesInput = {
   lineValueFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceLine"> | bigint | number
   lineVatFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceLine"> | bigint | number
   lineTotalFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceLine"> | bigint | number
+  wbtNo?: Prisma.StringNullableWithAggregatesFilter<"InvoiceLine"> | string | null
 }
 
 export type InvoiceLineCreateInput = {
@@ -382,6 +394,7 @@ export type InvoiceLineCreateInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
   invoice: Prisma.InvoiceCreateNestedOneWithoutLinesInput
   item?: Prisma.ItemCreateNestedOneWithoutInvoiceLinesInput
 }
@@ -399,6 +412,7 @@ export type InvoiceLineUncheckedCreateInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
 }
 
 export type InvoiceLineUpdateInput = {
@@ -412,6 +426,7 @@ export type InvoiceLineUpdateInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   invoice?: Prisma.InvoiceUpdateOneRequiredWithoutLinesNestedInput
   item?: Prisma.ItemUpdateOneWithoutInvoiceLinesNestedInput
 }
@@ -429,6 +444,7 @@ export type InvoiceLineUncheckedUpdateInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InvoiceLineCreateManyInput = {
@@ -444,6 +460,7 @@ export type InvoiceLineCreateManyInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
 }
 
 export type InvoiceLineUpdateManyMutationInput = {
@@ -457,6 +474,7 @@ export type InvoiceLineUpdateManyMutationInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InvoiceLineUncheckedUpdateManyInput = {
@@ -472,6 +490,7 @@ export type InvoiceLineUncheckedUpdateManyInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InvoiceLineListRelationFilter = {
@@ -497,6 +516,7 @@ export type InvoiceLineCountOrderByAggregateInput = {
   lineValueFils?: Prisma.SortOrder
   lineVatFils?: Prisma.SortOrder
   lineTotalFils?: Prisma.SortOrder
+  wbtNo?: Prisma.SortOrder
 }
 
 export type InvoiceLineAvgOrderByAggregateInput = {
@@ -521,6 +541,7 @@ export type InvoiceLineMaxOrderByAggregateInput = {
   lineValueFils?: Prisma.SortOrder
   lineVatFils?: Prisma.SortOrder
   lineTotalFils?: Prisma.SortOrder
+  wbtNo?: Prisma.SortOrder
 }
 
 export type InvoiceLineMinOrderByAggregateInput = {
@@ -536,6 +557,7 @@ export type InvoiceLineMinOrderByAggregateInput = {
   lineValueFils?: Prisma.SortOrder
   lineVatFils?: Prisma.SortOrder
   lineTotalFils?: Prisma.SortOrder
+  wbtNo?: Prisma.SortOrder
 }
 
 export type InvoiceLineSumOrderByAggregateInput = {
@@ -642,6 +664,7 @@ export type InvoiceLineCreateWithoutItemInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
   invoice: Prisma.InvoiceCreateNestedOneWithoutLinesInput
 }
 
@@ -657,6 +680,7 @@ export type InvoiceLineUncheckedCreateWithoutItemInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
 }
 
 export type InvoiceLineCreateOrConnectWithoutItemInput = {
@@ -701,6 +725,7 @@ export type InvoiceLineScalarWhereInput = {
   lineValueFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
   lineVatFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
   lineTotalFils?: Prisma.BigIntFilter<"InvoiceLine"> | bigint | number
+  wbtNo?: Prisma.StringNullableFilter<"InvoiceLine"> | string | null
 }
 
 export type InvoiceLineCreateWithoutInvoiceInput = {
@@ -714,6 +739,7 @@ export type InvoiceLineCreateWithoutInvoiceInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
   item?: Prisma.ItemCreateNestedOneWithoutInvoiceLinesInput
 }
 
@@ -729,6 +755,7 @@ export type InvoiceLineUncheckedCreateWithoutInvoiceInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
 }
 
 export type InvoiceLineCreateOrConnectWithoutInvoiceInput = {
@@ -769,6 +796,7 @@ export type InvoiceLineCreateManyItemInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
 }
 
 export type InvoiceLineUpdateWithoutItemInput = {
@@ -782,6 +810,7 @@ export type InvoiceLineUpdateWithoutItemInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   invoice?: Prisma.InvoiceUpdateOneRequiredWithoutLinesNestedInput
 }
 
@@ -797,6 +826,7 @@ export type InvoiceLineUncheckedUpdateWithoutItemInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InvoiceLineUncheckedUpdateManyWithoutItemInput = {
@@ -811,6 +841,7 @@ export type InvoiceLineUncheckedUpdateManyWithoutItemInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InvoiceLineCreateManyInvoiceInput = {
@@ -825,6 +856,7 @@ export type InvoiceLineCreateManyInvoiceInput = {
   lineValueFils: bigint | number
   lineVatFils: bigint | number
   lineTotalFils: bigint | number
+  wbtNo?: string | null
 }
 
 export type InvoiceLineUpdateWithoutInvoiceInput = {
@@ -838,6 +870,7 @@ export type InvoiceLineUpdateWithoutInvoiceInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   item?: Prisma.ItemUpdateOneWithoutInvoiceLinesNestedInput
 }
 
@@ -853,6 +886,7 @@ export type InvoiceLineUncheckedUpdateWithoutInvoiceInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type InvoiceLineUncheckedUpdateManyWithoutInvoiceInput = {
@@ -867,6 +901,7 @@ export type InvoiceLineUncheckedUpdateManyWithoutInvoiceInput = {
   lineValueFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineVatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   lineTotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  wbtNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -884,6 +919,7 @@ export type InvoiceLineSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   lineValueFils?: boolean
   lineVatFils?: boolean
   lineTotalFils?: boolean
+  wbtNo?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   item?: boolean | Prisma.InvoiceLine$itemArgs<ExtArgs>
 }, ExtArgs["result"]["invoiceLine"]>
@@ -901,6 +937,7 @@ export type InvoiceLineSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   lineValueFils?: boolean
   lineVatFils?: boolean
   lineTotalFils?: boolean
+  wbtNo?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   item?: boolean | Prisma.InvoiceLine$itemArgs<ExtArgs>
 }, ExtArgs["result"]["invoiceLine"]>
@@ -918,6 +955,7 @@ export type InvoiceLineSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   lineValueFils?: boolean
   lineVatFils?: boolean
   lineTotalFils?: boolean
+  wbtNo?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   item?: boolean | Prisma.InvoiceLine$itemArgs<ExtArgs>
 }, ExtArgs["result"]["invoiceLine"]>
@@ -935,9 +973,10 @@ export type InvoiceLineSelectScalar = {
   lineValueFils?: boolean
   lineVatFils?: boolean
   lineTotalFils?: boolean
+  wbtNo?: boolean
 }
 
-export type InvoiceLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "itemId" | "description" | "descriptionAr" | "qty" | "unit" | "rateFils" | "vatRate" | "lineValueFils" | "lineVatFils" | "lineTotalFils", ExtArgs["result"]["invoiceLine"]>
+export type InvoiceLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "itemId" | "description" | "descriptionAr" | "qty" | "unit" | "rateFils" | "vatRate" | "lineValueFils" | "lineVatFils" | "lineTotalFils" | "wbtNo", ExtArgs["result"]["invoiceLine"]>
 export type InvoiceLineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   item?: boolean | Prisma.InvoiceLine$itemArgs<ExtArgs>
@@ -970,6 +1009,7 @@ export type $InvoiceLinePayload<ExtArgs extends runtime.Types.Extensions.Interna
     lineValueFils: bigint
     lineVatFils: bigint
     lineTotalFils: bigint
+    wbtNo: string | null
   }, ExtArgs["result"]["invoiceLine"]>
   composites: {}
 }
@@ -1407,6 +1447,7 @@ export interface InvoiceLineFieldRefs {
   readonly lineValueFils: Prisma.FieldRef<"InvoiceLine", 'BigInt'>
   readonly lineVatFils: Prisma.FieldRef<"InvoiceLine", 'BigInt'>
   readonly lineTotalFils: Prisma.FieldRef<"InvoiceLine", 'BigInt'>
+  readonly wbtNo: Prisma.FieldRef<"InvoiceLine", 'String'>
 }
     
 

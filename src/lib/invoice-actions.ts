@@ -25,6 +25,10 @@ const lineSchema = z.object({
   unit: z.enum(["KG", "TON", "PCS", "BAG", "OTHER"]),
   rate: z.string().min(1),
   vatRate: z.string().min(1),
+  wbtNo: z
+    .string()
+    .max(60, "WBT # must be 60 characters or fewer")
+    .optional(),
 });
 
 const invoiceSchema = z.object({
@@ -94,6 +98,7 @@ export async function createInvoiceAction(
             if (Number.isNaN(n) || n < 0 || n > 100) throw new Error("Invalid VAT rate");
             return n <= 1 ? n : n / 100;
           })(),
+          wbtNo: l.wbtNo,
         })),
       }),
     );

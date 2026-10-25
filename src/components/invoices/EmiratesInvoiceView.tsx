@@ -7,6 +7,7 @@ export interface EmiratesInvoiceData {
     lines: {
       id: string;
       description: string;
+      wbtNo: string | null;
       qty: string | number | { toString(): string };
       unit: string;
       rateFils: bigint;
@@ -275,7 +276,12 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
             </thead>
             <tbody>
               {lines.map((l, idx) => {
-                const wbt = splitWbt(l.description);
+                // Explicit wbtNo column wins; fall back to a "WBT #..." suffix
+                // in the description for legacy data.
+                const wbtField = l.wbtNo?.trim();
+                const wbt = wbtField
+                  ? { main: l.description.trim(), wbt: `WBT # ${wbtField}` }
+                  : splitWbt(l.description);
                 const isTon = l.unit === "TON";
                 return (
                   <tr className="item" key={l.id}>

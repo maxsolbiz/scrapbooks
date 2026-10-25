@@ -12,6 +12,13 @@ export interface InvoiceLineInput {
   unit: UnitType;
   rateFils: bigint;
   vatRate: number; // fraction, e.g. 0.05
+  wbtNo?: string;
+}
+
+// Trim; empty -> null. Callers validate the 60-char cap.
+function normalizeWbt(value: string | undefined): string | null {
+  const v = value?.trim();
+  return v ? v : null;
 }
 
 export interface CreateInvoiceInput {
@@ -124,6 +131,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
           lineValueFils: c.lineValue,
           lineVatFils: c.lineVat,
           lineTotalFils: c.lineTotal,
+          wbtNo: normalizeWbt(c.wbtNo),
         })),
       },
     },

@@ -265,7 +265,8 @@ export const InvoiceLineScalarFieldEnum = {
   vatRate: 'vatRate',
   lineValueFils: 'lineValueFils',
   lineVatFils: 'lineVatFils',
-  lineTotalFils: 'lineTotalFils'
+  lineTotalFils: 'lineTotalFils',
+  wbtNo: 'wbtNo'
 } as const
 
 export type InvoiceLineScalarFieldEnum = (typeof InvoiceLineScalarFieldEnum)[keyof typeof InvoiceLineScalarFieldEnum]

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Kufi_Arabic } from "next/font/google";
 import { getServerLocale, getDictionary, isRtl } from "@/lib/i18n";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/pwa/PwaRegister";
 import "./globals.css";
 
@@ -54,7 +55,10 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <LocaleProvider dict={dict} locale={locale}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            {children}
+            <Toaster position="top-center" richColors />
+          </ThemeProvider>
         </LocaleProvider>
         <ServiceWorkerRegister />
       </body>

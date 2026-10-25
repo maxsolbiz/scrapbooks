@@ -152,3 +152,10 @@ html[dir="rtl"] body {
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Toasts must never appear in printed output / PDF */
+@media print {
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+}

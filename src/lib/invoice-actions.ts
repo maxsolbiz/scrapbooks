@@ -32,7 +32,27 @@ const invoiceSchema = z.object({
   partyId: z.string().min(1),
   notes: z.string().optional(),
   notesAr: z.string().optional(),
+  supplierRef: z.string().optional(),
+  purchaseOrder: z.string().optional(),
+  deliveryNote: z.string().optional(),
+  deliveryNoteDate: z.string().optional(),
+  vehicleNo: z.string().optional(),
+  modeOfPayment: z.string().optional(),
+  termsOfDelivery: z.string().optional(),
   lines: z.array(lineSchema).min(1, "At least one line"),
+});
+
+const invoicePrintDetailsSchema = z.object({
+  supplierRef: z.string().optional(),
+  purchaseOrder: z.string().optional(),
+  deliveryNote: z.string().optional(),
+  deliveryNoteDate: z
+    .string()
+    .optional()
+    .refine((v) => !v || !Number.isNaN(new Date(v).getTime()), "Invalid date"),
+  vehicleNo: z.string().optional(),
+  modeOfPayment: z.string().optional(),
+  termsOfDelivery: z.string().optional(),
 });
 
 export async function createInvoiceAction(
@@ -54,6 +74,13 @@ export async function createInvoiceAction(
         partyId: v.partyId,
         notes: v.notes,
         notesAr: v.notesAr,
+        supplierRef: v.supplierRef,
+        purchaseOrder: v.purchaseOrder,
+        deliveryNote: v.deliveryNote,
+        deliveryNoteDate: v.deliveryNoteDate ? new Date(v.deliveryNoteDate) : undefined,
+        vehicleNo: v.vehicleNo,
+        modeOfPayment: v.modeOfPayment,
+        termsOfDelivery: v.termsOfDelivery,
         createdById: user.id,
         lines: v.lines.map((l) => ({
           itemId: l.itemId || undefined,
@@ -92,5 +119,61 @@ export async function voidInvoiceAction(
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Failed to void invoice" };
+  }
+}
+
+function toNullIfEmpty(value?: string) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+export async function updateInvoicePrintDetailsAction(
+  invoiceId: string,
+  direction: InvoiceDirection,
+  input: z.input<typeof invoicePrintDetailsSchema>,
+): Promise<ActionResult> {
+  const user = await requireModule(directionModule(direction), "write");
+  const parsed = invoicePrintDetailsSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const v = parsed.data;
+  try {
+    const existing = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      select: { status: true, direction: true },
+    });
+    if (!existing || existing.direction !== direction) {
+      return { ok: false, error: "Invoice not found" };
+    }
+    if (existing.status === "VOID") {
+      return { ok: false, error: "Voided invoice cannot be edited" };
+    }
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        supplierRef: toNullIfEmpty(v.supplierRef),
+        purchaseOrder: toNullIfEmpty(v.purchaseOrder),
+        deliveryNote: toNullIfEmpty(v.deliveryNote),
+        deliveryNoteDate: v.deliveryNoteDate ? new Date(v.deliveryNoteDate) : null,
+        vehicleNo: toNullIfEmpty(v.vehicleNo),
+        modeOfPayment: toNullIfEmpty(v.modeOfPayment),
+        termsOfDelivery: toNullIfEmpty(v.termsOfDelivery),
+      },
+    });
+    await logAudit(
+      user,
+      "INVOICE_PRINT_DETAILS_UPDATE",
+      "Invoice",
+      invoiceId,
+      `${direction} print details updated`,
+    );
+    revalidatePath(`/sales-invoices/${invoiceId}`);
+    revalidatePath(`/purchase-invoices/${invoiceId}`);
+    revalidatePath(`/sales-invoices/${invoiceId}/print`);
+    revalidatePath(`/purchase-invoices/${invoiceId}/print`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed to update print details" };
   }
 }

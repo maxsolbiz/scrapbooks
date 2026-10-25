@@ -47,6 +47,7 @@ model CompanySettings {
   bankDetailsAr String  @default("")
   currencyCode  String  @default("AED")
   defaultVatRate Decimal @default(0.05) @db.Decimal(5, 4)
+  defaultInvoiceTemplate String @default("app")
 }
 
 // ─── Chart of Accounts ────────────────────────────────────────────────────────
@@ -252,6 +253,13 @@ model Invoice {
   party           Party            @relation(fields: [partyId], references: [id], onDelete: Restrict)
   status          InvoiceStatus    @default(DRAFT)
   trnSnapshot     String?
+  supplierRef     String?
+  purchaseOrder   String?
+  deliveryNote    String?
+  deliveryNoteDate DateTime?
+  vehicleNo       String?
+  modeOfPayment   String?
+  termsOfDelivery String?          @db.Text
   subtotalFils    BigInt           @default(0)
   vatFils         BigInt           @default(0)
   totalFils       BigInt           @default(0)

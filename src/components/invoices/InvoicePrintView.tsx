@@ -1,6 +1,6 @@
 import type { Invoice } from "@/generated/prisma/client";
 
-const UNITS: Record<string, { en: string; ar: string }> = {
+export const UNITS: Record<string, { en: string; ar: string }> = {
   KG: { en: "kg", ar: "كجم" },
   TON: { en: "ton", ar: "طن" },
   PCS: { en: "pcs", ar: "قطعة" },

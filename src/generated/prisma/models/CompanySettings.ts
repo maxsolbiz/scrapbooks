@@ -47,6 +47,7 @@ export type CompanySettingsMinAggregateOutputType = {
   bankDetailsAr: string | null
   currencyCode: string | null
   defaultVatRate: runtime.Decimal | null
+  defaultInvoiceTemplate: string | null
 }
 
 export type CompanySettingsMaxAggregateOutputType = {
@@ -62,6 +63,7 @@ export type CompanySettingsMaxAggregateOutputType = {
   bankDetailsAr: string | null
   currencyCode: string | null
   defaultVatRate: runtime.Decimal | null
+  defaultInvoiceTemplate: string | null
 }
 
 export type CompanySettingsCountAggregateOutputType = {
@@ -77,6 +79,7 @@ export type CompanySettingsCountAggregateOutputType = {
   bankDetailsAr: number
   currencyCode: number
   defaultVatRate: number
+  defaultInvoiceTemplate: number
   _all: number
 }
 
@@ -102,6 +105,7 @@ export type CompanySettingsMinAggregateInputType = {
   bankDetailsAr?: true
   currencyCode?: true
   defaultVatRate?: true
+  defaultInvoiceTemplate?: true
 }
 
 export type CompanySettingsMaxAggregateInputType = {
@@ -117,6 +121,7 @@ export type CompanySettingsMaxAggregateInputType = {
   bankDetailsAr?: true
   currencyCode?: true
   defaultVatRate?: true
+  defaultInvoiceTemplate?: true
 }
 
 export type CompanySettingsCountAggregateInputType = {
@@ -132,6 +137,7 @@ export type CompanySettingsCountAggregateInputType = {
   bankDetailsAr?: true
   currencyCode?: true
   defaultVatRate?: true
+  defaultInvoiceTemplate?: true
   _all?: true
 }
 
@@ -234,6 +240,7 @@ export type CompanySettingsGroupByOutputType = {
   bankDetailsAr: string
   currencyCode: string
   defaultVatRate: runtime.Decimal
+  defaultInvoiceTemplate: string
   _count: CompanySettingsCountAggregateOutputType | null
   _avg: CompanySettingsAvgAggregateOutputType | null
   _sum: CompanySettingsSumAggregateOutputType | null
@@ -272,6 +279,7 @@ export type CompanySettingsWhereInput = {
   bankDetailsAr?: Prisma.StringFilter<"CompanySettings"> | string
   currencyCode?: Prisma.StringFilter<"CompanySettings"> | string
   defaultVatRate?: Prisma.DecimalFilter<"CompanySettings"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringFilter<"CompanySettings"> | string
 }
 
 export type CompanySettingsOrderByWithRelationInput = {
@@ -287,6 +295,7 @@ export type CompanySettingsOrderByWithRelationInput = {
   bankDetailsAr?: Prisma.SortOrder
   currencyCode?: Prisma.SortOrder
   defaultVatRate?: Prisma.SortOrder
+  defaultInvoiceTemplate?: Prisma.SortOrder
 }
 
 export type CompanySettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -305,6 +314,7 @@ export type CompanySettingsWhereUniqueInput = Prisma.AtLeast<{
   bankDetailsAr?: Prisma.StringFilter<"CompanySettings"> | string
   currencyCode?: Prisma.StringFilter<"CompanySettings"> | string
   defaultVatRate?: Prisma.DecimalFilter<"CompanySettings"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringFilter<"CompanySettings"> | string
 }, "id">
 
 export type CompanySettingsOrderByWithAggregationInput = {
@@ -320,6 +330,7 @@ export type CompanySettingsOrderByWithAggregationInput = {
   bankDetailsAr?: Prisma.SortOrder
   currencyCode?: Prisma.SortOrder
   defaultVatRate?: Prisma.SortOrder
+  defaultInvoiceTemplate?: Prisma.SortOrder
   _count?: Prisma.CompanySettingsCountOrderByAggregateInput
   _avg?: Prisma.CompanySettingsAvgOrderByAggregateInput
   _max?: Prisma.CompanySettingsMaxOrderByAggregateInput
@@ -343,6 +354,7 @@ export type CompanySettingsScalarWhereWithAggregatesInput = {
   bankDetailsAr?: Prisma.StringWithAggregatesFilter<"CompanySettings"> | string
   currencyCode?: Prisma.StringWithAggregatesFilter<"CompanySettings"> | string
   defaultVatRate?: Prisma.DecimalWithAggregatesFilter<"CompanySettings"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringWithAggregatesFilter<"CompanySettings"> | string
 }
 
 export type CompanySettingsCreateInput = {
@@ -358,6 +370,7 @@ export type CompanySettingsCreateInput = {
   bankDetailsAr?: string
   currencyCode?: string
   defaultVatRate?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: string
 }
 
 export type CompanySettingsUncheckedCreateInput = {
@@ -373,6 +386,7 @@ export type CompanySettingsUncheckedCreateInput = {
   bankDetailsAr?: string
   currencyCode?: string
   defaultVatRate?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: string
 }
 
 export type CompanySettingsUpdateInput = {
@@ -388,6 +402,7 @@ export type CompanySettingsUpdateInput = {
   bankDetailsAr?: Prisma.StringFieldUpdateOperationsInput | string
   currencyCode?: Prisma.StringFieldUpdateOperationsInput | string
   defaultVatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CompanySettingsUncheckedUpdateInput = {
@@ -403,6 +418,7 @@ export type CompanySettingsUncheckedUpdateInput = {
   bankDetailsAr?: Prisma.StringFieldUpdateOperationsInput | string
   currencyCode?: Prisma.StringFieldUpdateOperationsInput | string
   defaultVatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CompanySettingsCreateManyInput = {
@@ -418,6 +434,7 @@ export type CompanySettingsCreateManyInput = {
   bankDetailsAr?: string
   currencyCode?: string
   defaultVatRate?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: string
 }
 
 export type CompanySettingsUpdateManyMutationInput = {
@@ -433,6 +450,7 @@ export type CompanySettingsUpdateManyMutationInput = {
   bankDetailsAr?: Prisma.StringFieldUpdateOperationsInput | string
   currencyCode?: Prisma.StringFieldUpdateOperationsInput | string
   defaultVatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CompanySettingsUncheckedUpdateManyInput = {
@@ -448,6 +466,7 @@ export type CompanySettingsUncheckedUpdateManyInput = {
   bankDetailsAr?: Prisma.StringFieldUpdateOperationsInput | string
   currencyCode?: Prisma.StringFieldUpdateOperationsInput | string
   defaultVatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  defaultInvoiceTemplate?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CompanySettingsCountOrderByAggregateInput = {
@@ -463,6 +482,7 @@ export type CompanySettingsCountOrderByAggregateInput = {
   bankDetailsAr?: Prisma.SortOrder
   currencyCode?: Prisma.SortOrder
   defaultVatRate?: Prisma.SortOrder
+  defaultInvoiceTemplate?: Prisma.SortOrder
 }
 
 export type CompanySettingsAvgOrderByAggregateInput = {
@@ -482,6 +502,7 @@ export type CompanySettingsMaxOrderByAggregateInput = {
   bankDetailsAr?: Prisma.SortOrder
   currencyCode?: Prisma.SortOrder
   defaultVatRate?: Prisma.SortOrder
+  defaultInvoiceTemplate?: Prisma.SortOrder
 }
 
 export type CompanySettingsMinOrderByAggregateInput = {
@@ -497,6 +518,7 @@ export type CompanySettingsMinOrderByAggregateInput = {
   bankDetailsAr?: Prisma.SortOrder
   currencyCode?: Prisma.SortOrder
   defaultVatRate?: Prisma.SortOrder
+  defaultInvoiceTemplate?: Prisma.SortOrder
 }
 
 export type CompanySettingsSumOrderByAggregateInput = {
@@ -526,6 +548,7 @@ export type CompanySettingsSelect<ExtArgs extends runtime.Types.Extensions.Inter
   bankDetailsAr?: boolean
   currencyCode?: boolean
   defaultVatRate?: boolean
+  defaultInvoiceTemplate?: boolean
 }, ExtArgs["result"]["companySettings"]>
 
 export type CompanySettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -541,6 +564,7 @@ export type CompanySettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   bankDetailsAr?: boolean
   currencyCode?: boolean
   defaultVatRate?: boolean
+  defaultInvoiceTemplate?: boolean
 }, ExtArgs["result"]["companySettings"]>
 
 export type CompanySettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -556,6 +580,7 @@ export type CompanySettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   bankDetailsAr?: boolean
   currencyCode?: boolean
   defaultVatRate?: boolean
+  defaultInvoiceTemplate?: boolean
 }, ExtArgs["result"]["companySettings"]>
 
 export type CompanySettingsSelectScalar = {
@@ -571,9 +596,10 @@ export type CompanySettingsSelectScalar = {
   bankDetailsAr?: boolean
   currencyCode?: boolean
   defaultVatRate?: boolean
+  defaultInvoiceTemplate?: boolean
 }
 
-export type CompanySettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nameEn" | "nameAr" | "trn" | "addressEn" | "addressAr" | "phone" | "email" | "bankDetailsEn" | "bankDetailsAr" | "currencyCode" | "defaultVatRate", ExtArgs["result"]["companySettings"]>
+export type CompanySettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nameEn" | "nameAr" | "trn" | "addressEn" | "addressAr" | "phone" | "email" | "bankDetailsEn" | "bankDetailsAr" | "currencyCode" | "defaultVatRate" | "defaultInvoiceTemplate", ExtArgs["result"]["companySettings"]>
 
 export type $CompanySettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompanySettings"
@@ -591,6 +617,7 @@ export type $CompanySettingsPayload<ExtArgs extends runtime.Types.Extensions.Int
     bankDetailsAr: string
     currencyCode: string
     defaultVatRate: runtime.Decimal
+    defaultInvoiceTemplate: string
   }, ExtArgs["result"]["companySettings"]>
   composites: {}
 }
@@ -1026,6 +1053,7 @@ export interface CompanySettingsFieldRefs {
   readonly bankDetailsAr: Prisma.FieldRef<"CompanySettings", 'String'>
   readonly currencyCode: Prisma.FieldRef<"CompanySettings", 'String'>
   readonly defaultVatRate: Prisma.FieldRef<"CompanySettings", 'Decimal'>
+  readonly defaultInvoiceTemplate: Prisma.FieldRef<"CompanySettings", 'String'>
 }
     
 

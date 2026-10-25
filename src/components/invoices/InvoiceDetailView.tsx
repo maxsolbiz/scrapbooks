@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VoidInvoiceButton } from "./VoidInvoiceButton";
+import { PrintDetailsForm } from "./PrintDetailsForm";
 import { formatAED } from "@/lib/money";
 
 export async function InvoiceDetailView({
@@ -41,6 +42,9 @@ export async function InvoiceDetailView({
   const canVoid =
     (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
     invoice.status === "POSTED";
+  const canEditPrintDetails =
+    (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
+    invoice.status !== "VOID";
 
   const statusBadge = (
     <Badge
@@ -145,6 +149,25 @@ export async function InvoiceDetailView({
             .map((a) => `${a.payment.paymentNo} — ${formatAED(a.amountFils)} AED`)
             .join(" · ")}
         </div>
+      )}
+
+      {canEditPrintDetails && (
+        <PrintDetailsForm
+          invoiceId={invoice.id}
+          direction={direction}
+          current={{
+            supplierRef: invoice.supplierRef ?? "",
+            purchaseOrder: invoice.purchaseOrder ?? "",
+            deliveryNote: invoice.deliveryNote ?? "",
+            deliveryNoteDate: invoice.deliveryNoteDate
+              ? invoice.deliveryNoteDate.toISOString().slice(0, 10)
+              : "",
+            vehicleNo: invoice.vehicleNo ?? "",
+            modeOfPayment: invoice.modeOfPayment ?? "",
+            termsOfDelivery: invoice.termsOfDelivery ?? "",
+          }}
+          dict={t}
+        />
       )}
     </div>
   );

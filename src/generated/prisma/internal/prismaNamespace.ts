@@ -1532,7 +1532,8 @@ export const CompanySettingsScalarFieldEnum = {
   bankDetailsEn: 'bankDetailsEn',
   bankDetailsAr: 'bankDetailsAr',
   currencyCode: 'currencyCode',
-  defaultVatRate: 'defaultVatRate'
+  defaultVatRate: 'defaultVatRate',
+  defaultInvoiceTemplate: 'defaultInvoiceTemplate'
 } as const
 
 export type CompanySettingsScalarFieldEnum = (typeof CompanySettingsScalarFieldEnum)[keyof typeof CompanySettingsScalarFieldEnum]
@@ -1653,6 +1654,13 @@ export const InvoiceScalarFieldEnum = {
   partyId: 'partyId',
   status: 'status',
   trnSnapshot: 'trnSnapshot',
+  supplierRef: 'supplierRef',
+  purchaseOrder: 'purchaseOrder',
+  deliveryNote: 'deliveryNote',
+  deliveryNoteDate: 'deliveryNoteDate',
+  vehicleNo: 'vehicleNo',
+  modeOfPayment: 'modeOfPayment',
+  termsOfDelivery: 'termsOfDelivery',
   subtotalFils: 'subtotalFils',
   vatFils: 'vatFils',
   totalFils: 'totalFils',

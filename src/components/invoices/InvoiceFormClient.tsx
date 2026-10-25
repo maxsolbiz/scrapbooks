@@ -49,6 +49,16 @@ interface Line {
   vatRate: string;
 }
 
+interface PrintDetails {
+  supplierRef: string;
+  purchaseOrder: string;
+  deliveryNote: string;
+  deliveryNoteDate: string;
+  vehicleNo: string;
+  modeOfPayment: string;
+  termsOfDelivery: string;
+}
+
 function toFils(value: string): bigint {
   const trimmed = value.trim();
   if (!trimmed || !/^\d+(\.\d{1,2})?$/.test(trimmed)) return 0n;
@@ -101,6 +111,15 @@ export function InvoiceFormClient({
     { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5" },
   ]);
   const [notes, setNotes] = useState("");
+  const [printDetails, setPrintDetails] = useState<PrintDetails>({
+    supplierRef: "",
+    purchaseOrder: "",
+    deliveryNote: "",
+    deliveryNoteDate: "",
+    vehicleNo: "",
+    modeOfPayment: "",
+    termsOfDelivery: "",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const totals = useMemo(() => {
@@ -162,6 +181,13 @@ export function InvoiceFormClient({
       date,
       partyId,
       notes,
+      supplierRef: printDetails.supplierRef || undefined,
+      purchaseOrder: printDetails.purchaseOrder || undefined,
+      deliveryNote: printDetails.deliveryNote || undefined,
+      deliveryNoteDate: printDetails.deliveryNoteDate || undefined,
+      vehicleNo: printDetails.vehicleNo || undefined,
+      modeOfPayment: printDetails.modeOfPayment || undefined,
+      termsOfDelivery: printDetails.termsOfDelivery || undefined,
       lines: lines.map((l) => ({
         itemId: l.itemId || undefined,
         description: l.description,
@@ -415,6 +441,40 @@ export function InvoiceFormClient({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
+
+          <div className="rounded-md border p-3">
+            <p className="mb-2 text-sm font-medium">{t.invoices.printDetails}</p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.invoices.supplierRef}</Label>
+                <Input value={printDetails.supplierRef} onChange={(e) => setPrintDetails({ ...printDetails, supplierRef: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.invoices.purchaseOrder}</Label>
+                <Input value={printDetails.purchaseOrder} onChange={(e) => setPrintDetails({ ...printDetails, purchaseOrder: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.invoices.modeOfPayment}</Label>
+                <Input value={printDetails.modeOfPayment} onChange={(e) => setPrintDetails({ ...printDetails, modeOfPayment: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.invoices.deliveryNote}</Label>
+                <Input value={printDetails.deliveryNote} onChange={(e) => setPrintDetails({ ...printDetails, deliveryNote: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.invoices.deliveryNoteDate}</Label>
+                <Input type="date" value={printDetails.deliveryNoteDate} onChange={(e) => setPrintDetails({ ...printDetails, deliveryNoteDate: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.invoices.vehicleNo}</Label>
+                <Input value={printDetails.vehicleNo} onChange={(e) => setPrintDetails({ ...printDetails, vehicleNo: e.target.value })} />
+              </div>
+              <div className="space-y-1.5 sm:col-span-3">
+                <Label className="text-xs">{t.invoices.termsOfDelivery}</Label>
+                <Input value={printDetails.termsOfDelivery} onChange={(e) => setPrintDetails({ ...printDetails, termsOfDelivery: e.target.value })} />
+              </div>
+            </div>
+          </div>
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={addLine}>

@@ -20,6 +20,13 @@ export interface CreateInvoiceInput {
   partyId: string;
   notes?: string;
   notesAr?: string;
+  supplierRef?: string;
+  purchaseOrder?: string;
+  deliveryNote?: string;
+  deliveryNoteDate?: Date;
+  vehicleNo?: string;
+  modeOfPayment?: string;
+  termsOfDelivery?: string;
   lines: InvoiceLineInput[];
   createdById: string;
   tx: Tx;
@@ -97,6 +104,13 @@ export async function createInvoice(input: CreateInvoiceInput) {
       totalFils: total,
       notes: input.notes || null,
       notesAr: input.notesAr || null,
+      supplierRef: input.supplierRef || null,
+      purchaseOrder: input.purchaseOrder || null,
+      deliveryNote: input.deliveryNote || null,
+      deliveryNoteDate: input.deliveryNoteDate || null,
+      vehicleNo: input.vehicleNo || null,
+      modeOfPayment: input.modeOfPayment || null,
+      termsOfDelivery: input.termsOfDelivery || null,
       createdById,
       lines: {
         create: computed.map((c) => ({

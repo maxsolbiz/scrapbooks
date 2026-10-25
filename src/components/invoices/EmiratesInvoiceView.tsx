@@ -114,8 +114,8 @@ const CERT_CSS = `
 .emv .item .num { white-space: nowrap; }
 .emv .item .num, .emv .filler .num { text-align: center; }
 .emv .item .wbt { display: block; padding-left: 13px; font-size: 8pt; }
-.emv .item td.desc { text-align: left; padding-left: 6px; }
-.emv .item td.desc .wbt { padding-left: 0; }
+.emv .item td.desc { text-align: left; padding-left: 6px; overflow-wrap: anywhere; }
+.emv .item td.desc .wbt { padding-left: 0; overflow-wrap: anywhere; word-break: break-word; }
 .emv .filler td { height: 2.00in; }
 .emv .totrow td { border-top: 1px solid #000; font-weight: bold; text-align: center; height: 0.24in; vertical-align: middle; padding-top: 4px; border-bottom: 1px solid #000; }
 .emv .band-c { display: flex; }

@@ -111,7 +111,7 @@ export async function InvoiceDetailView({
                 <TableCell>
                   {l.description}
                   {l.wbtNo ? (
-                    <div className="text-xs text-muted-foreground">WBT # {l.wbtNo}</div>
+                    <div className="text-xs text-muted-foreground break-words">WBT # {l.wbtNo}</div>
                   ) : null}
                 </TableCell>
                 <TableCell className="text-end tabular-nums">{Number(l.qty)}</TableCell>

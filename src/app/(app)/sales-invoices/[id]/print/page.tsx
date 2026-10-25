@@ -5,6 +5,7 @@ import { InvoicePrintView } from "@/components/invoices/InvoicePrintView";
 import { EmiratesInvoiceView } from "@/components/invoices/EmiratesInvoiceView";
 import { InvoiceTemplateSelect } from "@/components/invoices/InvoiceTemplateSelect";
 import { PrintButton } from "@/components/invoices/PrintButton";
+import { BackButton } from "@/components/invoices/BackButton";
 
 const EMI_TEMPLATES = new Set(["emirates-classic", "emirates-modern"]);
 
@@ -36,6 +37,7 @@ export default async function PrintInvoicePage({
   return (
     <div className="space-y-3">
       <div className="flex justify-end items-center gap-3 no-print">
+        <BackButton label="Back / رجوع" />
         <InvoiceTemplateSelect value={template} />
         <PrintButton label="Print / طباعة" />
       </div>

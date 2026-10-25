@@ -107,7 +107,7 @@ export function InvoicePrintView({
                 <td className="border border-neutral-400 p-1.5">{idx + 1}</td>
                 <td className="border border-neutral-400 p-1.5">
                   {l.description}
-                  {l.wbtNo ? <div className="text-[10px] text-neutral-600">WBT # {l.wbtNo}</div> : null}
+                  {l.wbtNo ? <div className="text-[10px] text-neutral-600 break-words">WBT # {l.wbtNo}</div> : null}
                 </td>
                 <td className="border border-neutral-400 p-1.5 text-right" dir="rtl">{l.descriptionAr ?? ""}</td>
                 <td className="border border-neutral-400 p-1.5 text-end tabular-nums">{String(l.qty)}</td>

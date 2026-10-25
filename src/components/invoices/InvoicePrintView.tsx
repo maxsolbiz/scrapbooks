@@ -47,7 +47,7 @@ export function InvoicePrintView({
 
   return (
     <div className="mx-auto max-w-3xl bg-white text-black print:bg-white print:text-black" dir="ltr">
-      <style>{`@media print { .no-print, nav, aside { display: none !important; } }`}</style>
+      <style>{`@media print { .no-print, nav, aside { display: none !important; } }@page { size: letter; margin: 0; }`}</style>
 
       <div className="border-2 border-black p-6 text-sm">
         {/* Header */}

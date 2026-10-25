@@ -142,9 +142,10 @@ const CERT_CSS = `
 .emv .foot { text-align: center; margin: 6px 0 0; }
 @media print {
   .no-print { display: none !important; }
-  .emv-page { padding: 0; }
 }
-@page { size: letter; margin: 0.5in; }
+/* Zero page margin: the browser has no header/footer box to draw, so Ctrl+P
+   outputs only the invoice sheet. The .emv-page padding supplies the paper inset. */
+@page { size: letter; margin: 0; }
 .emv.modern .inv-title { color: #1f4e79; }
 .emv.modern .items th { background: #f2f4f7; }
 .emv.modern .p-lbl, .emv.modern .h-left .lbl, .emv.modern .decl .d-h { background: #f2f4f7; }

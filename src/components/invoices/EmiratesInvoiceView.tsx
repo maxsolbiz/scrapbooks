@@ -129,7 +129,8 @@ const CERT_CSS = `
 .emv .mrow .aed { margin-left: auto; padding: 0 4px 0 6px; }
 .emv .mrow .mamt { min-width: 0.7in; text-align: right; }
 .emv .bank { padding: 6px 6px 4px 18px; }
-.emv .bank .b-lbl { font-weight: bold; padding-bottom: 2px; margin-left: -18px; }
+/* caption sits at the same inset as "Amount Chargeable In Words" (6px cell padding) */
+.emv .bank .b-lbl { font-weight: bold; padding-bottom: 2px; margin-left: -12px; }
 .emv .bank .b-line { font-family: Calibri, Carlito, Arial, sans-serif; font-weight: bold; font-size: 10.5pt; line-height: 1.15; }
 .emv .band-e { display: flex; }
 .emv .decl { width: 52%; padding: 3px 6px; }

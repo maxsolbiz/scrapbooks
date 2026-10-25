@@ -154,7 +154,10 @@ export async function createInvoice(input: CreateInvoiceInput) {
       lines: [
         { accountId: ar.id, debit: total, partyId },
         { accountId: income.id, credit: subtotal },
-        { accountId: vatAcc.id, credit: vatTotal },
+        // Reverse-charge / 0% VAT invoices have vatTotal === 0n; a zero-value
+        // journal line is illegal (assertBalanced), so include the VAT line
+        // only when there is VAT to post.
+        ...(vatTotal !== 0n ? [{ accountId: vatAcc.id, credit: vatTotal }] : []),
       ],
     });
     await tx.invoice.update({
@@ -172,7 +175,9 @@ export async function createInvoice(input: CreateInvoiceInput) {
       createdById,
       lines: [
         { accountId: expense.id, debit: subtotal },
-        { accountId: vatAcc.id, debit: vatTotal },
+        // 0% VAT (reverse-charge) purchases have vatTotal === 0n; omit the
+        // zero-value VAT debit line so the journal stays legal.
+        ...(vatTotal !== 0n ? [{ accountId: vatAcc.id, debit: vatTotal }] : []),
         { accountId: ap.id, credit: total, partyId },
       ],
     });

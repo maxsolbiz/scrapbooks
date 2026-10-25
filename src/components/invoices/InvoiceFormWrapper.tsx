@@ -8,6 +8,7 @@ interface InvoiceFormWrapperProps {
   items: any[];
   dict: any;
   today: string;
+  defaultVatRate: string;
 }
 
 export function InvoiceFormWrapper({
@@ -16,6 +17,7 @@ export function InvoiceFormWrapper({
   items,
   dict,
   today,
+  defaultVatRate,
 }: InvoiceFormWrapperProps) {
-  return <InvoiceFormClient direction={direction} parties={parties} items={items} dict={dict} today={today} />;
+  return <InvoiceFormClient direction={direction} parties={parties} items={items} dict={dict} today={today} defaultVatRate={defaultVatRate} />;
 }

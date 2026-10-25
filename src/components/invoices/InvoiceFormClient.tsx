@@ -90,6 +90,7 @@ interface InvoiceFormClientProps {
   items: ItemOption[];
   dict: Dictionary;
   today: string;
+  defaultVatRate: string;
 }
 
 export function InvoiceFormClient({
@@ -98,6 +99,7 @@ export function InvoiceFormClient({
   items,
   dict,
   today,
+  defaultVatRate,
 }: InvoiceFormClientProps) {
   const t = dict;
   const router = useRouter();
@@ -109,7 +111,7 @@ export function InvoiceFormClient({
   const [date, setDate] = useState(today);
   const [partyId, setPartyId] = useState("");
   const [lines, setLines] = useState<Line[]>([
-    { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5", wbtNo: "" },
+    { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: defaultVatRate, wbtNo: "" },
   ]);
   const [notes, setNotes] = useState("");
   const [printDetails, setPrintDetails] = useState<PrintDetails>({
@@ -145,7 +147,9 @@ export function InvoiceFormClient({
               itemId,
               unit: item?.unit ?? l.unit,
               rate: item?.defaultRate ? filsToDecimalString(BigInt(item.defaultRate)) : l.rate,
-              vatRate: item ? String(Number(item.vatRate) * 100 === 0 ? 0 : Number(item.vatRate) * 100) : l.vatRate,
+              // Keep the company default VAT rate on the line; the item's
+              // stored default rate no longer overrides it. Users can still
+              // change the rate per line (e.g. back to 5% when VAT applies).
               description: l.description || item?.nameEn || "",
             }
           : l,
@@ -160,7 +164,7 @@ export function InvoiceFormClient({
   function addLine() {
     setLines((prev) => [
       ...prev,
-      { id: `l${Date.now()}`, itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5", wbtNo: "" },
+      { id: `l${Date.now()}`, itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: defaultVatRate, wbtNo: "" },
     ]);
   }
 

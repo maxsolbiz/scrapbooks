@@ -6,7 +6,7 @@ import { InvoiceFormWrapper } from "@/components/invoices/InvoiceFormWrapper";
 
 export async function NewInvoicePage({ direction }: { direction: InvoiceDirection }) {
   await requireModule(direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write");
-  const [partiesRaw, itemsRaw, locale] = await Promise.all([
+  const [partiesRaw, itemsRaw, locale, settings] = await Promise.all([
     prisma.party.findMany({
       where: { isActive: true },
       orderBy: { code: "asc" },
@@ -26,6 +26,7 @@ export async function NewInvoicePage({ direction }: { direction: InvoiceDirectio
       },
     }),
     getServerLocale(),
+    prisma.companySettings.findFirst({ select: { defaultVatRate: true } }),
   ]);
   const dict = getDictionary(locale);
   const now = new Date();
@@ -46,6 +47,7 @@ export async function NewInvoicePage({ direction }: { direction: InvoiceDirectio
       }))}
       dict={dict}
       today={today}
+      defaultVatRate={settings ? settings.defaultVatRate.toString() : "5"}
     />
   );
 }

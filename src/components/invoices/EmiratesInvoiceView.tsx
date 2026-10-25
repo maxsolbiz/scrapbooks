@@ -97,7 +97,7 @@ const CERT_CSS = `
 .emv .h-left .lbl { font-weight: bold; }
 .emv .h-left .co { font-weight: bold; }
 .emv .h-left .from { border-bottom: 1px solid #000; padding-bottom: 3px; }
-.emv .h-left .line { padding: 2px 0; }
+.emv .h-left .line { padding: 1px 0; line-height: 1.18; }
 .emv .h-right { width: 55.3%; display: flex; flex-direction: column; }
 .emv .pair-row { display: flex; border-bottom: 1px solid #000; }
 .emv .pair { width: 40.3%; padding: 2px 6px; border-right: 1px solid #000; }
@@ -128,9 +128,9 @@ const CERT_CSS = `
 .emv .mrow b { font-weight: bold; white-space: nowrap; }
 .emv .mrow .aed { margin-left: auto; padding: 0 4px 0 6px; }
 .emv .mrow .mamt { min-width: 0.7in; text-align: right; }
-.emv .bank { padding: 6px 6px 4px; }
+.emv .bank { padding: 6px 6px 4px 18px; }
 .emv .bank .b-lbl { font-weight: bold; padding-bottom: 2px; }
-.emv .bank .b-line { font-family: Cambria, "Times New Roman", serif; font-weight: bold; font-size: 11pt; line-height: 1.25; }
+.emv .bank .b-line { font-family: Calibri, Carlito, Arial, sans-serif; font-weight: bold; font-size: 10.5pt; line-height: 1.15; }
 .emv .band-e { display: flex; }
 .emv .decl { width: 52%; padding: 3px 6px; }
 .emv .decl .d-h { font-weight: bold; text-decoration: underline; display: inline-block; padding-bottom: 1px; }

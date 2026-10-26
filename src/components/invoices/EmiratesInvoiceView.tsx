@@ -88,7 +88,7 @@ function splitWbt(description: string): { main: string; wbt: string | null } {
 }
 
 const CERT_CSS = `
-.emv { font-family: Calibri, Carlito, Arial, sans-serif; font-size: 8.8pt; color: #000; background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+.emv { font-family: Calibri, Carlito, Arial, sans-serif; font-size: 8.8pt; line-height: normal; color: #000; background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 .emv-page { padding: 16px 12px 28px; }
 .emv .sheet { width: 6.7in; margin: 0 auto; border: 1px solid #000; }
 .emv .inv-title { font-size: 20pt; font-weight: bold; text-align: center; margin: 0 0 8px; }
@@ -109,9 +109,11 @@ const CERT_CSS = `
 .emv .items th { border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center; font-weight: bold; padding: 3px 2px; vertical-align: top; }
 .emv .items td { padding: 3px 5px; vertical-align: top; }
 .emv .items td + td, .emv .items th + th { border-left: 1px solid #000; }
-.emv .item td { height: 0.30in; }
+.emv .item td { height: 0.30in; font-weight: bold; }
 .emv .item td, .emv .filler td { padding-left: 2px; padding-right: 2px; }
 .emv .item .num { white-space: nowrap; }
+/* global .num utility (mono for app serials) must not leak into the certified print table */
+.emv .items .num { font-family: Calibri, Carlito, Arial, sans-serif; font-variant-numeric: normal; }
 .emv .item .num, .emv .filler .num { text-align: center; }
 .emv .item .wbt { display: block; padding-left: 13px; font-size: 8pt; }
 .emv .item td.desc { text-align: left; padding-left: 6px; overflow-wrap: anywhere; }

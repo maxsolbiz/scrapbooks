@@ -109,7 +109,7 @@ const CERT_CSS = `
 .emv .items th { border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center; font-weight: bold; padding: 3px 2px; vertical-align: top; }
 .emv .items td { padding: 3px 5px; vertical-align: top; }
 .emv .items td + td, .emv .items th + th { border-left: 1px solid #000; }
-.emv .item td { height: 0.30in; font-weight: bold; }
+.emv .item td { height: 0.30in; }
 .emv .item td, .emv .filler td { padding-left: 2px; padding-right: 2px; }
 .emv .item .num { white-space: nowrap; }
 .emv .item .num, .emv .filler .num { text-align: center; }

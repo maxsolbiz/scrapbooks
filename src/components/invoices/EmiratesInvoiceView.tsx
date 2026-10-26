@@ -145,6 +145,10 @@ const CERT_CSS = `
 .emv .foot { text-align: center; margin: 6px 0 0; }
 @media print {
   .no-print { display: none !important; }
+  /* User-requested ~1in blank strip above the sheet on print output.
+     Filler inset below is shrunk by the same amount so output stays 1 page. */
+  .emv-page { padding-top: 0.7in; }
+  .emv .filler td { height: 1.17in; }
 }
 /* Screen-only polish: white "paper card" presentation on the app background.
    Dark mode: sheet keeps certified colors but gains a shadow so it reads as

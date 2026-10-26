@@ -46,8 +46,8 @@ export function InvoicePrintView({
   const title = isTaxInvoice ? "TAX INVOICE / فاتورة ضريبية" : invoice.direction === "SALES" ? "DELIVERY NOTE / سند تسليم" : "TAX INVOICE / فاتورة ضريبية";
 
   return (
-    <div className="mx-auto max-w-3xl rounded-md bg-white text-black shadow-sm print:rounded-none print:shadow-none dark:shadow-lg" dir="ltr">
-      <style>{`@media print { .no-print, nav, aside { display: none !important; } }@page { size: letter; margin: 0; }`}</style>
+    <div className="ivp mx-auto max-w-3xl rounded-md bg-white text-black shadow-sm print:rounded-none print:shadow-none dark:shadow-lg" dir="ltr">
+      <style>{`@media print { .no-print, nav, aside { display: none !important; } .ivp { padding-top: 1in; } }@page { size: letter; margin: 0; }`}</style>
 
       <div className="border-2 border-black p-6 text-sm">
         {/* Header */}

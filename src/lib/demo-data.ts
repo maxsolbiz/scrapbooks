@@ -110,7 +110,7 @@ async function ensureBase(tx: Tx): Promise<{ accById: (code: string) => string }
   await tx.user.upsert({
     where: { email: "admin@maxsolbiz.com" },
     update: {},
-    create: { name: "Admin", email: "admin@maxsolbiz.com", passwordHash: await hash("Start@123", 12), role: "ADMIN" },
+    create: { name: "Admin", email: "admin@maxsolbiz.com", passwordHash: await hash(process.env.DEMO_PASSWORD ?? "demo-change-me", 12), role: "ADMIN" },
   });
 
   for (const item of ITEMS) {

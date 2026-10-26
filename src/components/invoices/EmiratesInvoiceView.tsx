@@ -146,6 +146,13 @@ const CERT_CSS = `
 @media print {
   .no-print { display: none !important; }
 }
+/* Screen-only polish: white "paper card" presentation on the app background.
+   Dark mode: sheet keeps certified colors but gains a shadow so it reads as
+   paper on dark. Print resets everything to the certified 1-page output. */
+@media screen {
+  .emv .sheet { border-radius: 2px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+  html.dark .emv .sheet { border-radius: 4px; box-shadow: 0 10px 30px rgb(0 0 0 / 0.55); }
+}
 /* Zero page margin: the browser has no header/footer box to draw, so Ctrl+P
    outputs only the invoice sheet. The .emv-page padding supplies the paper inset. */
 @page { size: letter; margin: 0; }

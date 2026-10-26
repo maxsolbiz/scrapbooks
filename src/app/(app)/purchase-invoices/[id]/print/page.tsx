@@ -35,17 +35,19 @@ export default async function PrintInvoicePage({
     : "app";
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-end items-center gap-3 no-print">
+    <div className="w-full overflow-x-hidden space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 no-print sm:justify-end">
         <BackButton label="Back / رجوع" />
         <InvoiceTemplateSelect value={template} />
         <PrintButton label="Print / طباعة" />
       </div>
-      {template === "app" ? (
-        <InvoicePrintView data={{ invoice, company }} isTaxInvoice={false} />
-      ) : (
-        <EmiratesInvoiceView data={{ invoice, company, template }} />
-      )}
+      <div className="w-full overflow-x-auto rounded-md print:overflow-visible">
+        {template === "app" ? (
+          <InvoicePrintView data={{ invoice, company }} isTaxInvoice={false} />
+        ) : (
+          <EmiratesInvoiceView data={{ invoice, company, template }} />
+        )}
+      </div>
     </div>
   );
 }

@@ -18,6 +18,7 @@ export function InvoiceTemplateSelect({ value }: { value: string }) {
       <select
         id="invTpl"
         value={value}
+        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-auto dark:bg-background dark:text-foreground"
         onChange={(e) => {
           const url = new URL(window.location.href);
           url.searchParams.set("template", e.target.value);

@@ -62,7 +62,7 @@ async function main() {
     await prisma.user.upsert({
       where: { email: u.email },
       update: {},
-      create: { ...u, passwordHash: await hash("Start@123", 12) },
+      create: { ...u, passwordHash: await hash(process.env.DEMO_PASSWORD ?? "demo-change-me", 12) },
     });
   }
 

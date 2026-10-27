@@ -85,7 +85,7 @@
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
 | P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | PENDING | P0.1, P0.2 | | | Original stays POSTED; reversal linked by reversesEntryId; Invoice/Payment status=VOID |
-| P1.2 | Lock invoice row on allocation (FOR UPDATE) | F2 | IN_PROGRESS | P0.2 | | | Concurrency test requires committed-data mode |
+| P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
 | P1.3 | voidPayment handles allocations explicitly | F3 | PENDING | P0.1, P0.2 | | | Consistent with voidInvoice |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |
 | P1.5 | trialBalance via groupBy; accountLedger uses normalBalance | F6 | PENDING | P0.1, P0.2 | | | Follow accountBalances pattern |

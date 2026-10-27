@@ -243,7 +243,9 @@ describe("createPayment (P1.2: lock first + per-invoice aggregation)", () => {
       { timeout: 30_000 },
     ); // unawaited: blocked while tx1 holds the invoice row lock
     const blockedQuery = await waitBlocked(/FOR UPDATE|Serial/i);
-    console.log("BLOCKED ON:", JSON.stringify(blockedQuery.trim().slice(0, 120)));
+    // The polled query is a byproduct used for determinism; assert nothing on it
+    // (the Serial-vs-Invoice distinction is the MUTANT trap, not an assertion).
+    void blockedQuery;
     release("go");
 
     const results = await Promise.allSettled([tx1p, tx2p]);

@@ -8,16 +8,20 @@ import dotenv from "dotenv";
 // .env FILE via dotenv.parse(fs.readFileSync(".env")) and passes it to the guard.
 dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
+// Workers access the validated test URL via the db project's test.env (vitest does
+// not propagate globalSetup process.env changes into worker processes). The value
+// is re-validated by tests/db/setup.ts and re-asserted before every TRUNCATE.
+const TEST_URL = process.env.DATABASE_URL_TEST ?? "";
+
+const repoRoot = __dirname;
+const ALIAS = { "@": path.resolve(repoRoot, "src") };
+
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
-  },
   test: {
     globals: false,
     projects: [
       {
+        resolve: { alias: ALIAS },
         test: {
           name: "unit",
           include: ["tests/unit/**/*.test.ts"],
@@ -25,6 +29,7 @@ export default defineConfig({
         },
       },
       {
+        resolve: { alias: ALIAS },
         test: {
           name: "db",
           include: ["tests/db/**/*.test.ts"],
@@ -32,6 +37,8 @@ export default defineConfig({
           // DB tests truncate shared tables, so they must never run in parallel.
           fileParallelism: false,
           globalSetup: ["tests/global-setup.ts"],
+          setupFiles: ["tests/db/setup.ts"],
+          env: { DATABASE_URL: TEST_URL },
         },
       },
     ],

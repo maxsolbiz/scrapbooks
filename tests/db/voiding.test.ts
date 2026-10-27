@@ -436,12 +436,13 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
     // TRANSACTION NOT STARTED YET: tx2 is only created after tx1Ready —
     // tx1Ready resolves exactly after createPayment (=> its lockInvoices) has run
     // while tx1 holds the invoice lock, so the competitor cannot win the lock race.
+    let tx2p: Promise<unknown> | undefined;
     try {
       await tx1Ready;
-      const tx2p = prisma.$transaction(
+      tx2p = prisma.$transaction(
         (t) => voidInvoiceWithReversal({ invoiceId: invoice.id, reason: "undo sales", date: June2026, createdById: ctx.userId, tx: t as Tx }),
         { timeout: 30_000 },
-      ); // unawaited; must BLOCK on the Invoice lock held by tx1's lockInvoices
+      ); // unawaited until allSettled; must BLOCK on the Invoice lock held by tx1's lockInvoices
       const blocked = await firstBlockedInvoiceLock(4_000);
       expect(blocked.length).toBeGreaterThan(0); // the void was blocked on the invoice lock
       release("go");
@@ -453,12 +454,9 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
       expect(await prisma.payment.count({ where: { type: "RECEIPT", status: "POSTED" } })).toBe(1);
       const tb = await trialBalance(new Date("2026-12-31"));
       expect(tb.reduce((a, r) => a + r.debitTotal, 0n)).toBe(tb.reduce((a, r) => a + r.creditTotal, 0n));
-      // finally drains tx1 only (tx2 is scoped here but awaited inside the try) — drain both:
-      await Promise.allSettled([tx1p, tx2p]);
-      return;
     } finally {
       release("go");
-      await Promise.allSettled([tx1p]); // tx2 already settled inside the try
+      await Promise.allSettled(tx2p ? [tx1p, tx2p] : [tx1p]); // drain
     }
   });
 
@@ -490,9 +488,10 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
     // TRANSACTION NOT STARTED YET: tx2 is only created after tx1Ready —
     // tx1Ready resolves exactly after the void (=> its lockInvoices) has run while
     // tx1 holds the invoice lock, so createPayment cannot win the lock race.
+    let tx2p: Promise<unknown> | undefined;
     try {
       await tx1Ready;
-      const tx2p = prisma.$transaction(
+      tx2p = prisma.$transaction(
         (t) =>
           createPayment({
             tx: t as Tx,
@@ -505,7 +504,7 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
             allocations: [{ invoiceId: invoice.id, amountFils: 500n }],
           }),
         { timeout: 30_000 },
-      ); // unawaited; must BLOCK on the Invoice lock held by the void tx
+      ); // unawaited until allSettled; must BLOCK on the Invoice lock held by the void tx
       const blocked = await firstBlockedInvoiceLock(4_000);
       expect(blocked.length).toBeGreaterThan(0); // createPayment was blocked on the invoice lock
       release("go");
@@ -518,7 +517,7 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
       expect(await prisma.payment.count({ where: { status: "POSTED" } })).toBe(0);
     } finally {
       release("go");
-      await Promise.allSettled([tx1p]); // tx2 already settled inside the try
+      await Promise.allSettled(tx2p ? [tx1p, tx2p] : [tx1p]); // drain
     }
   });
 });

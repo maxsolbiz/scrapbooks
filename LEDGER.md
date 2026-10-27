@@ -219,3 +219,39 @@ Files 4 passed (4), Tests 16 passed (16); npx next build *> build.log = EXIT=0 (
 log pasted at generation time, 34 routes / 28 pages); git status clean after commit.
 **STOP = CHECKPOINT after commit (1); no push; commit (2) (accounting core + tests +
 mutation proofs) waits for reviewer CONTINUE.**
+
+### 2026-10-27 | P1.1 COMMIT (1b) - reviewer fixes to commit (1) | 93b5a8d
+1. FK action: schema + migration B edited IN PLACE (test-DB-only migration),
+   FK now ON DELETE NO ACTION ON UPDATE CASCADE (bulk deleteMany still possible via
+   statement-end checks; single-delete of an origin with a live reversal is blocked).
+   Regenerated client: internal/class.ts 2 +- (generated onDelete constant only).
+   Test DB recreated via SQL file piped to docker psql (DROP/CREATE "scrapbooks_test"
+   OWNER "scrap", literal output: DROP DATABASE / CREATE DATABASE); all 8 migrations
+   re-applied cleanly (migrate deploy, target printed).
+2. BOM scan over every session-created/changed file (repeated over prisma/ + ops/ +
+   tests/ trees): NO BOMs found (all files EF-BB-BF-free; the migration B BOM had
+   already been stripped during the P3018 recovery). New unit test
+   tests/unit/no-bom.test.ts: pure hasBom(buffer) with/without BOM + scan enforcing
+   no BOM in prisma/migrations + ops/sql .sql files (25 unit tests).
+   hasBom MUTATION PROOF: body disabled ("return false &&") -> "detects a leading
+   BOM" FAILED (Tests 1 failed | 2 passed (3)); restored -> Tests 25 passed (25).
+3. ops/sql/20261027_p11_commit1_reversal_link.sql rewritten via Node (no BOM, first
+   bytes 45 45 32 "--"): ADD VALUE comment corrected (own statement; usable-after-tx
+   rule on PG>=12), FK route now NO ACTION, header mandates APPLY SQL BEFORE
+   DEPLOYING THE CLIENT COMMIT, footer adds migrate resolve --applied instructions.
+4. Dev DB: npx prisma migrate deploy with the .env URL in the same invocation -
+   printed target: PostgreSQL database "scrapbooks" at localhost:54322; ONLY migration
+   B applied; "All migrations have been successfully applied."
+5. ROADMAP: P1.1 IN_PROGRESS (commits daa4563, a98412f, 93b5a8d - 1b); D10 + D11
+   recorded as "reviewer default, NOT user-confirmed"; Deploy section gains the
+   apply-SQL-before-deploy rule.
+6. Evidence: git show --stat daa4563 = exactly 9 files (the CompanySettings/Invoice/
+   InvoiceLine .ts warnings were pure CRLF-conversion noise; not in the commit).
+   npm test = Tests 25 passed (25); npx vitest run --project db --reporter=verbose
+   = all names listed (8 payments, 6 accounting, 1 ground-truth, 1 connection):
+   Test Files 4 passed (4), Tests 16 passed (16); npx next build *> build.log:
+   EXIT=0 (full 34-route log pasted at generation time).
+**PROCESS RULES (reviewer-binding, from now on): no prisma migrate dev / reset -
+migrate diff + migrate deploy only, DATABASE_URL set in the same invocation, target
+printed; files written via Node fs utf8 no-BOM only; every commit passes tests and
+the production build on its own.**

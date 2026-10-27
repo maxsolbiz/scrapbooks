@@ -16,17 +16,17 @@ beforeEach(async () => {
   ctx = await seedTestData(prisma);
 });
 
-function postViaTx(fn: (tx: Tx) => Promise<unknown>) {
-  return withTxRollback(prisma, fn as (tx: unknown) => Promise<unknown>);
+function postViaTx<T>(fn: (tx: Tx) => Promise<T>) {
+  return withTxRollback(prisma, fn);
 }
 
 describe("postJournalEntry", () => {
   it("happy path: posts a balanced entry (Mode A, rolled back)", async () => {
     const ar = ctx.accountByCode.get("1130")!;
     const income = ctx.accountByCode.get("4100")!;
-    const ids: string[] = await postViaTx(async (tx) => {
+    const ids: string[] = await       postViaTx(async (tx) => {
       const entry = await postJournalEntry({
-        tx: tx as Tx,
+        tx,
         date: new Date("2026-06-01"),
         narration: "test entry",
         sourceType: "MANUAL",
@@ -55,7 +55,7 @@ describe("postJournalEntry", () => {
     await expect(
       postViaTx(async (tx) =>
         postJournalEntry({
-          tx: tx as Tx,
+          tx,
           date: new Date("2026-06-01"),
           sourceType: "MANUAL",
           createdById: ctx.userId,
@@ -75,7 +75,7 @@ describe("postJournalEntry", () => {
     await expect(
       postViaTx(async (tx) =>
         postJournalEntry({
-          tx: tx as Tx,
+          tx,
           date: new Date("2026-06-01"),
           sourceType: "MANUAL",
           createdById: ctx.userId,
@@ -95,7 +95,7 @@ describe("postJournalEntry", () => {
     await expect(
       postViaTx(async (tx) =>
         postJournalEntry({
-          tx: tx as Tx,
+          tx,
           date: new Date("2026-06-01"),
           sourceType: "MANUAL",
           createdById: ctx.userId,
@@ -123,7 +123,7 @@ describe("voidJournalEntry (LEGACY behavior — replaced in P1.1)", () => {
     const income = ctx.accountByCode.get("4100")!;
     const entry = await prisma.$transaction(async (tx) =>
       postJournalEntry({
-        tx: tx as Tx,
+        tx,
         date: new Date("2026-06-01"),
         sourceType: "MANUAL",
         createdById: ctx.userId,
@@ -140,3 +140,4 @@ describe("voidJournalEntry (LEGACY behavior — replaced in P1.1)", () => {
     expect(reversal).toBeNull(); // legacy behavior: NO reversal entry
   });
 });
+

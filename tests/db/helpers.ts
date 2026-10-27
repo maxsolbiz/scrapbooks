@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { assertTestDatabase, type GuardResult } from "../db-guard";
+import type { Tx } from "@/lib/tx";
 
 /**
  * Test harness helpers for the `db` vitest project.
@@ -34,10 +35,10 @@ export function setHarnessContext(guard: GuardResult, mainUrlRaw: string): void 
   harness.mainUrlRaw = mainUrlRaw;
 }
 
-export async function withTxRollback<T>(prisma: PrismaClient, fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+export async function withTxRollback<T>(prisma: PrismaClient, fn: (tx: Tx) => Promise<T>): Promise<T> {
   let captured: T;
   try {
-    await prisma.$transaction(async (tx: PrismaClient) => {
+    await prisma.$transaction(async (tx) => {
       captured = await fn(tx);
       throw sentinel;
     });

@@ -12,7 +12,7 @@ type CoaRow = {
  * The canonical chart of accounts. Side-effect-free data module: safe for both
  * prisma/seed.ts and test harnesses to import.
  */
-export const COA: CoaRow[] = [] = [
+export const COA: CoaRow[] = [
   { code: "1000", nameEn: "Assets", nameAr: "الأصول", type: "ASSET", normalBalance: "DEBIT", group: true },
   { code: "1100", nameEn: "Current Assets", nameAr: "الأصول المتداولة", type: "ASSET", normalBalance: "DEBIT", group: true, parentCode: "1000" },
   { code: "1110", nameEn: "Cash on Hand", nameAr: "النقد في الصندوق", type: "ASSET", normalBalance: "DEBIT", parentCode: "1100", cashFlow: "OPERATING" },

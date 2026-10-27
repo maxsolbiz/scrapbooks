@@ -117,3 +117,49 @@ leak case, and empty password.
 CJS/ESM tech-debt note; tests/db/helpers.ts header states every DB test file must
 start with truncateAll(prisma) (the first ground-truth run collided on User_email
 because it lacked that truncate — now fixed in the test itself).
+
+### 2026-10-27 | P1.2 lock + F2b aggregation (build round)
+**What (ONE concern):** src/lib/payments.ts - exported lockInvoices(tx, ids): dedupe+sort
+ids, SELECT id FROM "Invoice" WHERE id IN (...) ORDER BY id FOR UPDATE via Prisma.sql/
+Prisma.join (parameterized, never interpolated; ORDER BY REQUIRED - IN-list order does not
+guarantee Postgres lock order), returns sorted unique ids for caller reuse. createPayment
+takes the lock FIRST, before any status/direction/outstanding read. F2b fixed: allocation
+validation previously checked each row independently (payments.ts:76-104), and the action
+schema had no duplicate guard (payments/actions.ts:24-25), so two rows for one invoice
+(700+700 vs outstanding 1000) both passed; validation now SUMS allocations per invoiceId
+and compares each total to the outstanding balance.
+**Mojibake scan (STEP 0, read-only):** all 14 session-touched files CLEAN (scan = U+00C2/
+U+00C3/U+00E2 followed by U+0080-00BF / U+20AC / U+2018-201E); no double-encoded text
+found; nothing repaired.
+**Tests (tests/db/payments.test.ts, starts with truncateAll):** happy; > outstanding;
+duplicate rows exceeding outstanding (F2b); allocations > payment; wrong party; wrong
+direction; VOID invoice; CONCURRENCY.
+**CONCURRENCY protocol (deterministic, no timing luck - amendments 3+4):** tx1 runs
+createPayment in full inside an open interactive tx (timeout 30s), signals, holds. tx2
+starts UNAWAITED; the test polls pg_stat_activity (wait_event_type='Lock') until tx2 is
+actually BLOCKED, which proves tx2's validation reads completed strictly before tx1
+commits; only then the gate releases and tx1 commits. Assertions are on the final outcome
+ONLY: tx1 fulfilled, tx2 rejected /exceeds the invoice outstanding/,
+SUM(PaymentAllocation.amountFils) <= invoice.totalFils (=700). NO assertion about
+"being blocked" is used as a pass condition.
+**Mutation proofs (literal):**
+- MUTANT A (lock removed): test FAILED - "Test Files 1 failed (1) / Tests 1 failed | 7
+  skipped (8)" on the final-outcome assertion; the polled BLOCKED query printed tx2
+  waiting on "Serial": INSERT INTO "public"."Serial" ... ON CONFLICT - amendment 4
+  predicted exactly this (serial blocking alone must not satisfy the outcome). Restored:
+  blocked query = "SELECT id FROM \"Invoice\" WHERE id IN ($1) ORDER BY id FOR UPDATE",
+  test PASSES - proof the LOCK is what made tx2 fail.
+- MUTANT B (per-invoice SUM check removed): 3 tests failed ("> outstanding", the F2b
+  duplicate-rows test, and the concurrency outcome test); restored: pass.
+**Evidence (literal):** npm test: Tests 22 passed (22); npx vitest run --project db
+--reporter=verbose: createPayment 8 tests (happy, 6 negatives incl. F2b, concurrency with
+poll log), accounting 6, ground-truth 1, connection 1 - Test Files 4 passed (4), Tests 16
+passed (16); npx next build *> build.log: EXIT=0 (Compiled successfully).
+**One honest flaw found and fixed during the build:** the first version of the
+concurrency test PASSED with MUTANT A applied (timing luck: tx1's commit raced tx2's
+validation). Rebuilt as the pg_stat_activity polling protocol above; now both mutants
+fail deterministically.
+**Guard rails kept:** every TRUNCATE via guarded truncateAll; LEDGER appended via Node
+UTF-8 no BOM (never Add-Content); no push (public repo + F10 documented locally).
+**ROADMAP:** F2b added under Findings (F1-F10) as CONFIRMED (payments.ts:76-104,
+payments/actions.ts:24-25) under task P1.2; P1.2 IN_PROGRESS awaiting acknowledgment.

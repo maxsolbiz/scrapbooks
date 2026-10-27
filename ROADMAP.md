@@ -25,6 +25,7 @@
 | F8 | src/generated/prisma committed; no real test runner; default README | CONFIRMED | repo structure; package.json; README.md |
 | F9 | No idempotency keys on financial endpoints (invoice/payment/journal create) | CONFIRMED | invoice-actions.ts:62-112; payments/actions.ts:29-63; journals/actions.ts:39-80 |
 | F10 | resetDemoDataAction deletes ALL payments, invoices, journals AND the AuditLog; gated only by SUPER_ADMIN role, no environment guard | CONFIRMED | settings/actions.ts:190-194; demo-data.ts:277-286 |
+| F2b | Allocation validation checks each row against outstandingForInvoice independently and the action schema has no duplicate guard, so two rows for one invoice (700+700 vs outstanding 1000) both pass | CONFIRMED | payments.ts:76-104; payments/actions.ts:24-25 |
 
 ---
 
@@ -84,7 +85,7 @@
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
 | P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | PENDING | P0.1, P0.2 | | | Original stays POSTED; reversal linked by reversesEntryId; Invoice/Payment status=VOID |
-| P1.2 | Lock invoice row on allocation (FOR UPDATE) | F2 | PENDING | P0.2 | | | Concurrency test requires committed-data mode |
+| P1.2 | Lock invoice row on allocation (FOR UPDATE) | F2 | IN_PROGRESS | P0.2 | | | Concurrency test requires committed-data mode |
 | P1.3 | voidPayment handles allocations explicitly | F3 | PENDING | P0.1, P0.2 | | | Consistent with voidInvoice |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |
 | P1.5 | trialBalance via groupBy; accountLedger uses normalBalance | F6 | PENDING | P0.1, P0.2 | | | Follow accountBalances pattern |

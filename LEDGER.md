@@ -37,3 +37,23 @@ commit 0f0e613c13a934f3e53bf93a83b6e7fa24d5fcec
  LEDGER.md | 11 ++++++++++-
  1 file changed, 10 insertions(+), 1 deletion(-)
 ```
+
+### 2026-10-27 | P0.2 (partial — guard phase) | 9dc493b, b4659d0
+**What:** Vitest deps/config/lockfile (8de6495); pure database guard with unit tests (9dc493b); bypass fix — query-param host/port overrides in pg-connection-string rejected, only `schema`/`sslmode` allowed on the test URL, dead fallback-name rule removed (b4659d0, amended earlier from 7214b64 pre-push).
+**Files:** package.json, package-lock.json, vitest.config.ts, tests/db-guard.ts, tests/unit/db-guard.test.ts
+**Verification (literal):**
+- `npm test`: `Test Files 1 passed (1)`, `Tests 14 passed (14)` (guard: happy + missing/equal/suffix/non-local-host negatives + ?host/?port/?dbname/?hostaddr override negatives + ?schema happy + main-URL-override sameness)
+- `npm ci --dry-run`: `up to date in 20s` (lockfile matches package.json)
+- `npm audit`: `2 vulnerabilities (1 moderate, 1 high)` — identical to pre-vitest baseline; vitest adds none
+- Exact prod build `npx next build`: first run FAILED `tests/db-guard.ts(66,19): error TS2345` (genuine type bug in test code; tsconfig untouched); fixed and build passed (`BUILD_EXIT=0`)
+
+### 2026-10-27 | P0.2 (harness + extraction + tests) | f1dc3a3..fe6e5cc
+**What:** Lenient-parser rename + fail-closed messaging (f1dc3a3); db harness — globalSetup reads main URL from the .env FILE via dotenv.parse, migrate deploy as child process with DATABASE_URL explicitly set to the validated test URL (printed target proof: `Datasource "db": PostgreSQL database "scrapbooks_test"`), per-worker setupFile validating before @/lib/db import, ground-truth `SELECT current_database()` abort check before every TRUNCATE, dynamic information_schema TRUNCATE (double-quoted identifiers, excluding _prisma_migrations), Mode A/B helpers (8b2bd26); prisma/coa.ts extraction with seed.ts importing it (e432693); seedTestData + accounting smoke tests, Mode A for tx functions / Mode B for committed void characterization (cc1904d); typing fixes found by the exact prod build (fe6e5cc); .env.test.example + gitignore negation (4336360).
+**Files:** tests/global-setup.ts, tests/db/{setup,helpers,seed,connection,accounting}.test.ts, vitest.config.ts, prisma/coa.ts, prisma/seed.ts, .env.test.example, .gitignore
+**Verification (literal):**
+- Seed BEFORE extraction (unmodified seed.ts, test DB `scrapbooks_test`): `Seed complete: users, COA (25 accounts), FY2026, items, parties`
+- Seed AFTER extraction: identical `Seed complete: users, COA (25 accounts), FY2026, items, parties`
+- `npm test`: `Test Files 1 passed (1)`, `Tests 14 passed (14)`
+- `npm run test:db`: `Test Files 2 passed (2)`, `Tests 7 passed (7)` — incl. `worker is connected to the validated TEST database` ground-truth test
+- Worker targeting proof (globalSetup output): `[migrate] Datasource "db": PostgreSQL database "scrapbooks_test", schema "public" at "localhost:54322"`, `[db-guard] guard OK: test DB "scrapbooks_test" on localhost:54322; main is localhost:54322/scrapbooks`
+- Exact prod build `npx next build *> build.log`: `EXIT=0` (Compiled successfully; TypeScript finished; 28/28 pages; test files present)

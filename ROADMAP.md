@@ -71,7 +71,7 @@
 | ID | Task | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|
 | P0.1 | Create ROADMAP.md and LEDGER.md | DONE | — | 09b2752, 0f0e613 | 2026-10-27 (build evidence in LEDGER.md) | Acknowledged by reviewer |
-| P0.2 | Vitest + test DB harness (npm test, test:db) | PENDING | — | | | Keep existing scripts/test-*.ts untouched |
+| P0.2 | Vitest + test DB harness (npm test, test:db) | IN_PROGRESS | — | 8de6495, 9dc493b, b4659d0, f1dc3a3, 8b2bd26, e432693, cc1904d, fe6e5cc, 4336360 | 2026-10-27 (evidence in LEDGER.md) | Guard attack-tested by reviewer (15 hostile URLs blocked); awaiting acknowledgment |
 | P0.3 | Decision: keep generated client committed (DROPPED) | PENDING | D8 | | | build is "next build" with no generate step; D8 awaiting user confirmation |
 | P0.4 | Replace default README with real docs | PENDING | — | | | |
 

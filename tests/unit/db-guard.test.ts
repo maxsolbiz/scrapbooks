@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assertTestDatabase, parseDbUrl } from "../db-guard";
+import { assertTestDatabase, parseDbUrlLenient } from "../db-guard";
 
 const MAIN = "postgresql://scrap:scrapdev@localhost:54322/scrapbooks";
 
@@ -103,13 +103,14 @@ describe("db-guard (pure function, no DB touched)", () => {
     ).toThrow(/must end in "_test"/);
   });
 
-  it("parseDbUrl throws on malformed URLs", () => {
-    expect(() => parseDbUrl("not a url")).toThrow(/not a valid URL/);
-    expect(() => parseDbUrl("mysql://localhost/scrapbooks_test")).toThrow(/postgres/);
+  it("parseDbUrlLenient throws on malformed URLs", () => {
+    expect(() => parseDbUrlLenient("not a url")).toThrow(/not a valid URL/);
+    expect(() => parseDbUrlLenient("mysql://localhost/scrapbooks_test")).toThrow(/postgres/);
   });
 
-  it("parseDbUrl throws on empty values", () => {
-    expect(() => parseDbUrl("")).toThrow(/empty or unset/);
-    expect(() => parseDbUrl(undefined)).toThrow(/empty or unset/);
+  it("parseDbUrlLenient throws on empty values", () => {
+    expect(() => parseDbUrlLenient("")).toThrow(/empty or unset/);
+    expect(() => parseDbUrlLenient(undefined)).toThrow(/empty or unset/);
   });
 });
+

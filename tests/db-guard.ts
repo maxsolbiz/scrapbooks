@@ -62,7 +62,12 @@ function parseUrl(raw: string | undefined, label: string, strictParams: boolean)
   return { host, port, database };
 }
 
-export function parseDbUrl(raw: string | undefined): ParsedUrl {
+/**
+ * Lenient parser for the MAIN url only (host/port query overrides still applied to
+ * the effective target). Named *_Lenient so the harness cannot accidentally use it
+ * on the TEST url, which must go through the strict path in assertTestDatabase.
+ */
+export function parseDbUrlLenient(raw: string | undefined): ParsedUrl {
   return parseUrl(raw, "Database URL", false);
 }
 
@@ -81,7 +86,7 @@ export function assertTestDatabase(
     throw new Error("DATABASE_URL_TEST is not set — refusing to run database tests");
   }
   if (!mainUrlRaw || !mainUrlRaw.trim()) {
-    throw new Error("DATABASE_URL is not set (read the .env FILE in globalSetup via dotenv.parse, not process.env) — refusing to run database tests");
+    throw new Error("DATABASE_URL is not set — the main URL is unknown, so refusing to run database tests (fail-closed. globalSetup must read the .env FILE via dotenv.parse; a missing .env leaves no safe comparison target)");
   }
 
   const test = parseUrl(testUrlRaw, "DATABASE_URL_TEST", true);

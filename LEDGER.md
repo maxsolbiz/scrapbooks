@@ -163,3 +163,20 @@ fail deterministically.
 UTF-8 no BOM (never Add-Content); no push (public repo + F10 documented locally).
 **ROADMAP:** F2b added under Findings (F1-F10) as CONFIRMED (payments.ts:76-104,
 payments/actions.ts:24-25) under task P1.2; P1.2 IN_PROGRESS awaiting acknowledgment.
+
+### 2026-10-27 | P1.2 close-out (reviewer items 1-5) | close-out commit
+1. Precise F2b mutant: per-row outstanding comparison restored (ignoring the per-invoice
+sum). Literal result: ONLY "negative (F2b): duplicate rows for one invoice exceeding
+outstanding reject (aggregation)" FAILED ("promise resolved {promise resolved 15-key
+payment object} instead of rejecting"); single-row "> outstanding" test PASSED - proving
+the AGGREGATION (not merely the check) is what the test guards. Fix restored.
+2. src/lib/payments.ts: single declaration of expectedDirection (line 92), no duplicate;
+tests/db/payments.test.ts debug console.log("BLOCKED ON") REMOVED (poll remains for
+determinism; asserted nothing on it).
+3. ROADMAP P1.2 row: DONE, Commits 0e183dc, 9175dc6 (+close-out commit), Verified
+2026-10-27, Notes name F2 + F2b, lockInvoices, pg_stat_activity polling.
+4. Character scan (mojibake + CJK/full-width U+3000-U+9FFF, U+FF00-U+FFEF):
+   CLEAN: src/lib/payments.ts / tests/db/payments.test.ts / LEDGER.md / ROADMAP.md.
+5. Evidence: npm test = Tests 22 passed (22); npx vitest run --project db = Test Files 4
+passed (4), Tests 16 passed (16); npx next build *> build.log: EXIT=0, full log (34
+routes, 28/28 pages) pasted at generation time.

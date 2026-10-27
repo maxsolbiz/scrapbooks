@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { prisma } from "@/lib/db";
 import { postJournalEntry, assertBalanced, voidJournalEntry } from "@/lib/accounting";
 import type { Tx } from "@/lib/tx";
-import { truncateAll, withTxRollback, harness } from "./helpers";
+import { truncateAll, withTxRollback } from "./helpers";
 import { seedTestData, type TestContext } from "./seed";
 
 // Per reviewer: functions taking a tx are tested via Mode A (rollback-sentinel);
@@ -24,7 +24,7 @@ describe("postJournalEntry", () => {
   it("happy path: posts a balanced entry (Mode A, rolled back)", async () => {
     const ar = ctx.accountByCode.get("1130")!;
     const income = ctx.accountByCode.get("4100")!;
-    const ids: string[] = await       postViaTx(async (tx) => {
+    const ids: string[] = await postViaTx(async (tx) => {
       const entry = await postJournalEntry({
         tx,
         date: new Date("2026-06-01"),
@@ -136,8 +136,9 @@ describe("voidJournalEntry (LEGACY behavior — replaced in P1.1)", () => {
     await voidJournalEntry(entry.id);
     const after = await prisma.journalEntry.findUniqueOrThrow({ where: { id: entry.id } });
     expect(after.status).toBe("VOID");
-    const reversal = await prisma.journalEntry.findFirst({ where: { sourceId: entry.id, entryNo: { contains: "REVERSAL" } } });
-    expect(reversal).toBeNull(); // legacy behavior: NO reversal entry
+    // legacy behavior: original is the ONLY entry — no reversal was created.
+    // (P1.1 changes this deliberately; this assertion is what detects the change.)
+    expect(await prisma.journalEntry.count()).toBe(1);
   });
 });
 

@@ -110,3 +110,29 @@ export function assertTestDatabase(
 
   return { testUrl: testUrlRaw, test, main };
 }
+
+/**
+ * Pure worker-URL check (moved out of tests/db/setup.ts so it is unit-testable).
+ * Throws on ANY problem; setup.ts must call this BEFORE importing @/lib/db
+ * (that module silently falls back to the DEV database when DATABASE_URL is unset).
+ */
+export function assertWorkerUrl(workerUrl: string | undefined, validatedUrl: string): void {
+  if (!workerUrl || !workerUrl.trim()) {
+    throw new Error(
+      "Worker has NO DATABASE_URL — aborting before @/lib/db import (its fallback would connect to the DEV database)",
+    );
+  }
+  if (workerUrl !== validatedUrl) {
+    throw new Error("Worker DATABASE_URL does not equal the validated test URL — aborting (unsafe target)");
+  }
+}
+
+/**
+ * Literal (non-regex) secret masking. split/join is used because URLs contain
+ * regex metacharacters (?, ., +) that would break `new RegExp(url, "g")`.
+ * An empty secret must be a no-op so the text is never corrupted.
+ */
+export function maskSecret(text: string, secret: string): string {
+  if (!secret) return text;
+  return text.split(secret).join("***");
+}

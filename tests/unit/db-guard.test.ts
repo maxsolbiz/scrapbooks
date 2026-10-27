@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assertTestDatabase, parseDbUrlLenient } from "../db-guard";
+import { assertTestDatabase, parseDbUrlLenient, assertWorkerUrl, maskSecret } from "../db-guard";
 
 const MAIN = "postgresql://scrap:scrapdev@localhost:54322/scrapbooks";
 
@@ -114,3 +114,38 @@ describe("db-guard (pure function, no DB touched)", () => {
   });
 });
 
+
+describe("assertWorkerUrl (pure)", () => {
+  const VALIDATED = "postgresql://scrap:scrapdev@localhost:54322/scrapbooks_test?schema=public";
+
+  it("accepts an exactly matching URL", () => {
+    expect(() => assertWorkerUrl(VALIDATED, VALIDATED)).not.toThrow();
+  });
+
+  it("throws when unset (message mentions the dev fallback risk)", () => {
+    for (const v of [undefined, "", "   "]) {
+      expect(() => assertWorkerUrl(v, VALIDATED)).toThrow(/NO DATABASE_URL.*fallback/);
+    }
+  });
+
+  it("throws on any mismatched URL (e.g. the main database)", () => {
+    expect(() =>
+      assertWorkerUrl("postgresql://scrap:scrapdev@localhost:54322/scrapbooks", VALIDATED),
+    ).toThrow(/does not equal the validated test URL/);
+  });
+});
+
+describe("maskSecret (pure, transaction-safe state)", () => {
+  const SECRET = "postgresql://scrap:p%2Fss?word@localhost:54322/scrapbooks_test?schema=public";
+
+  it("masks a URL containing regex metacharacters where RegExp replace would fail", () => {
+    const text = `error connecting to ${SECRET} at hop 2. Try: a+b?c?d.e`;
+    const masked = maskSecret(text, SECRET);
+    expect(masked).toBe("error connecting to *** at hop 2. Try: a+b?c?d.e");
+    expect(masked).not.toContain("p%2Fss");
+  });
+
+  it("never corrupts text when the secret is empty", () => {
+    expect(maskSecret("keep ?a.b+c?d exactly", "")).toBe("keep ?a.b+c?d exactly");
+  });
+});

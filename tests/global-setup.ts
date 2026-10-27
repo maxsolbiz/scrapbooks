@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { parse as dotenvParse, config as loadDotenv } from "dotenv";
-import { assertTestDatabase, type GuardResult } from "./db-guard";
+import { assertTestDatabase, maskSecret, type GuardResult } from "./db-guard";
 
 /**
  * Runs ONCE (globalSetup of the `db` vitest project) before any worker starts:
@@ -53,12 +53,15 @@ export default function globalSetup(): void {
   console.log(`[db-guard] migrate deploy target: ${dbRef}`);
   const out = `${child.stdout ?? ""}${child.stderr ?? ""}`;
   if (child.status !== 0) {
-    console.error(out.replace(new RegExp(guard.testUrl, "g"), "postgresql://***@***:***/" + guard.test.database));
+    console.error(maskSecret(out, guard.testUrl).replace(
+      /^postgresql:\/\/[^:@/]+:[^:@/]+@/gm,
+      "postgresql://***:***@",
+    ));
     throw new Error(`prisma migrate deploy failed (exit ${child.status}) against ${dbRef}`);
   }
   for (const line of out.split("\n")) {
     if (/migrations|database|Datasource|Applied|No pending/i.test(line)) {
-      console.log(`[migrate] ${line.trim().replace(new RegExp(guard.testUrl, "g"), `postgresql://***:***/${guard.test.database}`)}`);
+      console.log(`[migrate] ${maskSecret(line.trim(), guard.testUrl)}`);
     }
   }
   console.log(`[db-guard] guard OK: test DB "${guard.test.database}" on ${guard.test.host}:${guard.test.port}; main is ${guard.main.host}:${guard.main.port}/${guard.main.database}`);

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parse as dotenvParse } from "dotenv";
-import { assertTestDatabase } from "../db-guard";
+import { assertTestDatabase, assertWorkerUrl } from "../db-guard";
 import { setHarnessContext } from "./helpers";
 
 /**
@@ -23,12 +23,7 @@ try {
 }
 
 const guard = assertTestDatabase(process.env.DATABASE_URL_TEST, mainUrl);
-if (process.env.DATABASE_URL !== guard.testUrl) {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("Worker has NO DATABASE_URL — aborting before @/lib/db import (its fallback would connect to the DEV database)");
-  }
-  throw new Error("Worker DATABASE_URL does not equal the validated test URL — aborting (unsafe target)");
-}
+assertWorkerUrl(process.env.DATABASE_URL, guard.testUrl);
 
 // Only now is it safe to pull in the app's Prisma client.
 const { prisma } = (await import("@/lib/db")) as { prisma: import("@/generated/prisma/client").PrismaClient };

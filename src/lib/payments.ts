@@ -1,7 +1,8 @@
 import type { Tx } from "@/lib/tx";
 import type { EntrySource, PaymentMethod, PaymentType } from "@/generated/prisma/enums";
+import type { JournalEntry } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
-import { postJournalEntry, voidJournalEntry } from "@/lib/accounting";
+import { postJournalEntry, voidJournalEntry, reverseJournalEntry } from "@/lib/accounting";
 
 const CASH_CODE = "1110";
 const BANK_CODE = "1120";
@@ -222,4 +223,61 @@ export async function voidPayment(tx: Tx, paymentId: string): Promise<void> {
   if (payment.journalEntryId) {
     await voidJournalEntry(payment.journalEntryId, tx);
   }
+}
+
+export interface VoidPaymentWithReversalInput {
+  paymentId: string;
+  /** mandatory; appended to the reversal narration inside the tx */
+  reason: string;
+  /** caller-resolved reversal date (default today in Asia/Dubai at the ACTION layer) */
+  date: Date;
+  createdById: string;
+  tx: Tx;
+}
+
+/**
+ * P1.1 reversal-based void for payments. NEW function — legacy callers keep using
+ * voidPayment. Lock order per the binding: allocation invoice rows (sorted) ->
+ * the payment row -> journal-entry rows (inside reverseJournalEntry) -> Serial.
+ * D11: the PaymentAllocation rows are KEPT; consumers exclude them via payment status.
+ */
+export async function voidPaymentWithReversal(input: VoidPaymentWithReversalInput): Promise<JournalEntry | null> {
+  const { paymentId, date, createdById } = input;
+  const reason = input.reason?.trim() ?? "";
+  if (!reason) throw new Error("A non-blank reason is required");
+  if (reason.length > 2000) throw new Error("Reason must be at most 2000 characters");
+
+  // Read the allocation invoice ids FIRST so we can take locks in the binding order.
+  const probe = await input.tx.payment.findUnique({
+    where: { id: paymentId },
+    include: { allocations: { select: { invoiceId: true } } },
+  });
+  if (!probe) throw new Error("Payment not found");
+  const invoiceIds = probe.allocations.map((a) => a.invoiceId);
+
+  await lockInvoices(input.tx, invoiceIds); // 1. invoices, sorted, deduped
+  await input.tx.$queryRaw(Prisma.sql`SELECT id FROM "Payment" WHERE id = ${paymentId} FOR UPDATE`); // 2. payment row
+
+  // Re-validate UNDER the lock: the earlier probe is only a lock-order probe.
+  const payment = await input.tx.payment.findUnique({
+    where: { id: paymentId },
+    include: { allocations: true },
+  });
+  if (!payment) throw new Error("Payment not found");
+  if (payment.status === "VOID") throw new Error(`Payment ${payment.paymentNo} is already void`);
+
+  if (payment.journalEntryId) {
+    const reversal = await reverseJournalEntry({
+      entryId: payment.journalEntryId,
+      reason,
+      date,
+      createdById,
+      tx: input.tx,
+    });
+    await input.tx.payment.update({ where: { id: paymentId }, data: { status: "VOID" } });
+    return reversal;
+  }
+  // No journal entry (DRAFT payment): just flip the status; no reversal entry.
+  await input.tx.payment.update({ where: { id: paymentId }, data: { status: "VOID" } });
+  return null;
 }

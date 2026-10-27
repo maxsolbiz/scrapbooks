@@ -1,8 +1,9 @@
-import type { Prisma, InvoiceDirection, UnitType } from "@/generated/prisma/client";
+import type { Prisma, InvoiceDirection, UnitType, JournalEntry } from "@/generated/prisma/client";
 import type { Tx } from "@/lib/tx";
 import type { EntrySource } from "@/generated/prisma/enums";
-import { postJournalEntry, voidJournalEntry } from "@/lib/accounting";
+import { postJournalEntry, voidJournalEntry, reverseJournalEntry } from "@/lib/accounting";
 import { multiplyFilsByDecimal } from "@/lib/money";
+import { lockInvoices } from "@/lib/payments";
 
 export interface InvoiceLineInput {
   itemId?: string;
@@ -219,4 +220,67 @@ export async function voidInvoice(
 
 export function invoiceWhereFilter(direction: InvoiceDirection): Prisma.InvoiceWhereInput {
   return { direction };
+}
+
+export interface VoidInvoiceWithReversalInput {
+  invoiceId: string;
+  /** mandatory; appended to the reversal narration inside the tx */
+  reason: string;
+  /** caller-resolved reversal date (default today in Asia/Dubai at the ACTION layer) */
+  date: Date;
+  createdById: string;
+  tx: Tx;
+}
+
+/**
+ * P1.1 reversal-based void. NEW function — legacy callers keep using voidInvoice.
+ * Lock order: invoice rows (sorted) -> journal entry rows (inside reverseJournalEntry).
+ * Validation is re-read UNDER the lock. D11: allocations from VOID payments do not block.
+ */
+export async function voidInvoiceWithReversal(input: VoidInvoiceWithReversalInput): Promise<JournalEntry | null> {
+  const { invoiceId, date, createdById } = input;
+  const reason = input.reason?.trim() ?? "";
+  if (!reason) throw new Error("A non-blank reason is required");
+  if (reason.length > 2000) throw new Error("Reason must be at most 2000 characters");
+
+  // Lock FIRST, before any status/allocation read (P1.2 pattern).
+  await lockInvoices(input.tx, [invoiceId]);
+
+  const invoice = await input.tx.invoice.findUnique({
+    where: { id: invoiceId },
+    include: { allocations: { include: { payment: { select: { status: true } } } } },
+  });
+  if (!invoice) throw new Error("Invoice not found");
+  if (invoice.status === "VOID") throw new Error(`Invoice ${invoice.invoiceNo} is already void`);
+  if (invoice.status === "DRAFT") {
+    // DRAFT has no journal entry: voiding without a reversal is correct here.
+    if (invoice.journalEntryId) {
+      await voidJournalEntry(invoice.journalEntryId, input.tx);
+    }
+    await input.tx.invoice.update({
+      where: { id: invoiceId },
+      data: { status: "VOID" },
+    });
+    return null; // no reversal entry for a DRAFT void
+  }
+  if (invoice.status !== "POSTED") throw new Error(`Invoice ${invoice.invoiceNo} has an unexpected status ${invoice.status}`);
+  // D11: only allocations from non-VOID payments block voiding.
+  const activeAllocations = invoice.allocations.filter((a) => a.payment.status !== "VOID");
+  if (activeAllocations.length > 0) {
+    throw new Error("Invoice has payment allocations — remove them first");
+  }
+  if (!invoice.journalEntryId) {
+    throw new Error(`Invoice ${invoice.invoiceNo} has no journal entry to reverse`);
+  }
+  // Reverses the entry (or throws, e.g. closed FY) BEFORE the status flip, so the
+  // invoice stays POSTED if the reversal is impossible. Whole thing is one tx.
+  const reversal = await reverseJournalEntry({
+    entryId: invoice.journalEntryId,
+    reason,
+    date,
+    createdById,
+    tx: input.tx,
+  });
+  await input.tx.invoice.update({ where: { id: invoiceId }, data: { status: "VOID" } });
+  return reversal;
 }

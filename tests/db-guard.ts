@@ -136,3 +136,29 @@ export function maskSecret(text: string, secret: string): string {
   if (!secret) return text;
   return text.split(secret).join("***");
 }
+
+/**
+ * Mask a connection URL AND its parsed password (URL.password) with the same
+ * transaction-safe technique, in addition to the full-URL match, so a truncated
+ * or partially-printed URL cannot leak the credential. Percent-decoding is
+ * attempted for the password as well. Unknown/unparseable URLs still get the
+ * full-string mask.
+ */
+export function maskUrl(text: string, url: string): string {
+  let out = maskSecret(text, url);
+  try {
+    const pw = new URL(url).password;
+    if (pw) {
+      out = maskSecret(out, pw);
+      try {
+        const decoded = decodeURIComponent(pw);
+        if (decoded !== pw) out = maskSecret(out, decoded);
+      } catch {
+        /* malformed percent-encoding; raw form already masked */
+      }
+    }
+  } catch {
+    /* not a parseable URL; full-string mask already applied */
+  }
+  return out;
+}

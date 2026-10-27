@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assertTestDatabase, parseDbUrlLenient, assertWorkerUrl, maskSecret } from "../db-guard";
+import { assertTestDatabase, parseDbUrlLenient, assertWorkerUrl, maskSecret, maskUrl } from "../db-guard";
 
 const MAIN = "postgresql://scrap:scrapdev@localhost:54322/scrapbooks";
 
@@ -147,5 +147,26 @@ describe("maskSecret (pure, transaction-safe state)", () => {
 
   it("never corrupts text when the secret is empty", () => {
     expect(maskSecret("keep ?a.b+c?d exactly", "")).toBe("keep ?a.b+c?d exactly");
+  });
+});
+
+describe("maskUrl (masks full URL AND parsed password)", () => {
+  it("masks the password when only part of the URL is present in the text", () => {
+    const url = "postgresql://scrap:p%2Fss%3Fword@localhost:54322/scrapbooks_test"; // password: p/ss?word
+    const text = `ECONNREFUSED for host localhost:54322 dbname scrapbooks_test user scrap password p/ss?word`;
+    const masked = maskUrl(text, url);
+    expect(masked).not.toContain("p/ss?word");
+    expect(masked).not.toContain("p%2Fss%3Fword");
+  });
+  it("masks the password embedded in a partially-printed URL", () => {
+    const url = "postgresql://scrap:s3cret@localhost:54322/scrapbooks_test";
+    const text = "connecting postgresql://scrap:s3cret@localhos (truncated)";
+    const masked = maskUrl(text, url);
+    expect(masked).not.toContain("s3cret");
+  });
+  it("empty password: full-URL masking only, text otherwise intact", () => {
+    const url = "postgresql://localhost:54322/scrapbooks_test";
+    const text = "target " + url + " marker?.a+b";
+    expect(maskUrl(text, url)).toBe("target *** marker?.a+b");
   });
 });

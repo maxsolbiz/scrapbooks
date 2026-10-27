@@ -24,6 +24,9 @@ import type { Tx } from "@/lib/tx";
  * TRUNCATE lists tables DYNAMICALLY from information_schema (schema public, excluding
  * _prisma_migrations) so later phases cannot forget new tables; identifiers are
  * double-quoted because Prisma creates case-sensitive tables (e.g. "JournalLine").
+ *
+ * TEST HYGIENE: every DB test file must start with truncateAll(prisma) (shared
+ * worker state; a missing truncate causes unique-constraint collisions).
  */
 
 const sentinel = Symbol("rollback-sentinel");

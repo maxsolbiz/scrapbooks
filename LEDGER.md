@@ -61,12 +61,12 @@ commit 0f0e613c13a934f3e53bf93a83b6e7fa24d5fcec
 ### 2026-10-27 | P0.2 correction (non-buildable intermediate commits) | fe6e5cc
 Per reviewer finding #4: commits 8b2bd26, e432693 and cc1904d do NOT pass `npx next build` in
 isolation (TS2322/TS2769/TS2322 in prisma/coa.ts, tests/db/helpers.ts, tests/db/accounting.test.ts
-— fixed by fe6e5cc). fe6e5cc is the FIRST deployable commit; do not cut a release at any earlier
+â€” fixed by fe6e5cc). fe6e5cc is the FIRST deployable commit; do not cut a release at any earlier
 commit. History NOT rewritten (per instruction, after the amend mishap earlier today).
 
 ### 2026-10-27 | Reviewer follow-up commit (P0.2 findings #1-#3, #6) | test-negatives commit
 **What:** pure `assertWorkerUrl(envUrl, validatedUrl)` moved from tests/db/setup.ts inline code to
-tests/db-guard.ts (setup.ts now calls it); DB negative test tests/db/ground-truth.test.ts —
+tests/db-guard.ts (setup.ts now calls it); DB negative test tests/db/ground-truth.test.ts â€”
 tampered harness.guard clone (test.database different), expects truncateAll + assertCurrentDatabase
 to reject /GROUND TRUTH MISMATCH/ and verifies seeded user rows SURVIVE, restore in `finally`;
 void characterization now asserts `journalEntry.count() === 1` (a falsifiable assertion) instead
@@ -75,15 +75,45 @@ of the never-failing entryNo-contains-"REVERSAL" check; unused `harness` import 
 `new RegExp(guard.testUrl, "g")` in tests/global-setup.ts.
 **Verification (literal):**
 - MUTATION CHECK: with the ground-truth comparison disabled (`if (false && ...)`), the new test
-  FAILED: `× tampered harness context: truncateAll and assertCurrentDatabase reject /GROUND
-  TRUTH MISMATCH/ and seeded rows survive` — `stdout | tests/db/ground-truth.test.ts` shown, then
+  FAILED: `Ã— tampered harness context: truncateAll and assertCurrentDatabase reject /GROUND
+  TRUTH MISMATCH/ and seeded rows survive` â€” `stdout | tests/db/ground-truth.test.ts` shown, then
   check restored and the suite passed again.
 - `npm test`: `Test Files 1 passed (1)`, `Tests 19 passed (19)` (14 prior + 3 assertWorkerUrl +
   2 maskSecret)
 - `npx vitest run --project db --reporter=verbose`: `Test Files 3 passed (3)`, `Tests 8 passed
-  (8)` — all 8 test names listed (4 postJournalEntry, 1 assertBalanced, 1 void characterization,
+  (8)` â€” all 8 test names listed (4 postJournalEntry, 1 assertBalanced, 1 void characterization,
   1 ground-truth abort, 1 worker connection ground truth)
 - `npx next build *> build.log`: `EXIT=0`; log includes compilation, TypeScript finish, all
-  34 route lines (`ƒ`/`?` markers), 28/28 static pages — pasted in full before deletion.
+  34 route lines (`Æ’`/`?` markers), 28/28 static pages â€” pasted in full before deletion.
 **Any TRUNCATE performed in this session was executed only via the guarded truncateAll helper;
 no ad-hoc docker exec TRUNCATE (the one reported earlier is corrected here).**
+
+### 2026-10-27 | P0.2 close-out (encoding repair + reviewer items #2-#5) | close-out commit
+**Encoding:** every file touched this session was validated with Node
+TextDecoder("utf-8", {fatal:true}) + U+FFFD scan. Result: 13 of 14 files OK;
+LEDGER.md FAILED (7 invalid sequences) because Add-Content wrote em dashes, Ã— and
+Æ’ as CP1252 single bytes (0x97/0xD7/0x83). Repair was byte-surgical (encoding only,
+content untouched): the 7 corrupt bytes were spliced to their correct UTF-8 forms; the
+existing valid UTF-8 sequences (e2 80 94) elsewhere in the file were left alone. After
+repair: fatal decode OK, U+FFFD count 0, git diff limited to 6 line pairs (the corrupt
+symbols). FUTURE RULE: append/write files ONLY via Node fs or
+[IO.File]::WriteAll/AppendAllText with [Text.UTF8Encoding]::new($false) â€” never
+Add-Content/Set-Content/Out-File in this repo.
+
+**Ad-hoc TRUNCATE, stated plainly:** during the coa.ts extraction step, a manual
+`docker exec ... psql -c 'TRUNCATE TABLE "User" CASCADE'` was attempted against
+scrapbooks_test; it failed on PowerShell quoting (relation public.user does not
+exist), so nothing was truncated. It bypassed the guarded harness and must not recur.
+
+**Masking hardening:** new pure maskUrl(text, url) in tests/db-guard.ts â€” masks the
+full URL and additionally the parsed password (URL.password, raw and
+percent-decoded forms), still split/join (regex-metacharacter safe); used in
+tests/global-setup.ts for migrate output and failure output. Unit tests cover a
+password containing percent-encoded metacharacters (p%2Fss%3Fword), a truncated-URL
+leak case, and empty password.
+
+**Other:** ROADMAP heading renamed to Findings (F1-F10 Verification); P0.2 row DONE
+(commits now include b016407, 901a7bb, 752e21f) and P0.4 gains the vitest.config.ts
+CJS/ESM tech-debt note; tests/db/helpers.ts header states every DB test file must
+start with truncateAll(prisma) (the first ground-truth run collided on User_email
+because it lacked that truncate â€” now fixed in the test itself).

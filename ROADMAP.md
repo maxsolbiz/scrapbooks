@@ -11,9 +11,7 @@
 
 ---
 
-## Findings (F1-F9 Verification)
-
-> F10 added 2026-10-27 (outside original scope, found during reviewer security review of the public repo/history).
+## Findings (F1-F10 Verification)
 
 | ID | Claim | Verdict | Evidence |
 |---|---|---|---|
@@ -75,9 +73,9 @@
 | ID | Task | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|
 | P0.1 | Create ROADMAP.md and LEDGER.md | DONE | — | 09b2752, 0f0e613 | 2026-10-27 (build evidence in LEDGER.md) | Acknowledged by reviewer |
-| P0.2 | Vitest + test DB harness (npm test, test:db) | IN_PROGRESS | — | 8de6495, 9dc493b, b4659d0, f1dc3a3, 8b2bd26, e432693, cc1904d, fe6e5cc, 4336360 | 2026-10-27 (evidence in LEDGER.md) | Guard attack-tested by reviewer (15 hostile URLs blocked); awaiting acknowledgment |
+| P0.2 | Vitest + test DB harness (npm test, test:db) | DONE | — | 8de6495, 9dc493b, b4659d0, f1dc3a3, 8b2bd26, e432693, cc1904d, fe6e5cc, 4336360, b016407, 901a7bb, 752e21f | 2026-10-27 (evidence in LEDGER.md) | ACKNOWLEDGED by reviewer |
 | P0.3 | Decision: keep generated client committed (DROPPED) | PENDING | D8 | | | build is "next build" with no generate step; D8 awaiting user confirmation |
-| P0.4 | Replace default README with real docs | PENDING | — | | | |
+| P0.4 | Replace default README with real docs | PENDING | — | | | Notes: vitest.config.ts is loaded as CJS with ESM syntax (Vite warning); do NOT rename to .mts without replacing __dirname |
 
 ---
 

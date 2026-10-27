@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
-import type { Tx } from "@/lib/tx";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import type { EntrySource } from "@/generated/prisma/enums";
+import type { Tx } from "@/lib/tx";
 
 export const FILS_PER_AED = 100;
 
@@ -24,6 +24,9 @@ export interface PostJournalInput {
   createdById: string;
   lines: PostLineInput[];
   tx: Tx;
+  /** Reversal path ONLY: skip the isActive check (a deactivated historic account
+   * must not make a voidable document un-voidable). Normal posting never sets it. */
+  allowInactive?: boolean;
 }
 
 const SOURCE_PREFIX: Record<string, string> = {
@@ -34,6 +37,7 @@ const SOURCE_PREFIX: Record<string, string> = {
   RECEIPT: "RCP",
   OPENING_BALANCE: "OB",
   YEAR_END_CLOSE: "YEC",
+  REVERSAL: "REV",
 };
 
 async function nextNumber(tx: Tx, key: string) {
@@ -71,14 +75,17 @@ export function assertBalanced(lines: PostLineInput[]) {
 }
 
 export async function postJournalEntry(input: PostJournalInput) {
-  const { tx, date, narration, narrationAr, sourceType, sourceId, createdById } = input;
+  const { tx, date, narration, narrationAr, sourceType, sourceId, createdById, allowInactive } = input;
   const lines = input.lines;
 
   assertBalanced(lines);
 
   for (const line of lines) {
     const account = await tx.account.findUnique({ where: { id: line.accountId } });
-    if (!account || !account.isActive) {
+    if (!account) {
+      throw new Error(`Account ${line.accountId} is missing or inactive`);
+    }
+    if (!account.isActive && !allowInactive) {
       throw new Error(`Account ${line.accountId} is missing or inactive`);
     }
     if (account.isGroup) {
@@ -136,6 +143,79 @@ export async function voidJournalEntry(entryId: string, tx?: Tx) {
     where: { id: entryId },
     data: { status: "VOID" },
   });
+}
+
+export interface ReverseJournalInput {
+  entryId: string;
+  /** mandatory, caller-checked non-blank; appended to the reversal narration INSIDE the tx */
+  reason: string;
+  /** reversal date: default is today at the ACTION layer; must be >= original date, OPEN FY */
+  date: Date;
+  createdById: string;
+  tx: Tx;
+}
+
+/**
+ * P1.1 reversal-by-default. The original entry STAYS POSTED; a mirrored POSTED
+ * reversal (every line copied with debit/credit swapped AND partyId + description
+ * preserved) is linked via the unique reversesEntryId. Only POSTED targets.
+ */
+export async function reverseJournalEntry(input: ReverseJournalInput) {
+  const { entryId, date, createdById } = input;
+  const reason = input.reason?.trim() ?? "";
+  if (!reason) throw new Error("A non-blank reason is required");
+  if (reason.length > 2000) throw new Error("Reason must be at most 2000 characters");
+
+  // Serialize concurrent reversals of the same target: lock BEFORE any reads.
+  await input.tx.$queryRaw(Prisma.sql`SELECT id FROM "JournalEntry" WHERE id = ${entryId} FOR UPDATE`);
+
+  const target = await input.tx.journalEntry.findUniqueOrThrow({
+    where: { id: entryId },
+    include: { lines: true, reversedBy: { select: { id: true, entryNo: true } } },
+  });
+  if (target.status !== "POSTED") {
+    throw new Error(`Entry ${target.entryNo} is ${target.status} — only POSTED entries are reversed`);
+  }
+  if (target.reversedBy) throw new Error(`Entry ${target.entryNo} is already reversed by ${target.reversedBy.entryNo}`);
+  if (target.reversesEntryId) throw new Error(`Entry ${target.entryNo} is itself a reversal and cannot be reversed`);
+
+  if (date.getTime() < target.date.getTime()) {
+    throw new Error(`Reversal date ${date.toISOString().slice(0, 10)} is before the original entry date ${target.date.toISOString().slice(0, 10)}`);
+  }
+  const fiscalYear = await input.tx.fiscalYear.findFirst({
+    where: { starts: { lte: date }, ends: { gte: date } },
+  });
+  if (!fiscalYear) throw new Error(`No fiscal year covers ${date.toISOString().slice(0, 10)}`);
+  if (fiscalYear.status !== "OPEN") throw new Error(`Fiscal year ${fiscalYear.name} is closed`);
+
+  const reversal = await postJournalEntry({
+    tx: input.tx,
+    date,
+    narration: `REVERSAL of ${target.entryNo}: ${reason}`,
+    narrationAr: target.narrationAr ? `عكس ${target.entryNo}: ${reason}` : null,
+    sourceType: "REVERSAL",
+    sourceId: target.sourceId ?? undefined,
+    createdById,
+    allowInactive: true,
+    lines: target.lines.map((l) => ({
+      accountId: l.accountId,
+      debit: l.credit,
+      credit: l.debit,
+      partyId: l.partyId ?? undefined,
+      description: l.description ?? undefined,
+    })),
+  });
+
+  try {
+    await input.tx.journalEntry.update({ where: { id: reversal.id }, data: { reversesEntryId: entryId } });
+  } catch (e) {
+    // unique violation on reversesEntryId => another reversal raced and won
+    if (typeof e === "object" && e !== null && (e as { code?: string }).code === "P2002") {
+      throw new Error(`Entry ${target.entryNo} is already reversed`);
+    }
+    throw e;
+  }
+  return reversal;
 }
 
 export interface AccountBalance {

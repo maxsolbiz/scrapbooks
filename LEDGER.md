@@ -180,3 +180,42 @@ determinism; asserted nothing on it).
 5. Evidence: npm test = Tests 22 passed (22); npx vitest run --project db = Test Files 4
 passed (4), Tests 16 passed (16); npx next build *> build.log: EXIT=0, full log (34
 routes, 28/28 pages) pasted at generation time.
+
+### 2026-10-27 | P1.1 COMMIT (1) - schema + migrations + regenerated client | daa4563
+**Schema (additive only):** EntrySource gains REVERSAL (single-statement migration
+20261027062727_add_reversal_source: ALTER TYPE "EntrySource" ADD VALUE 'REVERSAL';);
+JournalEntry gains unique nullable reversesEntryId + named self-relation
+"JournalEntryReversal" (reversesEntry/reversedBy), migration
+20261027064800_journal_entry_reversal_link: AlterTable + CreateIndex + AddForeignKey
+(ON DELETE SET NULL). Old code unchanged; build verified green on the new client.
+**Procedure (honest):** prisma migrate dev --create-only was attempted THREE times;
+Prisma 7 CLI hard-requires a TTY ("environment is non-interactive ... is not
+supported" - literal) and prisma 7 removed --from-url/--accept-data-loss, so the SQL
+was authored via "npx prisma migrate diff --from-config-datasource --to-schema
+prisma/schema.prisma --script" with DATABASE_URL explicitly set to
+postgresql://scrap:***@localhost:54322/scrapbooks_test (printed target line:
+'Datasource "db": PostgreSQL database "scrapbooks_test", schema "public" at
+"localhost:54322"'). NEVER migrate reset; the test DB received migration B via
+npx prisma migrate deploy (same explicit env), which first FAILED on a UTF-8 BOM
+prepend (P3018, syntax error at position 1) - BOM removed via Node, migration marked
+rolled-back via migrate resolve --rolled-back, deploy re-run: "All migrations have
+been successfully applied."
+**HONEST DISCLOSURE - dev DB touched:** one aborted attempt (command that piped
+stdin while the explicit env had NOT been set in that invocation) targeted the DEV
+database "scrapbooks" and APPLIED migration add_reversal_source (ADD VALUE -
+additive, no data change) to the DEV database. Recorded here; pass 2+ targeted
+scrapbooks_test. Per reviewer note, the user will additionally run
+"npx prisma migrate deploy" on the DEV database to bring it to 8 migrations.
+**Production packaging:** ops/sql/20261027_p11_commit1_reversal_link.sql (user-applied;
+statements separate, no explicit tx; commented SELECT version() check; commented
+rollback block; enum value is NOT droppable - documented).
+**Generated client scope (git diff --stat):** enums.ts (3 +-), internal/class.ts (8 +-),
+internal/prismaNamespace(ts) (3 +-), models/JournalEntry.ts (393 +-); 5 files changed,
+396 insertions(+), 14 deletions(-). In the SAME commit as schemas per D8/deploy rule.
+**Postgres version (test DB):** PostgreSQL 16.13 (Alpine musl) - ADD VALUE outside
+tx supported.
+**Evidence:** npm test = Tests 22 passed (22); npx vitest run --project db = Test
+Files 4 passed (4), Tests 16 passed (16); npx next build *> build.log = EXIT=0 (full
+log pasted at generation time, 34 routes / 28 pages); git status clean after commit.
+**STOP = CHECKPOINT after commit (1); no push; commit (2) (accounting core + tests +
+mutation proofs) waits for reviewer CONTINUE.**

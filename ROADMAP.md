@@ -44,6 +44,7 @@
 | D9 | Keep demo/reset action in production (with env guard), or remove entirely? Reviewer recommends removal; AuditLog rows must NEVER be deleted either way | OPEN (user decision) | 2026-10-27 |
 | D10 | Reversal date policy: default today; must be >= original entry date; must fall in an OPEN fiscal year | reviewer default, NOT user-confirmed | 2026-10-27 |
 | D11 | Voided payments KEEP their PaymentAllocation rows (excluded everywhere by payment status filter, never hard-deleted) | reviewer default, NOT user-confirmed | 2026-10-27 |
+| D12 | Should the generic reversal apply to YEAR_END_CLOSE or OPENING_BALANCE entries? Reversing a year-end close is not a normal void | reviewer default: reverseJournalEntry REJECTS sourceType YEAR_END_CLOSE with a clear message — NOT user-confirmed; OPENING_BALANCE unaddressed so far | 2026-10-27 |
 
 ---
 
@@ -87,7 +88,7 @@
 
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
-| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | IN_PROGRESS | F1 | P0.1, P0.2 | daa4563, a98412f, — (1b) | 2026-10-27 (checkpoint) | Original stays POSTED; reversal linked by reversesEntryId; sourceType REVERSAL with REV prefix; reversal lines copy partyId+description; FK ON DELETE NO ACTION; commit (1b) done — awaiting acknowledgment |
+| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | IN_PROGRESS | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, (2b) | 2026-10-27 (checkpoint) | Original stays POSTED; reversal linked by reversesEntryId; sourceType REVERSAL with REV prefix; reversal lines copy partyId+description; FK ON DELETE NO ACTION; commit (2) accounting core done — (2b) fixes in progress |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
 | P1.3 | voidPayment handles allocations explicitly | F3 | PENDING | P0.1, P0.2 | | | Consistent with voidInvoice |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |

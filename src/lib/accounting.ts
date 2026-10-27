@@ -5,6 +5,12 @@ import type { Tx } from "@/lib/tx";
 
 export const FILS_PER_AED = 100;
 
+/** Calender-date-only comparison key: the app stores dates as UTC midnight, so
+ * "on/after" means the UTC YYYY-MM-DD string, never the raw timestamp. */
+function toUtcDateString(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
 export interface PostLineInput {
   accountId: string;
   /** fils */
@@ -165,6 +171,7 @@ export async function reverseJournalEntry(input: ReverseJournalInput) {
   const reason = input.reason?.trim() ?? "";
   if (!reason) throw new Error("A non-blank reason is required");
   if (reason.length > 2000) throw new Error("Reason must be at most 2000 characters");
+  if (Number.isNaN(date.getTime())) throw new Error("Reversal date is invalid");
 
   // Serialize concurrent reversals of the same target: lock BEFORE any reads.
   await input.tx.$queryRaw(Prisma.sql`SELECT id FROM "JournalEntry" WHERE id = ${entryId} FOR UPDATE`);
@@ -178,14 +185,20 @@ export async function reverseJournalEntry(input: ReverseJournalInput) {
   }
   if (target.reversedBy) throw new Error(`Entry ${target.entryNo} is already reversed by ${target.reversedBy.entryNo}`);
   if (target.reversesEntryId) throw new Error(`Entry ${target.entryNo} is itself a reversal and cannot be reversed`);
+  if (target.sourceType === "YEAR_END_CLOSE") {
+    throw new Error(`Entry ${target.entryNo} is a year-end close and cannot be reversed (D12)`);
+  }
 
-  if (date.getTime() < target.date.getTime()) {
-    throw new Error(`Reversal date ${date.toISOString().slice(0, 10)} is before the original entry date ${target.date.toISOString().slice(0, 10)}`);
+  // Date semantics: the app stores dates as UTC midnight, so compare CALENDAR
+  // dates only — a time component (e.g. "today" computed in Asia/Dubai) must not
+  // make a same-day reversal fail.
+  if (toUtcDateString(date) < toUtcDateString(target.date)) {
+    throw new Error(`Reversal date ${toUtcDateString(date)} is before the original entry date ${toUtcDateString(target.date)}`);
   }
   const fiscalYear = await input.tx.fiscalYear.findFirst({
     where: { starts: { lte: date }, ends: { gte: date } },
   });
-  if (!fiscalYear) throw new Error(`No fiscal year covers ${date.toISOString().slice(0, 10)}`);
+  if (!fiscalYear) throw new Error(`No fiscal year covers ${toUtcDateString(date)}`);
   if (fiscalYear.status !== "OPEN") throw new Error(`Fiscal year ${fiscalYear.name} is closed`);
 
   const reversal = await postJournalEntry({

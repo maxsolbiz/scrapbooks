@@ -94,7 +94,7 @@ export async function accountLedger(
 
 export interface PartyLedgerRow {
   date: string;
-  kind: "INVOICE" | "PAYMENT";
+  kind: "INVOICE" | "PAYMENT" | "REVERSAL";
   docNo: string;
   docId: string;
   narration: string | null;
@@ -129,6 +129,7 @@ export async function partyLedger(
           entryNo: true,
           narration: true,
           date: true,
+          sourceType: true,
           invoiceFor: { select: { id: true, invoiceNo: true } },
           paymentFor: { select: { id: true, paymentNo: true } },
         },
@@ -141,9 +142,12 @@ export async function partyLedger(
     running += (l.debit ?? 0n) - (l.credit ?? 0n);
     const invoice = l.entry.invoiceFor;
     const payment = l.entry.paymentFor;
+    // A reversal row is its own document (sourceType REVERSAL); without this it
+    // would have been mislabeled "PAYMENT" because invoiceFor/paymentFor are both null.
+    const kind = l.entry.sourceType === "REVERSAL" ? "REVERSAL" : invoice ? "INVOICE" : "PAYMENT";
     rows.push({
       date: l.entry.date.toISOString().slice(0, 10),
-      kind: invoice ? "INVOICE" : "PAYMENT",
+      kind,
       docNo: invoice?.invoiceNo ?? payment?.paymentNo ?? l.entry.entryNo,
       docId: invoice?.id ?? payment?.id ?? l.entryId,
       narration: l.entry.narration,

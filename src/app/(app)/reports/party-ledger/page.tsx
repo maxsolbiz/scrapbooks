@@ -93,7 +93,7 @@ await requireModule("reports");
                     <TableCell className="hidden text-xs sm:table-cell">{r.kind}</TableCell>
                     <TableCell>
                       <Link
-                        href={r.kind === "INVOICE" ? `/sales-invoices/${r.docId}` : `/payments/${r.docId}`}
+                        href={r.kind === "INVOICE" ? `/sales-invoices/${r.docId}` : r.kind === "REVERSAL" ? `/journals/${r.docId}` : `/payments/${r.docId}`}
                         className="hover:underline font-mono text-xs"
                       >
                         {r.docNo}

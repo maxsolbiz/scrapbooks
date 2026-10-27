@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { readdirSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 /** Pure check: a buffer starts with the UTF-8 BOM (EF BB BF). */
@@ -18,25 +19,23 @@ describe("hasBom (pure)", () => {
 });
 
 // A BOM at the start of a .sql file breaks psql -f with "syntax error at or near"
-// (P3018 precedent); a BOM in committed files is therefore forbidden.
+// (P3018 precedent); a BOM in ANY tracked text file is forbidden — the Write tool
+// has repeatedly added one on this machine, and unguarded cases slip into commits.
 const repoRoot = path.resolve(__dirname, "..", "..");
-function collectSql(dir: string, acc: string[]): string[] {
-  for (const e of readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) collectSql(p, acc);
-    else if (p.endsWith(".sql")) acc.push(p);
-  }
-  return acc;
-}
-const sqlFiles = [
-  ...collectSql(path.join(repoRoot, "prisma", "migrations"), []),
-  ...collectSql(path.join(repoRoot, "ops", "sql"), []),
-];
+const TEXT_EXT = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs", ".json", ".md", ".sql", ".prisma", ".css"]);
 
-describe("committed .sql files carry no BOM", () => {
-  it("every prisma/migrations and ops/sql .sql file starts with SQL, not a BOM", () => {
-    expect(sqlFiles.length).toBeGreaterThan(0);
-    const offenders = sqlFiles.filter((p) => hasBom(readFileSync(p)));
+function trackedTextFiles(): string[] {
+  const out = execFileSync("git", ["ls-files", "-z"], { cwd: repoRoot, encoding: "buffer" });
+  return (out.toString("utf8").split("\0").filter(Boolean) as string[])
+    .filter((f) => TEXT_EXT.has(path.extname(f).toLowerCase()))
+    .map((f) => path.join(repoRoot, f));
+}
+
+describe("every tracked text file carries no BOM", () => {
+  it("git ls-files text sources start with content, not a BOM", () => {
+    const files = trackedTextFiles();
+    expect(files.length).toBeGreaterThan(10);
+    const offenders = files.filter((p) => hasBom(readFileSync(p)));
     expect(offenders.map((p) => path.relative(repoRoot, p))).toEqual([]);
   });
 });

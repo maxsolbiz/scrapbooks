@@ -251,6 +251,23 @@ describe("reverseJournalEntry (P1.1 accounting core)", () => {
     ).rejects.toThrow(/before the original entry date/);
   });
 
+  it("negative: DAY-BEFORE boundary rejects (original 2026-06-01, reversal 2026-05-31)", async () => {
+    const { entry } = await seedSalesEntry(500n, { date: new Date("2026-06-01") });
+    await expect(
+      prisma.$transaction((t) =>
+        reverseJournalEntry({ entryId: entry.id, reason: "one day back", date: new Date("2026-05-31"), createdById: ctx.userId, tx: t as Tx }),
+      ),
+    ).rejects.toThrow(/before the original entry date/);
+  });
+
+  it("negative: unknown entry id rejects with the friendly message", async () => {
+    await expect(
+      prisma.$transaction((t) =>
+        reverseJournalEntry({ entryId: "nonexistent-id-000", reason: "x", date: new Date("2026-07-01"), createdById: ctx.userId, tx: t as Tx }),
+      ),
+    ).rejects.toThrow(/Journal entry not found/);
+  });
+
   it("negative: invalid Date rejects (NaN time)", async () => {
     const { entry } = await seedSalesEntry(500n);
     await expect(

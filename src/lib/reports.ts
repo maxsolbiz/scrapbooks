@@ -144,6 +144,8 @@ export async function partyLedger(
     const payment = l.entry.paymentFor;
     // A reversal row is its own document (sourceType REVERSAL); without this it
     // would have been mislabeled "PAYMENT" because invoiceFor/paymentFor are both null.
+    // KNOWN ISSUE (recorded in ROADMAP): entries that are neither an invoice nor a
+    // payment (manual journals, opening balances) still fall back to kind PAYMENT.
     const kind = l.entry.sourceType === "REVERSAL" ? "REVERSAL" : invoice ? "INVOICE" : "PAYMENT";
     rows.push({
       date: l.entry.date.toISOString().slice(0, 10),

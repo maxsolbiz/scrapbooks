@@ -24,16 +24,22 @@ describe("hasBom (pure)", () => {
 const repoRoot = path.resolve(__dirname, "..", "..");
 const TEXT_EXT = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs", ".json", ".md", ".sql", ".prisma", ".css"]);
 
-function trackedTextFiles(): string[] {
-  const out = execFileSync("git", ["ls-files", "-z"], { cwd: repoRoot, encoding: "buffer" });
+function candidateTextFiles(): string[] {
+  // --others: UNTRACKED working files are scanned too — a Write/Node-created file
+  // escapes the check only until git add, and that is exactly when it slips into a commit.
+  const out = execFileSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+    { cwd: repoRoot, encoding: "buffer" },
+  );
   return (out.toString("utf8").split("\0").filter(Boolean) as string[])
     .filter((f) => TEXT_EXT.has(path.extname(f).toLowerCase()))
     .map((f) => path.join(repoRoot, f));
 }
 
 describe("every tracked text file carries no BOM", () => {
-  it("git ls-files text sources start with content, not a BOM", () => {
-    const files = trackedTextFiles();
+  it("git ls-files (tracked + untracked) text sources start with content, not a BOM", () => {
+    const files = candidateTextFiles();
     expect(files.length).toBeGreaterThan(10);
     const offenders = files.filter((p) => hasBom(readFileSync(p)));
     expect(offenders.map((p) => path.relative(repoRoot, p))).toEqual([]);

@@ -5,7 +5,7 @@ import type { Tx } from "@/lib/tx";
 
 export const FILS_PER_AED = 100;
 
-/** Calender-date-only comparison key: the app stores dates as UTC midnight, so
+/** Calendar-date-only comparison key: the app stores dates as UTC midnight, so
  * "on/after" means the UTC YYYY-MM-DD string, never the raw timestamp. */
 function toUtcDateString(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -176,10 +176,11 @@ export async function reverseJournalEntry(input: ReverseJournalInput) {
   // Serialize concurrent reversals of the same target: lock BEFORE any reads.
   await input.tx.$queryRaw(Prisma.sql`SELECT id FROM "JournalEntry" WHERE id = ${entryId} FOR UPDATE`);
 
-  const target = await input.tx.journalEntry.findUniqueOrThrow({
+  const target = await input.tx.journalEntry.findUnique({
     where: { id: entryId },
     include: { lines: true, reversedBy: { select: { id: true, entryNo: true } } },
   });
+  if (!target) throw new Error("Journal entry not found");
   if (target.status !== "POSTED") {
     throw new Error(`Entry ${target.entryNo} is ${target.status} — only POSTED entries are reversed`);
   }

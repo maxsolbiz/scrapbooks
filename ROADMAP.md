@@ -48,7 +48,19 @@
 
 ---
 
+### Known issues (partyLedger labels)
+
+- partyLedger (`src/lib/reports.ts`) labels any entry that is neither an invoice nor a payment
+  (manual journals, opening balances) as `kind: PAYMENT`, and the party-ledger page links it to
+  `/payments/<journal-entry-id>` -> 404. REVERSAL rows were fixed in commit (2b) (kind REVERSAL,
+  link /journals/<id>); the generic fallback fix is still TODO. Consumers verified by grep in (3a):
+  only `src/app/(app)/reports/party-ledger/page.tsx` consumes `PartyLedgerRow.kind` (status-badge's
+  local `kind` variable is unrelated).
+
+---
+
 ## Working Standards
+
 1. Every schema-changing commit MUST include the regenerated `src/generated/prisma` client, because the VPS build runs `npm ci && npx next build` with no `prisma generate`.
 2. Minimal-footprint, additive changes. Prefer new nullable columns/new tables/new files over rewriting existing ones. No refactors outside the approved task.
 3. Fixes scoped to CONFIRMED bugs only (F-items marked CONFIRMED).
@@ -88,7 +100,7 @@
 
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
-| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | IN_PROGRESS | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, (2b) | 2026-10-27 (checkpoint) | Original stays POSTED; reversal linked by reversesEntryId; sourceType REVERSAL with REV prefix; reversal lines copy partyId+description; FK ON DELETE NO ACTION; commit (2) accounting core done — (2b) fixes in progress |
+| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | IN_PROGRESS | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, 30ca9c5, (3a) | 2026-10-27 (checkpoint) | Original stays POSTED; reversal linked by reversesEntryId; sourceType REVERSAL with REV prefix; reversal lines copy partyId+description; FK ON DELETE NO ACTION; commit (2b) accepted — commit (3) next |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
 | P1.3 | voidPayment handles allocations explicitly | F3 | PENDING | P0.1, P0.2 | | | Consistent with voidInvoice |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |

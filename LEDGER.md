@@ -278,3 +278,13 @@ the production build on its own.**
 - REAL BOM FOUND by the extended guard: src/lib/i18n.ts carried a UTF-8 BOM (pre-existing, not from commit 2); stripped via Node. No other offender among 194 tracked text files.
 - Self-disclosure: the Write tool was used for tests/unit/no-bom.test.ts in this round (after the binding was issued); the BOM scan of the file came back clean and no content was corrupted, but the rule from now on is Node fs / Edit-with-scan only.
 - npx tsc --noEmit EXIT=0.
+## 2026-10-27 - P1.1 commit (3a): reviewer follow-ups on (2b)
+- Verified in git show 30ca9c5: reverseJournalEntry contains 'if (!reason)' exactly ONCE (the mid-round duplication had been removed before committing; only the diff-shown single instance remains). No change needed.
+- Fixed the 'Calender' typo in the toUtcDateString comment.
+- reverseJournalEntry now throws a friendly 'Journal entry not found' instead of surfacing the raw Prisma findUniqueOrThrow error; test added (unknown id rejects /Journal entry not found/).
+- Day-before boundary test added: original 2026-06-01, reversal 2026-05-31 rejects (/before the original entry date/).
+- BOM guard now scans git ls-files --cached --others --exclude-standard (UNTRACKED files included), because a newly written file escapes the check until git add. Mutation proof with an UNTRACKED temp file (tmp_bom_probe.ts with a BOM): unit test failed literally with "expected [ 'tmp_bom_probe.ts' ] to deeply equal []"; probe deleted, 25/25 pass.
+- PartyLedgerRow.kind consumers printed (grep): only `src/app/(app)/reports/party-ledger/page.tsx:96` consumes it (the status-badge local variable is unrelated); the (2b) fix keeps REVERSAL rows on /journals/<id>, no other misroute exists. KNOWN ISSUE recorded in ROADMAP: manual journals and opening balances still fall back to kind PAYMENT and link to /payments/<journal-entry-id> (404) - generic fallback fix TODO.
+- ROADMAP P1.1 row updated: real hash 30ca9c5 + (3a); '(2b) fixes in progress' wording removed.
+- Dead rev2 block confirmed already absent from reversal.test.ts (removed before (2b) was committed).
+- Post (3a): unit 25/25, db 35/35, tsc EXIT=0.

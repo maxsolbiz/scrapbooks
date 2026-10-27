@@ -57,3 +57,33 @@ commit 0f0e613c13a934f3e53bf93a83b6e7fa24d5fcec
 - `npm run test:db`: `Test Files 2 passed (2)`, `Tests 7 passed (7)` â€” incl. `worker is connected to the validated TEST database` ground-truth test
 - Worker targeting proof (globalSetup output): `[migrate] Datasource "db": PostgreSQL database "scrapbooks_test", schema "public" at "localhost:54322"`, `[db-guard] guard OK: test DB "scrapbooks_test" on localhost:54322; main is localhost:54322/scrapbooks`
 - Exact prod build `npx next build *> build.log`: `EXIT=0` (Compiled successfully; TypeScript finished; 28/28 pages; test files present)
+
+### 2026-10-27 | P0.2 correction (non-buildable intermediate commits) | fe6e5cc
+Per reviewer finding #4: commits 8b2bd26, e432693 and cc1904d do NOT pass `npx next build` in
+isolation (TS2322/TS2769/TS2322 in prisma/coa.ts, tests/db/helpers.ts, tests/db/accounting.test.ts
+— fixed by fe6e5cc). fe6e5cc is the FIRST deployable commit; do not cut a release at any earlier
+commit. History NOT rewritten (per instruction, after the amend mishap earlier today).
+
+### 2026-10-27 | Reviewer follow-up commit (P0.2 findings #1-#3, #6) | test-negatives commit
+**What:** pure `assertWorkerUrl(envUrl, validatedUrl)` moved from tests/db/setup.ts inline code to
+tests/db-guard.ts (setup.ts now calls it); DB negative test tests/db/ground-truth.test.ts —
+tampered harness.guard clone (test.database different), expects truncateAll + assertCurrentDatabase
+to reject /GROUND TRUTH MISMATCH/ and verifies seeded user rows SURVIVE, restore in `finally`;
+void characterization now asserts `journalEntry.count() === 1` (a falsifiable assertion) instead
+of the never-failing entryNo-contains-"REVERSAL" check; unused `harness` import removed; pure
+`maskSecret(text, secret)` (split/join, regex-metacharacter-safe) replaces
+`new RegExp(guard.testUrl, "g")` in tests/global-setup.ts.
+**Verification (literal):**
+- MUTATION CHECK: with the ground-truth comparison disabled (`if (false && ...)`), the new test
+  FAILED: `× tampered harness context: truncateAll and assertCurrentDatabase reject /GROUND
+  TRUTH MISMATCH/ and seeded rows survive` — `stdout | tests/db/ground-truth.test.ts` shown, then
+  check restored and the suite passed again.
+- `npm test`: `Test Files 1 passed (1)`, `Tests 19 passed (19)` (14 prior + 3 assertWorkerUrl +
+  2 maskSecret)
+- `npx vitest run --project db --reporter=verbose`: `Test Files 3 passed (3)`, `Tests 8 passed
+  (8)` — all 8 test names listed (4 postJournalEntry, 1 assertBalanced, 1 void characterization,
+  1 ground-truth abort, 1 worker connection ground truth)
+- `npx next build *> build.log`: `EXIT=0`; log includes compilation, TypeScript finish, all
+  34 route lines (`ƒ`/`?` markers), 28/28 static pages — pasted in full before deletion.
+**Any TRUNCATE performed in this session was executed only via the guarded truncateAll helper;
+no ad-hoc docker exec TRUNCATE (the one reported earlier is corrected here).**

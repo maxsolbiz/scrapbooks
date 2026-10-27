@@ -13,6 +13,8 @@
 
 ## Findings (F1-F9 Verification)
 
+> F10 added 2026-10-27 (outside original scope, found during reviewer security review of the public repo/history).
+
 | ID | Claim | Verdict | Evidence |
 |---|---|---|---|
 | F1 | voidJournalEntry only flips status, no reversal, no FY check | CONFIRMED | accounting.ts:130-139 |
@@ -24,6 +26,7 @@
 | F7 | No credit/debit notes, no supplierRef unique, no DB constraints | CONFIRMED | schema.prisma; accounting.ts:48-71 |
 | F8 | src/generated/prisma committed; no real test runner; default README | CONFIRMED | repo structure; package.json; README.md |
 | F9 | No idempotency keys on financial endpoints (invoice/payment/journal create) | CONFIRMED | invoice-actions.ts:62-112; payments/actions.ts:29-63; journals/actions.ts:39-80 |
+| F10 | resetDemoDataAction deletes ALL payments, invoices, journals AND the AuditLog; gated only by SUPER_ADMIN role, no environment guard | CONFIRMED | settings/actions.ts:190-194; demo-data.ts:277-286 |
 
 ---
 
@@ -39,6 +42,7 @@
 | D6 | Cheque/PDC scope | | |
 | D7 | Allow negative stock or block | | |
 | D8 | P0.3: keep generated client committed, or add prisma generate to build? | PROPOSED (reviewer recommendation): keep generated client committed; P0.3 dropped. NOT yet user-confirmed | 2026-10-27 |
+| D9 | Keep demo/reset action in production (with env guard), or remove entirely? Reviewer recommends removal; AuditLog rows must NEVER be deleted either way | OPEN (user decision) | 2026-10-27 |
 
 ---
 
@@ -89,6 +93,7 @@
 | P1.6 | DB triggers: immutability + balance check | F7 | PENDING | P0.1, P0.2, D5 | | | Must not break reversal flow |
 | P1.7 | Duplicate vendor invoice guard (partial unique index) | F7 | PENDING | P0.1, P0.2 | | | Scan existing data first |
 | P1.8 | Idempotency keys on all financial create endpoints | F9 | PENDING | P0.2 | | | Invoice, payment, journal create actions |
+| P1.9 | Remove or environment-gate resetDemoData; never delete AuditLog | F10 | PENDING | P0.2, D9 | | | User decision D9 needed before build |
 
 ---
 

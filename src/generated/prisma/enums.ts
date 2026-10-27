@@ -72,7 +72,8 @@ export const EntrySource = {
   PAYMENT: 'PAYMENT',
   RECEIPT: 'RECEIPT',
   OPENING_BALANCE: 'OPENING_BALANCE',
-  YEAR_END_CLOSE: 'YEAR_END_CLOSE'
+  YEAR_END_CLOSE: 'YEAR_END_CLOSE',
+  REVERSAL: 'REVERSAL'
 } as const
 
 export type EntrySource = (typeof EntrySource)[keyof typeof EntrySource]

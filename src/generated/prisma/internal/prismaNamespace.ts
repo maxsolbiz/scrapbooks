@@ -1584,7 +1584,8 @@ export const JournalEntryScalarFieldEnum = {
   createdById: 'createdById',
   postedAt: 'postedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  reversesEntryId: 'reversesEntryId'
 } as const
 
 export type JournalEntryScalarFieldEnum = (typeof JournalEntryScalarFieldEnum)[keyof typeof JournalEntryScalarFieldEnum]

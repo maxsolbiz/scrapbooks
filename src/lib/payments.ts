@@ -1,5 +1,6 @@
 import type { Tx } from "@/lib/tx";
 import type { EntrySource, PaymentMethod, PaymentType } from "@/generated/prisma/enums";
+import { Prisma } from "@/generated/prisma/client";
 import { postJournalEntry, voidJournalEntry } from "@/lib/accounting";
 
 const CASH_CODE = "1110";
@@ -24,6 +25,20 @@ export interface CreatePaymentInput {
   allocations?: PaymentAllocationInput[];
   createdById: string;
   tx: Tx;
+}
+
+/**
+ * Row-lock the invoice rows a write touches, BEFORE any status/direction/outstanding
+ * reads, so concurrent writers serialize. Ids are deduped and sorted, and the SQL
+ * locks in `ORDER BY id` order (an IN-list does not guarantee Postgres lock order),
+ * which prevents AB/BA deadlocks between payments allocating overlapping sets.
+ * Parameterized via Prisma.join — never string-interpolated.
+ */
+export async function lockInvoices(tx: Tx, invoiceIds: readonly string[]): Promise<string[]> {
+  const ids = [...new Set(invoiceIds)].sort();
+  if (ids.length === 0) return ids;
+  await tx.$queryRaw(Prisma.sql`SELECT id FROM "Invoice" WHERE id IN (${Prisma.join(ids)}) ORDER BY id FOR UPDATE`);
+  return ids;
 }
 
 export async function outstandingForInvoice(tx: Tx, invoiceId: string) {
@@ -68,11 +83,16 @@ export async function createPayment(input: CreatePaymentInput) {
   }
   const accountOf = method === "CASH" ? cash : bank;
 
-  // validate allocations
+  // Lock FIRST (before status/direction/outstanding reads — F2), then validate
+  // allocations with duplicates AGGREGATED per invoice (F2b): two rows for the
+  // same invoice must be summed, not each checked independently.
+  await lockInvoices(tx, allocations.map((a) => a.invoiceId));
+  const perInvoice = new Map<string, bigint>();
   let allocatedTotal = 0n;
+  const expectedDirection = type === "RECEIPT" ? "SALES" : "PURCHASE";
   for (const alloc of allocations) {
     if (alloc.amountFils <= 0n) throw new Error("Allocation amount must be positive");
-    const expectedDirection = type === "RECEIPT" ? "SALES" : "PURCHASE";
+    perInvoice.set(alloc.invoiceId, (perInvoice.get(alloc.invoiceId) ?? 0n) + alloc.amountFils);
     const invoice = await tx.invoice.findUnique({
       where: { id: alloc.invoiceId },
       include: { party: { select: { id: true } } },
@@ -90,11 +110,14 @@ export async function createPayment(input: CreatePaymentInput) {
     if (invoice.party.id !== partyId) {
       throw new Error("Allocated invoice belongs to a different party");
     }
-    const outstanding = await outstandingForInvoice(tx, alloc.invoiceId);
-    if (outstanding !== null && alloc.amountFils > outstanding) {
+    allocatedTotal += alloc.amountFils;
+  }
+  // F2b: per-invoice totals against outstanding (sum of duplicate rows)
+  for (const [invoiceId, sum] of perInvoice) {
+    const outstanding = await outstandingForInvoice(tx, invoiceId);
+    if (outstanding !== null && sum > outstanding) {
       throw new Error("Allocation exceeds the invoice outstanding");
     }
-    allocatedTotal += alloc.amountFils;
   }
   if (allocatedTotal > amountFils) {
     throw new Error("Allocations exceed the payment amount");

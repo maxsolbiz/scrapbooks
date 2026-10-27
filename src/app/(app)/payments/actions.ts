@@ -6,7 +6,8 @@ import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
-import { createPayment, voidPayment } from "@/lib/payments";
+import { createPayment, voidPaymentWithReversal } from "@/lib/payments";
+import { todayDubai } from "@/lib/dates";
 import type { PaymentMethod, PaymentType } from "@/generated/prisma/enums";
 
 export type ActionResult<T = undefined> =
@@ -62,11 +63,31 @@ export async function createPaymentAction(
   }
 }
 
-export async function voidPaymentAction(paymentId: string): Promise<ActionResult> {
+const voidReasonSchema = z
+  .string()
+  .trim()
+  .min(1, "A reason is required to void a payment")
+  .max(2000, "Reason must be at most 2000 characters");
+
+export async function voidPaymentAction(paymentId: string, reason: string): Promise<ActionResult> {
   const user = await requireModule("payments", "write");
+  const parsed = voidReasonSchema.safeParse(reason);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid reason" };
+  }
   try {
-    await prisma.$transaction(async (tx) => voidPayment(tx, paymentId));
-    await logAudit(user, "PAYMENT_VOID", "Payment", paymentId, "Voided payment");
+    const reversal = await prisma.$transaction(async (tx) =>
+      voidPaymentWithReversal({ paymentId, reason: parsed.data, date: todayDubai(), createdById: user.id, tx }),
+    );
+    await logAudit(
+      user,
+      "PAYMENT_VOID",
+      "Payment",
+      paymentId,
+      `Voided payment ${
+        reversal ? `with reversal entry ${reversal.entryNo}` : "(no journal entry)"
+      } - reason: ${parsed.data}`,
+    );
     revalidatePath("/payments");
     revalidatePath("/dashboard");
     return { ok: true };

@@ -7,7 +7,19 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { voidPaymentAction } from "../actions";
 
-export function VoidPaymentButton({ paymentId, label }: { paymentId: string; label: string }) {
+export function VoidPaymentButton({
+  paymentId,
+  label,
+  confirmText,
+  reasonLabel,
+  reasonPlaceholder,
+}: {
+  paymentId: string;
+  label: string;
+  confirmText: string;
+  reasonLabel: string;
+  reasonPlaceholder: string;
+}) {
   const router = useRouter();
 
   return (
@@ -18,10 +30,11 @@ export function VoidPaymentButton({ paymentId, label }: { paymentId: string; lab
         </Button>
       }
       title={label}
-      description={"This will void the payment voucher and its journal entry. This action is recorded and can be audited."}
+      description={confirmText}
       confirmLabel={label}
-      onConfirm={async () => {
-        const res = await voidPaymentAction(paymentId);
+      reason={{ label: reasonLabel, placeholder: reasonPlaceholder }}
+      onConfirm={async (reason) => {
+        const res = await voidPaymentAction(paymentId, reason);
         if (!res.ok) {
           toast.error(res.error);
           return;

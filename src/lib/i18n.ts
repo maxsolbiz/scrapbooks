@@ -197,7 +197,10 @@ const en = {
     new: "New invoice",
     posted: "Invoice posted",
     voidInvoice: "Void invoice",
-    voidConfirm: "Void this invoice? Its journal entry will be voided too.",
+    voidConfirm:
+      "Void this invoice? A mirrored reversal entry is posted; the original entry stays POSTED for the audit trail.",
+    voidReason: "Reason (required)",
+    voidReasonPlaceholder: "Why is this invoice being voided?",
     qty: "Qty",
     rate: "Rate (AED)",
     item: "Item",
@@ -237,6 +240,10 @@ const en = {
     overOutstanding: "Allocation exceeds the invoice outstanding",
     posted: "Payment posted",
     voidPayment: "Void payment",
+    voidConfirm:
+      "Void this payment? Its journal entry is reversed with a mirrored entry and the invoice outstanding is restored. The original entry stays POSTED for the audit trail.",
+    voidReason: "Reason (required)",
+    voidReasonPlaceholder: "Why is this payment being voided?",
   },
   error: {
     generic: "Something went wrong",
@@ -434,7 +441,9 @@ const ar: typeof en = {
     new: "فاتورة جديدة",
     posted: "تم ترحيل الفاتورة",
     voidInvoice: "إلغاء الفاتورة",
-    voidConfirm: "إلغاء هذه الفاتورة؟ سيُلغى قيدها المحاسبي أيضاً.",
+    voidConfirm: "إلغاء هذه الفاتورة؟ يُرحَّل قيدُ عكسٍ مطابق، ويبقى القيد الأصلي مُرحَّلاً لأغراض التدقيق.",
+    voidReason: "السبب (مطلوب)",
+    voidReasonPlaceholder: "لماذا تُلغى هذه الفاتورة؟",
     qty: "الكمية",
     rate: "السعر",
     item: "الصنف",
@@ -474,6 +483,9 @@ const ar: typeof en = {
     overOutstanding: "التخصيص يتجاوز المتبقي للفاتورة",
     posted: "تم ترحيل السند",
     voidPayment: "إلغاء السند",
+    voidConfirm: "إلغاء هذا السند؟ يُعكس قيده بقيدٍ مطابق ويُعاد المتبقي إلى الفواتير، ويبقى القيد الأصلي مُرحَّلاً لأغراض التدقيق.",
+    voidReason: "السبب (مطلوب)",
+    voidReasonPlaceholder: "لماذا يُلغى هذا السند؟",
   },
   error: {
     generic: "حدث خطأ ما",

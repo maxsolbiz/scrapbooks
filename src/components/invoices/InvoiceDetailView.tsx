@@ -35,7 +35,7 @@ export async function InvoiceDetailView({
     include: {
       party: true,
       lines: { orderBy: { id: "asc" } },
-      allocations: { include: { payment: { select: { paymentNo: true, id: true } } } },
+      allocations: { include: { payment: { select: { paymentNo: true, id: true, status: true } } } },
     },
   });
   if (!invoice) notFound();
@@ -88,7 +88,14 @@ export async function InvoiceDetailView({
             </Button>
           )}
           {canVoid && (
-            <VoidInvoiceButton invoiceId={invoice.id} direction={direction} label={t.invoices.voidInvoice} confirmText={t.invoices.voidConfirm} />
+            <VoidInvoiceButton
+              invoiceId={invoice.id}
+              direction={direction}
+              label={t.invoices.voidInvoice}
+              confirmText={t.invoices.voidConfirm}
+              reasonLabel={t.invoices.voidReason}
+              reasonPlaceholder={t.invoices.voidReasonPlaceholder}
+            />
           )}
         </div>
       </div>
@@ -148,9 +155,10 @@ export async function InvoiceDetailView({
         </div>
       </div>
 
-      {invoice.allocations.length > 0 && (
+      {invoice.allocations.filter((a) => a.payment.status !== "VOID").length > 0 && (
         <div className="text-sm text-muted-foreground">
           {invoice.allocations
+            .filter((a) => a.payment.status !== "VOID")
             .map((a) => `${a.payment.paymentNo} — ${formatAED(a.amountFils)} AED`)
             .join(" · ")}
         </div>

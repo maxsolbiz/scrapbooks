@@ -13,12 +13,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export function ConfirmDialog({
   trigger,
   title,
   description,
   confirmLabel,
+  cancelLabel = "Cancel",
+  reason,
   onConfirm,
   destructive = true,
 }: {
@@ -26,21 +30,28 @@ export function ConfirmDialog({
   title: string;
   description: string;
   confirmLabel: string;
-  onConfirm: () => Promise<{ ok: boolean; error?: string } | void>;
+  cancelLabel?: string;
+  reason?: { label: string; placeholder: string };
+  onConfirm: (reason: string) => Promise<{ ok: boolean; error?: string } | void>;
   destructive?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [reasonText, setReasonText] = useState("");
 
   async function handleConfirm() {
+    if (reason && !reasonText.trim()) return;
     setPending(true);
     try {
-      await onConfirm();
+      await onConfirm(reasonText);
+      setReasonText("");
       setOpen(false);
     } finally {
       setPending(false);
     }
   }
+
+  const reasonValid = !reason || reasonText.trim().length > 0;
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -50,14 +61,27 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {reason && (
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm-dialog-reason">{reason.label}</Label>
+            <Textarea
+              id="confirm-dialog-reason"
+              value={reasonText}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReasonText(e.target.value)}
+              placeholder={reason.placeholder}
+              maxLength={2000}
+              className="min-h-16"
+            />
+          </div>
+        )}
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
               e.preventDefault();
               handleConfirm();
             }}
-            disabled={pending}
+            disabled={pending || !reasonValid}
             className={destructive ? "bg-destructive text-white hover:bg-destructive/90" : ""}
           >
             {pending ? "…" : confirmLabel}

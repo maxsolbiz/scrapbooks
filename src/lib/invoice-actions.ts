@@ -6,7 +6,8 @@ import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
-import { createInvoice, voidInvoice } from "@/lib/invoices";
+import { createInvoice, voidInvoiceWithReversal } from "@/lib/invoices";
+import { todayDubai } from "@/lib/dates";
 import type { InvoiceDirection, UnitType } from "@/generated/prisma/client";
 
 function directionModule(direction: InvoiceDirection) {
@@ -111,14 +112,35 @@ export async function createInvoiceAction(
   }
 }
 
+const voidReasonSchema = z
+  .string()
+  .trim()
+  .min(1, "A reason is required to void an invoice")
+  .max(2000, "Reason must be at most 2000 characters");
+
 export async function voidInvoiceAction(
   invoiceId: string,
   direction: InvoiceDirection,
+  reason: string,
 ): Promise<ActionResult> {
   const user = await requireModule(directionModule(direction), "write");
+  const parsed = voidReasonSchema.safeParse(reason);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid reason" };
+  }
   try {
-    await prisma.$transaction(async (tx) => voidInvoice(tx, invoiceId));
-    await logAudit(user, "INVOICE_VOID", "Invoice", invoiceId, `Voided ${direction} invoice`);
+    const reversal = await prisma.$transaction(async (tx) =>
+      voidInvoiceWithReversal({ invoiceId, reason: parsed.data, date: todayDubai(), createdById: user.id, tx }),
+    );
+    await logAudit(
+      user,
+      "INVOICE_VOID",
+      "Invoice",
+      invoiceId,
+      `Voided ${direction} invoice ${
+        reversal ? `with reversal entry ${reversal.entryNo}` : "(no journal entry)"
+      } - reason: ${parsed.data}`,
+    );
     revalidatePath(direction === "SALES" ? "/sales-invoices" : "/purchase-invoices");
     revalidatePath("/dashboard");
     return { ok: true };

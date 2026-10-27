@@ -13,11 +13,15 @@ export function VoidInvoiceButton({
   direction,
   label,
   confirmText,
+  reasonLabel,
+  reasonPlaceholder,
 }: {
   invoiceId: string;
   direction: InvoiceDirection;
   label: string;
-  confirmText?: string;
+  confirmText: string;
+  reasonLabel: string;
+  reasonPlaceholder: string;
 }) {
   const router = useRouter();
 
@@ -29,10 +33,11 @@ export function VoidInvoiceButton({
         </Button>
       }
       title={label}
-      description={confirmText ?? "Void this invoice? Its journal entry will be voided too."}
+      description={confirmText}
       confirmLabel={label}
-      onConfirm={async () => {
-        const res = await voidInvoiceAction(invoiceId, direction);
+      reason={{ label: reasonLabel, placeholder: reasonPlaceholder }}
+      onConfirm={async (reason) => {
+        const res = await voidInvoiceAction(invoiceId, direction, reason);
         if (!res.ok) {
           toast.error(res.error);
           return;

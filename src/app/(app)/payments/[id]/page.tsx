@@ -64,7 +64,13 @@ export default async function PaymentDetailPage({
             </Button>
           )}
           {(await moduleCan(user, "payments", "write")) && payment.status === "POSTED" && (
-            <VoidPaymentButton paymentId={payment.id} label={t.payments.voidPayment} />
+            <VoidPaymentButton
+              paymentId={payment.id}
+              label={t.payments.voidPayment}
+              confirmText={t.payments.voidConfirm}
+              reasonLabel={t.payments.voidReason}
+              reasonPlaceholder={t.payments.voidReasonPlaceholder}
+            />
           )}
         </div>
       </div>

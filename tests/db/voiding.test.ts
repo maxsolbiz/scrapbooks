@@ -47,6 +47,23 @@ async function seedReceiptAgainst(invoiceId: string, amountFils: bigint, opts?: 
   );
 }
 
+/** Polls pg_stat_activity until some OTHER connection blocks on an Invoice row lock query.
+ * Returns the blocked query text, or "" if nothing blocked within the deadline. */
+function firstBlockedInvoiceLock(deadlineMs: number): Promise<string> {
+  return (async () => {
+    const deadline = Date.now() + deadlineMs;
+    for (;;) {
+      const rows = (await prisma.$queryRawUnsafe<{ query: string }[]>(
+        `SELECT query FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND pid <> pg_backend_pid() ORDER BY query_start LIMIT 1`,
+      )) as unknown as { query: string }[];
+      const q = rows[0]?.query ?? "";
+      if (/Invoice[\s\S]*FOR UPDATE/.test(q)) return q;
+      if (Date.now() > deadline) return "";
+      await new Promise((r) => setTimeout(r, 25));
+    }
+  })();
+}
+
 const June2026 = new Date("2026-07-01");
 
 describe("voidInvoiceWithReversal (P1.1 commit 3)", () => {
@@ -97,7 +114,7 @@ describe("voidInvoiceWithReversal (P1.1 commit 3)", () => {
       prisma.$transaction((t) =>
         voidInvoiceWithReversal({ invoiceId: invoice.id, reason: "x", date: June2026, createdById: ctx.userId, tx: t as Tx }),
       ),
-    ).rejects.toThrow(/.payment allocations/);
+    ).rejects.toThrow(/payment allocations — remove them first/);
     // void the payment first, then the invoice must go through
     await prisma.$transaction((t) =>
       voidPaymentWithReversal({ paymentId: payment.id, reason: "wrong bank", date: June2026, createdById: ctx.userId, tx: t as Tx }),
@@ -232,21 +249,6 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
       { timeout: 30_000 },
     ); // unawaited; one of the two transactions must block on the invoice row lock
 
-    /** Resolves with the blocked query text, or "" if nothing blocked within the deadline. */
-    const firstBlockedInvoiceLock = (deadlineMs: number) =>
-      (async () => {
-        const deadline = Date.now() + deadlineMs;
-        for (;;) {
-          const rows = (await prisma.$queryRawUnsafe<{ query: string }[]>(
-            `SELECT query FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND pid <> pg_backend_pid() ORDER BY query_start LIMIT 1`,
-          )) as unknown as { query: string }[];
-          const q = rows[0]?.query ?? "";
-          if (/Invoice[\s\S]*FOR UPDATE/.test(q)) return q;
-          if (Date.now() > deadline) return "";
-          await new Promise((r) => setTimeout(r, 25));
-        }
-      })();
-
     let results: [PromiseSettledResult<unknown>, PromiseSettledResult<unknown>] | { timeout: true };
     const allSettledP = Promise.allSettled([tx1p, tx2p]) as Promise<[PromiseSettledResult<unknown>, PromiseSettledResult<unknown>]>;
     try {
@@ -288,5 +290,235 @@ describe("voidPaymentWithReversal (P1.1 commit 3)", () => {
     // mutual exclusion is checked above via statuses; the books must balance either way:
     const tb = await trialBalance(new Date("2026-12-31"));
     expect(tb.reduce((a, r) => a + r.debitTotal, 0n)).toBe(tb.reduce((a, r) => a + r.creditTotal, 0n));
+  });
+
+  it("cross-period: a payment whose entry sits in a CLOSED FY (legacy-shaped rows) is voided into the OPEN FY; outstanding restored", async () => {
+    const fy2025 = await prisma.fiscalYear.create({
+      data: { name: "FY2025", starts: new Date("2025-01-01"), ends: new Date("2025-12-31"), status: "CLOSED" },
+    });
+    // Historical rows shaped like production data from before the void feature:
+    // customer invoice dated 2025-05-01 + receipt dated 2025-06-15, entry POSTED in CLOSED FY2025.
+    const invoice = await prisma.invoice.create({
+      data: {
+        invoiceNo: "INV-FY2025-0007",
+        direction: "SALES",
+        date: new Date("2025-05-01"),
+        partyId: ctx.customerId,
+        status: "POSTED",
+        subtotalFils: 2000n,
+        vatFils: 0n,
+        totalFils: 2000n,
+        createdById: ctx.userId,
+      },
+    });
+    const legacyEntry = await prisma.journalEntry.create({
+      data: {
+        entryNo: "INV-FY2025-0007",
+        date: new Date("2025-05-01"),
+        narration: "Sales invoice INV-FY2025-0007",
+        status: "POSTED",
+        sourceType: "SALES_INVOICE",
+        sourceId: invoice.id,
+        fiscalYearId: fy2025.id,
+        createdById: ctx.userId,
+        lines: {
+          create: [
+            { accountId: ctx.accountByCode.get("1130")!, debit: 2000n, partyId: ctx.customerId },
+            { accountId: ctx.accountByCode.get("4100")!, credit: 2000n },
+          ],
+        },
+      },
+    });
+    await prisma.invoice.update({ where: { id: invoice.id }, data: { journalEntryId: legacyEntry.id } });
+    const rcpEntry = await prisma.journalEntry.create({
+      data: {
+        entryNo: "RCP-FY2025-0003",
+        date: new Date("2025-06-15"),
+        narration: "Receipt RCP-FY2025-0003",
+        status: "POSTED",
+        sourceType: "RECEIPT",
+        fiscalYearId: fy2025.id,
+        createdById: ctx.userId,
+        lines: {
+          create: [
+            { accountId: ctx.accountByCode.get("1120")!, debit: 2000n },
+            { accountId: ctx.accountByCode.get("1130")!, credit: 2000n, partyId: ctx.customerId },
+          ],
+        },
+      },
+    });
+    const payment = await prisma.payment.create({
+      data: {
+        paymentNo: "RCP-FY2025-0003",
+        type: "RECEIPT",
+        method: "BANK",
+        date: new Date("2025-06-15"),
+        partyId: ctx.customerId,
+        status: "POSTED",
+        amountFils: 2000n,
+        journalEntryId: rcpEntry.id,
+        createdById: ctx.userId,
+        allocations: { create: [{ invoiceId: invoice.id, amountFils: 2000n }] },
+      },
+    });
+    expect(await outstandingForInvoice(prisma as never, invoice.id)).toBe(0n);
+
+    const reversal = await prisma.$transaction((t) =>
+      voidPaymentWithReversal({ paymentId: payment.id, reason: "wrong bank account", date: new Date("2026-07-01"), createdById: ctx.userId, tx: t as Tx }),
+    );
+    expect(reversal).not.toBeNull();
+    expect(reversal!.entryNo.startsWith("REV-FY2026")).toBe(true); // reversal landed in the OPEN FY
+    expect(await outstandingForInvoice(prisma as never, invoice.id)).toBe(2000n); // restored
+    expect((await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })).status).toBe("VOID");
+    // the receipt in the CLOSED FY nets 0 in the trial balance (original + reversal both POSTED)
+    const tb = await trialBalance(new Date("2026-12-31"));
+    expect(tb.find((r) => r.code === "1120")!.debitTotal).toBe(tb.find((r) => r.code === "1120")!.creditTotal);
+  });
+
+  it("partial-allocation: a receipt allocated across TWO invoices restores BOTH outstandings (lock ids sorted)", async () => {
+    const invA = await seedPostedSalesInvoice(1000n, { date: new Date("2026-06-01") });
+    const invB = await seedPostedSalesInvoice(2000n, { date: new Date("2026-06-02") });
+    // full createPayment with allocations in ALREADY-UNSORTED order (B then A): locks serialize sorted anyway
+    const payment = await prisma.$transaction((t) =>
+      createPayment({
+        tx: t as Tx,
+        type: "RECEIPT",
+        method: "BANK",
+        date: new Date("2026-06-20"),
+        partyId: ctx.customerId,
+        amountFils: 700n,
+        createdById: ctx.userId,
+        allocations: [
+          { invoiceId: invB.id, amountFils: 500n },
+          { invoiceId: invA.id, amountFils: 200n },
+        ],
+      }),
+    );
+    expect(await outstandingForInvoice(prisma as never, invA.id)).toBe(800n);
+    expect(await outstandingForInvoice(prisma as never, invB.id)).toBe(1500n);
+
+    await prisma.$transaction((t) =>
+      voidPaymentWithReversal({ paymentId: payment.id, reason: "duplicate receipt", date: new Date("2026-07-01"), createdById: ctx.userId, tx: t as Tx }),
+    );
+    expect(await outstandingForInvoice(prisma as never, invA.id)).toBe(1000n); // restored
+    expect(await outstandingForInvoice(prisma as never, invB.id)).toBe(2000n); // restored
+    expect((await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })).status).toBe("VOID");
+    expect(await prisma.paymentAllocation.count()).toBe(2); // D11: kept
+  });
+
+  it("DETERMINISTIC payment-wins: createPayment holds the invoice lock behind a gate; the void blocks and rejects with the allocation error; invoice stays POSTED", { timeout: 20_000 }, async () => {
+    const invoice = await seedPostedSalesInvoice(1000n);
+
+    let signal!: (v: string) => void;
+    const tx1Ready = new Promise<string>((r) => (signal = r));
+    let release!: (v: string) => void;
+    const gate = new Promise<string>((r) => (release = r));
+
+    const tx1p = prisma.$transaction(
+      async (t) => {
+        const payment = await createPayment({
+          tx: t as Tx,
+          type: "RECEIPT",
+          method: "BANK",
+          date: new Date("2026-06-25"),
+          partyId: ctx.customerId,
+          amountFils: 700n,
+          createdById: ctx.userId,
+          allocations: [{ invoiceId: invoice.id, amountFils: 700n }],
+        });
+        signal("reached"); // tx1 holds the invoice row lock from lockInvoices onward
+        await gate;
+        return payment;
+      },
+      { timeout: 30_000 },
+    );
+
+    // TRANSACTION NOT STARTED YET: tx2 is only created after tx1Ready —
+    // tx1Ready resolves exactly after createPayment (=> its lockInvoices) has run
+    // while tx1 holds the invoice lock, so the competitor cannot win the lock race.
+    try {
+      await tx1Ready;
+      const tx2p = prisma.$transaction(
+        (t) => voidInvoiceWithReversal({ invoiceId: invoice.id, reason: "undo sales", date: June2026, createdById: ctx.userId, tx: t as Tx }),
+        { timeout: 30_000 },
+      ); // unawaited; must BLOCK on the Invoice lock held by tx1's lockInvoices
+      const blocked = await firstBlockedInvoiceLock(4_000);
+      expect(blocked.length).toBeGreaterThan(0); // the void was blocked on the invoice lock
+      release("go");
+      const results = await Promise.allSettled([tx1p, tx2p]);
+      expect(results[0].status).toBe("fulfilled"); // payment wins deterministically
+      expect(results[1].status).toBe("rejected");
+      expect(String((results[1] as PromiseRejectedResult).reason)).toMatch(/payment allocations — remove them first/);
+      expect((await prisma.invoice.findUniqueOrThrow({ where: { id: invoice.id } })).status).toBe("POSTED");
+      expect(await prisma.payment.count({ where: { type: "RECEIPT", status: "POSTED" } })).toBe(1);
+      const tb = await trialBalance(new Date("2026-12-31"));
+      expect(tb.reduce((a, r) => a + r.debitTotal, 0n)).toBe(tb.reduce((a, r) => a + r.creditTotal, 0n));
+      // finally drains tx1 only (tx2 is scoped here but awaited inside the try) — drain both:
+      await Promise.allSettled([tx1p, tx2p]);
+      return;
+    } finally {
+      release("go");
+      await Promise.allSettled([tx1p]); // tx2 already settled inside the try
+    }
+  });
+
+  it("DETERMINISTIC void-wins: the void transaction holds the invoice lock behind a gate; createPayment blocks and rejects; invoice ends VOID with one reversal", { timeout: 20_000 }, async () => {
+    const invoice = await seedPostedSalesInvoice(1000n);
+
+    let signal!: (v: string) => void;
+    const tx1Ready = new Promise<string>((r) => (signal = r));
+    let release!: (v: string) => void;
+    const gate = new Promise<string>((r) => (release = r));
+
+    const tx1p = prisma.$transaction(
+      async (t) => {
+        const reversal = await voidInvoiceWithReversal({
+          invoiceId: invoice.id,
+          reason: "void first",
+          date: June2026,
+          createdById: ctx.userId,
+          tx: t as Tx,
+        });
+        expect(reversal).not.toBeNull();
+        signal("reached"); // the void holds the invoice lock
+        await gate;
+        return reversal;
+      },
+      { timeout: 30_000 },
+    );
+
+    // TRANSACTION NOT STARTED YET: tx2 is only created after tx1Ready —
+    // tx1Ready resolves exactly after the void (=> its lockInvoices) has run while
+    // tx1 holds the invoice lock, so createPayment cannot win the lock race.
+    try {
+      await tx1Ready;
+      const tx2p = prisma.$transaction(
+        (t) =>
+          createPayment({
+            tx: t as Tx,
+            type: "RECEIPT",
+            method: "BANK",
+            date: new Date("2026-06-25"),
+            partyId: ctx.customerId,
+            amountFils: 500n,
+            createdById: ctx.userId,
+            allocations: [{ invoiceId: invoice.id, amountFils: 500n }],
+          }),
+        { timeout: 30_000 },
+      ); // unawaited; must BLOCK on the Invoice lock held by the void tx
+      const blocked = await firstBlockedInvoiceLock(4_000);
+      expect(blocked.length).toBeGreaterThan(0); // createPayment was blocked on the invoice lock
+      release("go");
+      const results = await Promise.allSettled([tx1p, tx2p]);
+      expect(results[0].status).toBe("fulfilled"); // void wins deterministically
+      expect(results[1].status).toBe("rejected");
+      expect(String((results[1] as PromiseRejectedResult).reason)).toMatch(/not posted/);
+      expect((await prisma.invoice.findUniqueOrThrow({ where: { id: invoice.id } })).status).toBe("VOID");
+      expect(await prisma.journalEntry.findMany({ where: { sourceType: "REVERSAL" } })).toHaveLength(1);
+      expect(await prisma.payment.count({ where: { status: "POSTED" } })).toBe(0);
+    } finally {
+      release("go");
+      await Promise.allSettled([tx1p]); // tx2 already settled inside the try
+    }
   });
 });

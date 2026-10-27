@@ -110,6 +110,19 @@
 | P1.8 | Idempotency keys on all financial create endpoints | F9 | PENDING | P0.2 | | | Invoice, payment, journal create actions |
 | P1.9 | Remove or environment-gate resetDemoData; never delete AuditLog | F10 | PENDING | P0.2, D9 | | | User decision D9 needed before build |
 
+### Phase 1 switching table (legacy callers -> new call sites)
+
+Legacy `voidInvoice` / `voidPayment` / `voidJournalEntry` stay temporarily; every UI action
+switches to the reversal-based functions in commit (4) (P1.1 actions/permissions layer):
+
+| Legacy function | Called by | Switch to | Target commit |
+|---|---|---|---|
+| `voidInvoice` | `src/lib/invoice-actions.ts:114-120` (`voidInvoiceAction` — permission check, audit, revalidate) | `voidInvoiceWithReversal` (+ AuditLog + reversal reason surfaced to the dialog) | (4) |
+| `voidPayment` | `src/app/(app)/payments/actions.ts:65-68` (`voidPaymentAction`) | `voidPaymentWithReversal` (+ AuditLog + reason) | (4) |
+| `voidJournalEntry` (legacy) | only called internally by legacy `voidInvoice` / `voidPayment` / tests (`accounting.test.ts` legacy characterization) | none — characterized as legacy, replaced by `reverseJournalEntry` | (5) |
+
+After commit (4) no UI path reaches the legacy voids; removal is commit (5).
+
 ---
 
 ## PHASE 2 — Receivables & Partial Payments

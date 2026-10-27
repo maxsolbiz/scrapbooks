@@ -190,7 +190,8 @@ export async function createInvoice(input: CreateInvoiceInput) {
         { accountId: ap.id, credit: total, partyId },
       ],
     });
-    await tx.invoice.update({
+    // keep the returned object in sync with the journal linkage (callers read journalEntryId)
+    return tx.invoice.update({
       where: { id: invoice.id },
       data: { journalEntryId: je.id },
     });

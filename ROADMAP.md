@@ -38,7 +38,7 @@
 | D5 | Postgres trigger enforcement acceptable? | | |
 | D6 | Cheque/PDC scope | | |
 | D7 | Allow negative stock or block | | |
-| D8 | P0.3: keep generated client committed, or add prisma generate to build? | Keep generated client committed; P0.3 status DROPPED | 2026-10-26 |
+| D8 | P0.3: keep generated client committed, or add prisma generate to build? | PROPOSED (reviewer recommendation): keep generated client committed; P0.3 dropped. NOT yet user-confirmed | 2026-10-27 |
 
 ---
 
@@ -62,7 +62,7 @@
 
 ## Deploy
 - Command: `git pull && npm ci && npx next build && pm2 restart scrapbooks` (run on VPS via `ssh scrapbooks-vps "cd /root/scrapbooks && git pull && npm ci && npx next build && pm2 restart scrapbooks"`)
-- Source: user-confirmed
+- Source: executed on VPS on 2026-10-27 via ssh following the user's "deploy" instruction; not yet recorded from a repo deploy script (none exist in-repo)
 
 ---
 
@@ -70,9 +70,9 @@
 
 | ID | Task | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|
-| P0.1 | Create ROADMAP.md and LEDGER.md | APPROVED | — | | | |
+| P0.1 | Create ROADMAP.md and LEDGER.md | DONE | — | 09b2752, 0f0e613 | 2026-10-27 (build evidence in LEDGER.md) | Acknowledged by reviewer |
 | P0.2 | Vitest + test DB harness (npm test, test:db) | PENDING | — | | | Keep existing scripts/test-*.ts untouched |
-| P0.3 | Decision: keep generated client committed (DROPPED) | DROPPED | D8 | | | build is "next build" with no generate step |
+| P0.3 | Decision: keep generated client committed (DROPPED) | PENDING | D8 | | | build is "next build" with no generate step; D8 awaiting user confirmation |
 | P0.4 | Replace default README with real docs | PENDING | — | | | |
 
 ---

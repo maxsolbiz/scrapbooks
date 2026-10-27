@@ -2,17 +2,26 @@
  * Pure database-safety guard. No env mutation here — the caller (tests/global-setup.ts)
  * applies the returned test URL to process.env.DATABASE_URL.
  *
+ * IMPORTANT: the pg driver (@prisma/adapter-pg → pg-connection-string) lets URL
+ * QUERY PARAMETERS override the effective host/port (e.g. ?host=prod.example.com
+ * or ?port=6543). The guard therefore:
+ *  - test URL: allows ONLY the params `schema` and `sslmode`; ANY other param name
+ *    (host, hostaddr, port, dbname, database, user, service, …) is a hard rejection.
+ *  - main URL: parsed leniently, but its EFFECTIVE host/port apply any `host`/`port`
+ *    query override, so the "same target" comparison cannot be fooled.
+ *
  * Rules (all mandatory):
  *  - DATABASE_URL_TEST is set.
- *  - Parsed host, port AND database name differ from the main DATABASE_URL
- *    (main URL read-only via `.env`, since vitest does not load it).
+ *  - Parsed effective host, port AND database name differ from the main DATABASE_URL
+ *    (main URL read-only via the .env FILE in globalSetup, never process.env — vitest
+ *    does not load .env, and .env.test must not masquerade as the main URL).
  *  - Test database name ends in "_test".
  *  - Test host is in {localhost, 127.0.0.1, ::1}.
- *  - Test database name is not the dev fallback name "scrapbooks" (src/lib/db.ts).
  */
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
-const DEV_FALLBACK_DB = "scrapbooks";
+/** Query params allowed on the TEST url — anything else could change the effective target. */
+const TEST_URL_ALLOWED_PARAMS = new Set(["schema", "sslmode"]);
 
 export interface ParsedUrl {
   host: string;
@@ -20,24 +29,41 @@ export interface ParsedUrl {
   database: string;
 }
 
-export function parseDbUrl(raw: string | undefined): ParsedUrl {
+function parseUrl(raw: string | undefined, label: string, strictParams: boolean): ParsedUrl {
   if (!raw || !raw.trim()) {
-    throw new Error("Database URL is empty or unset");
+    throw new Error(`${label} is empty or unset`);
   }
   let url: URL;
   try {
     url = new URL(raw);
   } catch {
-    throw new Error(`Database URL is not a valid URL: value withheld for safety`);
+    throw new Error(`${label} is not a valid URL: value withheld for safety`);
   }
   if (url.protocol !== "postgresql:" && url.protocol !== "postgres:") {
-    throw new Error(`Database URL must be a postgres:// URL, got protocol "${url.protocol}"`);
+    throw new Error(`${label} must be a postgres:// URL, got protocol "${url.protocol}"`);
   }
-  const host = url.hostname;
-  const port = url.port || "5432";
-  const database = decodeURIComponent(url.pathname.replace(/^\//, "")) || url.searchParams.get("database") || "";
-  if (!database) throw new Error("Database URL has no database name");
+
+  if (strictParams) {
+    for (const key of url.searchParams.keys()) {
+      if (!TEST_URL_ALLOWED_PARAMS.has(key)) {
+        throw new Error(
+          `${label} contains a forbidden query parameter "${key}" (query params can override host/port in pg-connection-string; only ${[...TEST_URL_ALLOWED_PARAMS].join(" and ")} are allowed)`,
+        );
+      }
+    }
+  }
+
+  // Effective host/port: query params `host` / `port` override the authority
+  // (pg-connection-string behavior). Always computed so comparisons cannot be fooled.
+  const host = url.searchParams.get("host") || url.hostname;
+  const port = url.searchParams.get("port") || url.port || "5432";
+  const database = decodeURIComponent(url.pathname.replace(/^\//, ""));
+  if (!database) throw new Error(`${label} has no database name`);
   return { host, port, database };
+}
+
+export function parseDbUrl(raw: string | undefined): ParsedUrl {
+  return parseUrl(raw, "Database URL", false);
 }
 
 export interface GuardResult {
@@ -55,22 +81,19 @@ export function assertTestDatabase(
     throw new Error("DATABASE_URL_TEST is not set — refusing to run database tests");
   }
   if (!mainUrlRaw || !mainUrlRaw.trim()) {
-    throw new Error("DATABASE_URL is not set (load .env read-only before calling the guard) — refusing to run database tests");
+    throw new Error("DATABASE_URL is not set (read the .env FILE in globalSetup via dotenv.parse, not process.env) — refusing to run database tests");
   }
 
-  const test = parseDbUrl(testUrlRaw);
-  const main = parseDbUrl(mainUrlRaw);
+  const test = parseUrl(testUrlRaw, "DATABASE_URL_TEST", true);
+  const main = parseUrl(mainUrlRaw, "DATABASE_URL", false);
 
   if (!LOCAL_HOSTS.has(test.host)) {
     throw new Error(
-      `DATABASE_URL_TEST host "${test.host}" is not a local host (allowed: localhost, 127.0.0.1, ::1)`,
+      `DATABASE_URL_TEST effective host "${test.host}" is not a local host (allowed: localhost, 127.0.0.1, ::1)`,
     );
   }
   if (!test.database.endsWith("_test")) {
     throw new Error(`DATABASE_URL_TEST database name "${test.database}" must end in "_test"`);
-  }
-  if (test.database === DEV_FALLBACK_DB) {
-    throw new Error(`DATABASE_URL_TEST database name "${test.database}" is the dev fallback name and is not acceptable`);
   }
   if (
     test.host === main.host &&

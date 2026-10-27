@@ -2,8 +2,10 @@ import { defineConfig } from "vitest/config";
 import path from "node:path";
 import dotenv from "dotenv";
 
-// Load .env.test (explicit path); fall back to .env (read-only comparison uses the
-// same loader inside tests/db-guard.ts). dotenv does NOT override already-set vars.
+// Load .env.test (explicit path) so DATABASE_URL_TEST exists for the db project.
+// The MAIN DATABASE_URL is deliberately NOT read from process.env (a DATABASE_URL
+// present in .env.test could masquerade as the main URL) — globalSetup reads the
+// .env FILE via dotenv.parse(fs.readFileSync(".env")) and passes it to the guard.
 dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
 export default defineConfig({

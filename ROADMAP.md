@@ -42,6 +42,8 @@
 | D7 | Allow negative stock or block | | |
 | D8 | P0.3: keep generated client committed, or add prisma generate to build? | PROPOSED (reviewer recommendation): keep generated client committed; P0.3 dropped. NOT yet user-confirmed | 2026-10-27 |
 | D9 | Keep demo/reset action in production (with env guard), or remove entirely? Reviewer recommends removal; AuditLog rows must NEVER be deleted either way | OPEN (user decision) | 2026-10-27 |
+| D10 | Reversal date policy: default today; must be >= original entry date; must fall in an OPEN fiscal year | reviewer default, NOT user-confirmed | 2026-10-27 |
+| D11 | Voided payments KEEP their PaymentAllocation rows (excluded everywhere by payment status filter, never hard-deleted) | reviewer default, NOT user-confirmed | 2026-10-27 |
 
 ---
 
@@ -66,6 +68,7 @@
 ## Deploy
 - Command: `git pull && npm ci && npx next build && pm2 restart scrapbooks` (run on VPS via `ssh scrapbooks-vps "cd /root/scrapbooks && git pull && npm ci && npx next build && pm2 restart scrapbooks"`)
 - Source: executed on VPS on 2026-10-27 via ssh following the user's "deploy" instruction; not yet recorded from a repo deploy script (none exist in-repo)
+- Schema-changing commits: apply the ops/sql SQL on production BEFORE deploying (the committed client selects the new columns — deploying code first breaks the app)
 
 ---
 
@@ -84,7 +87,7 @@
 
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
-| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | PENDING | P0.1, P0.2 | | | Original stays POSTED; reversal linked by reversesEntryId; Invoice/Payment status=VOID |
+| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | IN_PROGRESS | F1 | P0.1, P0.2 | daa4563, a98412f, — (1b) | 2026-10-27 (checkpoint) | Original stays POSTED; reversal linked by reversesEntryId; sourceType REVERSAL with REV prefix; reversal lines copy partyId+description; FK ON DELETE NO ACTION; commit (1b) done — awaiting acknowledgment |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
 | P1.3 | voidPayment handles allocations explicitly | F3 | PENDING | P0.1, P0.2 | | | Consistent with voidInvoice |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |

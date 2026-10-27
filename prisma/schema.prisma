@@ -150,7 +150,7 @@ model JournalEntry {
   /// Authoritative link for reversal-by-default (P1.1): on a REVERSAL entry this is
   /// the reversed entry; on an original entry, null. Unique prevents two reversals.
   reversesEntryId String? @unique
-  reversesEntry   JournalEntry? @relation("JournalEntryReversal", fields: [reversesEntryId], references: [id], onDelete: SetNull)
+  reversesEntry   JournalEntry? @relation("JournalEntryReversal", fields: [reversesEntryId], references: [id], onDelete: NoAction)
   /// Backside convenience relation: the reversal mirroring THIS entry (if any).
   reversedBy      JournalEntry? @relation("JournalEntryReversal")
 

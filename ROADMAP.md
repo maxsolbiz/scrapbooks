@@ -25,6 +25,7 @@
 | F8 | src/generated/prisma committed; no real test runner; default README | CONFIRMED | repo structure; package.json; README.md |
 | F9 | No idempotency keys on financial endpoints (invoice/payment/journal create) | CONFIRMED | invoice-actions.ts:62-112; payments/actions.ts:29-63; journals/actions.ts:39-80 |
 | F10 | resetDemoDataAction deletes ALL payments, invoices, journals AND the AuditLog; gated only by SUPER_ADMIN role, no environment guard | CONFIRMED | settings/actions.ts:190-194; demo-data.ts:277-286 |
+| F11 | Manual journal void bypasses reversal: `voidJournal` flips entry status directly to VOID with no reversal entry, no FY check, and no mandatory reason — outside the P1.1 reversal-by-default rule | CONFIRMED | src/app/(app)/journals/actions.ts:82-89 |
 | F2b | Allocation validation checks each row against outstandingForInvoice independently and the action schema has no duplicate guard, so two rows for one invoice (700+700 vs outstanding 1000) both pass | CONFIRMED | payments.ts:76-104; payments/actions.ts:24-25 |
 
 ---
@@ -102,7 +103,7 @@
 |---|---|---|---|---|---|---|---|
 | P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | DONE | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, 30ca9c5, ff04de4, e1f2b3f, 8bc24e3, c974ed0, 6054e32, 8e63b5b | 2026-10-28 | Complete: reversal-based void for invoices (voidInvoiceWithReversal) and payments (voidPaymentWithReversal), lock-first order invoices→payment→entries→Serial, D11 active-allocation guard (allocations kept, excluded by payment status everywhere), D12 YEAR_END_CLOSE reject (reviewer default), DRAFT-only legacy voidJournalEntry (accounting.ts:143), void actions in invoice-actions.ts/payments actions with mandatory reason + AuditLog, legacy voidInvoice/voidPayment removed (commit 5), UI dialogs EN+AR |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
-| P1.3 | voidPayment handles allocations explicitly | F3 | DONE | P0.1, P0.2 | 6054e32, 8e63b5b | 2026-10-28 | Allocations KEPT (D11); voidPaymentWithReversal reverses the payment entry and flips status; PaymentAllocation rows excluded everywhere by payment status filter |
+| P1.3 | voidPayment handles allocations explicitly | F3 | DONE | P0.1, P0.2 | e1f2b3f, 6054e32, 8e63b5b | 2026-10-28 | Allocations KEPT (D11); voidPaymentWithReversal reverses the payment entry and flips status; PaymentAllocation rows excluded everywhere by payment status filter |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |
 | P1.5 | trialBalance via groupBy; accountLedger uses normalBalance | F6 | PENDING | P0.1, P0.2 | | | Follow accountBalances pattern |
 | P1.6 | DB triggers: immutability + balance check | F7 | PENDING | P0.1, P0.2, D5 | | | Must not break reversal flow |

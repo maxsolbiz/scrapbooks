@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { roundFils } from "@/lib/invoices";
-import { multiplyFilsByDecimal } from "@/lib/money";
+import { roundHalfUpDiv, RATE_SCALE, vatForLine, multiplyFilsByDecimal } from "@/lib/money";
 
 describe("roundFils (current behavior: truncates)", () => {
   // At 5% (rate 0.05), vat = value * 5 / 100 fils:
@@ -52,3 +52,78 @@ describe("multiplyFilsByDecimal (current behavior: truncates)", () => {
     expect(() => multiplyFilsByDecimal(100n, "-1")).toThrow(/Invalid quantity/);
   });
 });
+
+describe("RATE_SCALE", () => {
+  it("is 10^8", () => {
+    expect(RATE_SCALE).toBe(100_000_000n);
+  });
+});
+
+describe("roundHalfUpDiv", () => {
+  it("halves round up (away from zero)", () => {
+    expect(roundHalfUpDiv(1n, 2n)).toBe(1n); // 0.5 -> 1
+    expect(roundHalfUpDiv(3n, 2n)).toBe(2n); // 1.5 -> 2
+  });
+
+  it("below half rounds down", () => {
+    expect(roundHalfUpDiv(1n, 3n)).toBe(0n); // 0.333 -> 0
+    expect(roundHalfUpDiv(2n, 5n)).toBe(0n); // 0.4 -> 0
+  });
+
+  it("exact division is unchanged", () => {
+    expect(roundHalfUpDiv(4n, 2n)).toBe(2n);
+    expect(roundHalfUpDiv(100n, 10n)).toBe(10n);
+  });
+
+  it("negatives round half away from zero", () => {
+    expect(roundHalfUpDiv(-1n, 2n)).toBe(-1n); // -0.5 -> -1
+    expect(roundHalfUpDiv(-3n, 2n)).toBe(-2n); // -1.5 -> -2
+    expect(roundHalfUpDiv(-1n, 3n)).toBe(0n); // -0.333 -> 0
+  });
+
+  it("zero yields zero", () => {
+    expect(roundHalfUpDiv(0n, 5n)).toBe(0n);
+  });
+
+  it("handles large bigint values (no floats)", () => {
+    const large = 9007199254740993n; // > 2^53
+    expect(roundHalfUpDiv(large * 2n, 2n)).toBe(large);
+    expect(roundHalfUpDiv(large * 2n + 1n, 2n)).toBe(large + 1n); // .5 -> up
+  });
+
+  it("denominator zero throws", () => {
+    expect(() => roundHalfUpDiv(1n, 0n)).toThrow(/Denominator must be positive/);
+  });
+
+  it("negative denominator throws", () => {
+    expect(() => roundHalfUpDiv(1n, -1n)).toThrow(/Denominator must be positive/);
+  });
+});
+
+describe("vatForLine", () => {
+  it("rounds half up at 5% VAT", () => {
+    expect(vatForLine(10n, 0.05)).toBe(1n); // 0.5 -> 1 (truncation would give 0)
+    expect(vatForLine(8n, 0.05)).toBe(0n); // 0.4 -> 0
+    expect(vatForLine(30n, 0.05)).toBe(2n); // 1.5 -> 2
+    expect(vatForLine(99n, 0.05)).toBe(5n); // 4.95 -> 5
+  });
+
+  it("exact division is unchanged", () => {
+    expect(vatForLine(20n, 0.05)).toBe(1n); // 1.0
+    expect(vatForLine(100n, 0.05)).toBe(5n); // 5.0
+  });
+
+  it("negative values round half away from zero", () => {
+    expect(vatForLine(-10n, 0.05)).toBe(-1n);
+    expect(vatForLine(-8n, 0.05)).toBe(0n);
+  });
+
+  it("zero value yields zero vat", () => {
+    expect(vatForLine(0n, 0.05)).toBe(0n);
+  });
+
+  it("uses integer math only (no float drift)", () => {
+    expect(vatForLine(123456789n, 0.075)).toBe(9259259n); // 9,259,259.175 -> 9,259,259
+  });
+});
+

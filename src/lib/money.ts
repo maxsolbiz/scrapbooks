@@ -35,6 +35,27 @@ export function decimalStringToFils(value: string): bigint {
   return negative ? -fils : fils;
 }
 
+/** Scale for vat-rate integer math: 1 rate unit = 10^8. A rate of 0.05 scales to 5,000,000. */
+export const RATE_SCALE = 100_000_000n;
+
+/** Divide two positive-ish bigints rounding half away from zero (school rounding).
+ * Throws when the denominator is zero or negative. No floats anywhere. */
+export function roundHalfUpDiv(numerator: bigint, denominator: bigint): bigint {
+  if (denominator <= 0n) throw new Error("Denominator must be positive");
+  const absNum = numerator < 0n ? -numerator : numerator;
+  const quotient = absNum / denominator;
+  const remainder = absNum % denominator;
+  const roundedUp = remainder * 2n >= denominator;
+  const magnitude = roundedUp ? quotient + 1n : quotient;
+  return numerator < 0n ? -magnitude : magnitude;
+}
+
+/** VAT for one line, half-up on fils: valueFils * vatRate / RATE_SCALE, no floats. */
+export function vatForLine(valueFils: bigint, vatRate: number): bigint {
+  const scaled = BigInt(Math.round(vatRate * Number(RATE_SCALE)));
+  return roundHalfUpDiv(valueFils * scaled, RATE_SCALE);
+}
+
 /** Format fils as AED with thousands separators and exactly 2 decimals. */
 export function formatAED(fils: bigint, withCurrency = false): string {
   const formatted = filsToDecimalString(fils);

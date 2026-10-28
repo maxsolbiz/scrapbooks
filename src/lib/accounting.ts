@@ -236,6 +236,51 @@ export async function reverseJournalEntry(input: ReverseJournalInput) {
   return reversal;
 }
 
+export interface VoidManualJournalInput {
+  entryId: string;
+  /** mandatory; appended to the reversal narration inside the tx */
+  reason: string;
+  /** caller-resolved reversal date (default today in Asia/Dubai at the ACTION layer) */
+  date: Date;
+  createdById: string;
+  tx: Tx;
+}
+
+/**
+ * Void a manual journal entry by reversal (P1.1b, F11). The original entry
+ * STAYS POSTED; a mirrored POSTED reversal is linked via reversesEntryId.
+ * Only sourceType === "MANUAL" entries can be voided from the journals screen;
+ * every other source type must be voided through its own source document.
+ * Lock order: journal entry row first (same row reverseJournalEntry locks next,
+ * inside the same transaction — no self-deadlock).
+ */
+export async function voidManualJournal(input: VoidManualJournalInput) {
+  const { entryId, date, createdById } = input;
+  const reason = input.reason?.trim() ?? "";
+  if (!reason) throw new Error("A non-blank reason is required");
+  if (reason.length > 2000) throw new Error("Reason must be at most 2000 characters");
+  if (Number.isNaN(date.getTime())) throw new Error("Reversal date is invalid");
+
+  // Serialize concurrent voids of the same target: lock BEFORE any reads.
+  await input.tx.$queryRaw(Prisma.sql`SELECT id FROM "JournalEntry" WHERE id = ${entryId} FOR UPDATE`);
+
+  const target = await input.tx.journalEntry.findUnique({ where: { id: entryId } });
+  if (!target) throw new Error("Journal entry not found");
+  if (target.sourceType !== "MANUAL") {
+    throw new Error(`Entry ${target.entryNo} is a ${target.sourceType} entry — void the source document instead`);
+  }
+  if (target.status === "VOID") throw new Error(`Entry ${target.entryNo} is already void`);
+  if (target.status === "DRAFT") {
+    // DRAFT has no journal entry: voiding without a reversal is correct here.
+    await voidJournalEntry(entryId, input.tx);
+    return null;
+  }
+  if (target.status !== "POSTED") {
+    throw new Error(`Entry ${target.entryNo} is ${target.status} — only POSTED entries can be voided`);
+  }
+  return reverseJournalEntry({ entryId: target.id, reason, date, createdById, tx: input.tx });
+}
+
 export interface AccountBalance {
   accountId: string;
   debit: bigint;

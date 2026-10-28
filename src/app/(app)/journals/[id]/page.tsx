@@ -36,9 +36,17 @@ export default async function JournalDetailPage({
         },
         orderBy: { debit: "desc" },
       },
+      reversedBy: { select: { id: true, entryNo: true } },
     },
   });
   if (!entry) notFound();
+
+  const original = entry.reversesEntryId
+    ? await prisma.journalEntry.findUnique({
+        where: { id: entry.reversesEntryId },
+        select: { entryNo: true },
+      })
+    : null;
 
   const totalDebit = entry.lines.reduce((acc, l) => acc + l.debit, 0n);
   const totalCredit = entry.lines.reduce((acc, l) => acc + l.credit, 0n);
@@ -56,15 +64,35 @@ export default async function JournalDetailPage({
               {entry.status}
             </Badge>
             <span className="text-xs">{entry.sourceType}</span>
+            {entry.reversedBy && (
+              <span className="text-xs">
+                Reversed by{" "}
+                <Link href={`/journals/${entry.reversedBy.id}`} className="hover:underline">
+                  {entry.reversedBy.entryNo}
+                </Link>
+              </span>
+            )}
+            {original && (
+              <span className="text-xs">Reversal of {original.entryNo}</span>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link href="/journals">{t.common.back}</Link>
           </Button>
-          {(await moduleCan(user, "journals", "write")) && entry.status === "POSTED" && (
-            <VoidJournalButton entryId={entry.id} label={t.journals.voidEntry} confirmText={t.journals.voidConfirm} />
-          )}
+          {(await moduleCan(user, "journals", "write")) &&
+            entry.sourceType === "MANUAL" &&
+            entry.status === "POSTED" && (
+              <VoidJournalButton
+                entryId={entry.id}
+                label={t.journals.voidEntry}
+                confirmText={t.journals.voidConfirm}
+                cancelLabel={t.common.cancel}
+                reasonLabel={t.journals.voidReason}
+                reasonPlaceholder={t.journals.voidReasonPlaceholder}
+              />
+            )}
         </div>
       </div>
 

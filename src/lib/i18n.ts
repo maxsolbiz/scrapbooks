@@ -175,7 +175,10 @@ const en = {
     entryNo: "Entry No.",
     source: "Source",
     voidEntry: "Void this entry",
-    voidConfirm: "Void this entry? The line data stays for the audit trail.",
+    voidConfirm:
+      "Void this entry? A mirrored reversal entry is posted; the original entry stays POSTED for the audit trail.",
+    voidReason: "Reason (required)",
+    voidReasonPlaceholder: "Why is this entry being voided?",
   },
   parties: {
     new: "New party",
@@ -419,7 +422,9 @@ const ar: typeof en = {
     entryNo: "رقم القيد",
     source: "المصدر",
     voidEntry: "إلغاء هذا القيد",
-    voidConfirm: "الإلغاء؟ تُحفظ الأسطر لأغراض التدقيق.",
+    voidConfirm: "إلغاء هذا القيد؟ يُرحَّل قيدُ عكسٍ مطابق، ويبقى القيد الأصلي مُرحَّلاً لأغراض التدقيق.",
+    voidReason: "السبب (مطلوب)",
+    voidReasonPlaceholder: "لماذا يُلغى هذا القيد؟",
   },
   parties: {
     new: "طرف جديد",

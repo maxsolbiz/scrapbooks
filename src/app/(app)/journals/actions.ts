@@ -5,7 +5,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
-import { postJournalEntry, assertBalanced } from "@/lib/accounting";
+import { postJournalEntry, assertBalanced, voidManualJournal } from "@/lib/accounting";
+import { todayDubai } from "@/lib/dates";
 import type { EntrySource } from "@/generated/prisma/enums";
 
 export type ActionResult<T = undefined> =
@@ -79,14 +80,35 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
   }
 }
 
-export async function voidJournal(entryId: string): Promise<ActionResult> {
+const voidReasonSchema = z
+  .string()
+  .trim()
+  .min(1, "A reason is required to void a journal entry")
+  .max(2000, "Reason must be at most 2000 characters");
+
+export async function voidJournal(entryId: string, reason: string): Promise<ActionResult> {
   const user = await requireModule("journals", "write");
+  const parsed = voidReasonSchema.safeParse(reason);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid reason" };
+  }
   try {
-    await prisma.journalEntry.update({
-      where: { id: entryId },
-      data: { status: "VOID" },
-    });
-    await logAudit(user, "JOURNAL_VOID", "JournalEntry", entryId, "Voided journal entry");
+    const reversal = await prisma.$transaction(async (tx) =>
+      voidManualJournal({ entryId, reason: parsed.data, date: todayDubai(), createdById: user.id, tx }),
+    );
+    try {
+      await logAudit(
+        user,
+        "JOURNAL_VOID",
+        "JournalEntry",
+        entryId,
+        `Voided journal entry ${
+          reversal ? `with reversal entry ${reversal.entryNo}` : "(draft, no reversal)"
+        } - reason: ${parsed.data}`,
+      );
+    } catch (auditErr) {
+      console.error("JOURNAL_VOID audit failed:", auditErr);
+    }
     revalidatePath("/journals");
     revalidatePath(`/journals/${entryId}`);
     revalidatePath("/dashboard");

@@ -121,7 +121,6 @@ describe("multiplyFilsLenient (client compat)", () => {
     [1000n, "0"],
     [1000n, "0.000"],
     [1000000000n, "1000"],
-    [333n, "0.333"],
     // Boundary: more than 3 decimals — client rejects (0n)
     [1000n, "1.2345"],
     [1000n, "1.0005"],
@@ -137,8 +136,9 @@ describe("multiplyFilsLenient (client compat)", () => {
     [1000n, "0.5"],
     [1000n, "1."],
     [1000n, "1e3"],
+    [1000n, ".5"],
+    [1000n, " 2 "],
     [1000n, "00.5"],
-    [1000n, "1.0005"],
     // Large values
     [1000n, "1000000000000000000000000000000000000000"],
     [1234567890123456789012345678901234567890n, "1"],
@@ -151,10 +151,26 @@ describe("multiplyFilsLenient (client compat)", () => {
   it("never throws for any string input", () => {
     const inputs: string[] = [
       "", " ", "abc", "1,5", "1.2345", "1.", "1e3", "-1", ".5", "00.5",
-      "1.0005", "1000000000000000000000000000000000000000",
+      "1.0005", " 2 ", "1000000000000000000000000000000000000000",
     ];
     for (const qty of inputs) {
       expect(() => multiplyFilsLenient(1000n, qty)).not.toThrow();
     }
   });
+
+  it("generated grid: lenient equals legacy and never throws", () => {
+    const rates = [0n, 1n, 333n, 1000n, 123456789n];
+    const ints = ["0", "1", "00", "7", "99999"];
+    const fracs = ["", ".5", ".05", ".005", ".0005", ".1234", ".9999"];
+    const pads = ["", " ", "  "];
+    const qtys: string[] = ["-1", "abc", "", "1e3", "1,5", ".5", "1."];
+    for (const i of ints) for (const f of fracs) for (const l of pads) for (const r of pads) qtys.push(l + i + f + r);
+    for (const rate of rates) {
+      for (const q of qtys) {
+        expect(() => multiplyFilsLenient(rate, q)).not.toThrow();
+        expect(String(multiplyFilsLenient(rate, q))).toBe(String(legacyClientMultiply(rate, q)));
+      }
+    }
+  });
+
 });

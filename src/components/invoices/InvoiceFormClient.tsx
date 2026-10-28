@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInvoiceAction } from "@/lib/invoice-actions";
-import { formatAED, filsToDecimalString, vatOf, vatForLine } from "@/lib/money";
+import { formatAED, filsToDecimalString, multiplyFilsLenient, vatOf, vatForLine } from "@/lib/money";
 import type { Dictionary } from "@/lib/i18n";
 
 export interface PartyOption {
@@ -67,14 +67,6 @@ function toFils(value: string): bigint {
   return BigInt(whole || "0") * 100n + BigInt((part + "0").slice(0, 2));
 }
 
-function multiply(rateFils: bigint, qty: string): bigint {
-  const q = qty.trim();
-  if (!q || !/^\d+(\.\d{1,3})?$/.test(q)) return 0n;
-  const [whole, part = ""] = q.split(".");
-  const thousandths = BigInt(whole) * 1000n + BigInt((part + "000").slice(0, 3));
-  return (rateFils * thousandths) / 1000n;
-}
-
 interface InvoiceFormClientProps {
   direction: InvoiceDirection;
   parties: PartyOption[];
@@ -120,7 +112,7 @@ export function InvoiceFormClient({
     let subtotal = 0n;
     let vat = 0n;
     for (const l of lines) {
-      const value = multiply(toFils(l.rate), l.qty);
+      const value = multiplyFilsLenient(toFils(l.rate), l.qty);
       const lineVat = vatOf(value, l.vatRate);
       subtotal += value;
       vat += lineVat;
@@ -238,7 +230,7 @@ export function InvoiceFormClient({
           {/* Mobile layout - shown on screens < 640px */}
           <div className="block sm:hidden">
             {lines.map((l, idx) => {
-              const value = multiply(toFils(l.rate), l.qty);
+              const value = multiplyFilsLenient(toFils(l.rate), l.qty);
               const lineTotal = value + vatOf(value, l.vatRate);
               return (
                 <Card key={l.id} className="p-3">
@@ -347,7 +339,7 @@ export function InvoiceFormClient({
                 </thead>
                 <tbody>
                   {lines.map((l) => {
-                    const value = multiply(toFils(l.rate), l.qty);
+const value = multiplyFilsLenient(toFils(l.rate), l.qty);
                     const lineTotal = value + vatOf(value, l.vatRate);
                     return (
                       <tr key={l.id} className="border-b last:border-b-0 align-top">

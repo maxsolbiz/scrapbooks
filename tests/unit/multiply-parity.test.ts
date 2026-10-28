@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { multiplyFilsByDecimal } from "@/lib/money";
+import { multiplyFilsByDecimal, multiplyFilsLenient } from "@/lib/money";
 
 /**
  * Oracle: verbatim copy of the client-side `multiply` function that currently
@@ -106,5 +106,55 @@ describe("multiplyFilsByDecimal (server source of truth)", () => {
     expect(multiplyFilsByDecimal(100n, 1.5)).toBe(150n);
     expect(multiplyFilsByDecimal(100n, 0)).toBe(0n);
     expect(() => multiplyFilsByDecimal(100n, 1e21)).toThrow("Invalid quantity: 1e+21");
+  });
+});
+
+describe("multiplyFilsLenient (client compat)", () => {
+  // Differential test: multiplyFilsLenient must match legacy client multiply for ALL inputs.
+  // The legacy function is kept verbatim as legacyClientMultiply above.
+  it.each([
+    // Happy path — identical
+    [1000n, "1"],
+    [1000n, "1.5"],
+    [1000n, "2.005"],
+    [333n, "0.333"],
+    [1000n, "0"],
+    [1000n, "0.000"],
+    [1000000000n, "1000"],
+    [333n, "0.333"],
+    // Boundary: more than 3 decimals — client rejects (0n)
+    [1000n, "1.2345"],
+    [1000n, "1.0005"],
+    // Negative — client returns 0n (regex rejects)
+    [1000n, "-1"],
+    // Empty / whitespace — client returns 0n
+    [1000n, ""],
+    [1000n, "  "],
+    // Non-numeric — client returns 0n (regex fails)
+    [1000n, "abc"],
+    [1000n, "1,5"],
+    // Edge cases
+    [1000n, "0.5"],
+    [1000n, "1."],
+    [1000n, "1e3"],
+    [1000n, "00.5"],
+    [1000n, "1.0005"],
+    // Large values
+    [1000n, "1000000000000000000000000000000000000000"],
+    [1234567890123456789012345678901234567890n, "1"],
+  ])("rate %s x qty '%s'", (rateFils: bigint, qty: string) => {
+    const legacy = legacyClientMultiply(rateFils, qty);
+    const lenient = multiplyFilsLenient(rateFils, qty);
+    expect(String(legacy)).toBe(String(lenient));
+  });
+
+  it("never throws for any string input", () => {
+    const inputs: string[] = [
+      "", " ", "abc", "1,5", "1.2345", "1.", "1e3", "-1", ".5", "00.5",
+      "1.0005", "1000000000000000000000000000000000000000",
+    ];
+    for (const qty of inputs) {
+      expect(() => multiplyFilsLenient(1000n, qty)).not.toThrow();
+    }
   });
 });

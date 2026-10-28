@@ -82,6 +82,16 @@ export function multiplyFilsByDecimal(rateFils: bigint, qty: string | number): b
   return (rateFils * qtyThousandths) / 1000n;
 }
 
+/** Multiply rate (fils) by qty (decimal string) without floats.
+ * Lenient version: invalid or empty qty returns 0n instead of throwing.
+ * Delegates to multiplyFilsByDecimal for all valid input.
+ */
+export function multiplyFilsLenient(rateFils: bigint, qty: string): bigint {
+  const q = qty.trim();
+  if (!q || !/^\d+(\.\d{1,3})?$/.test(q)) return 0n;
+  return multiplyFilsByDecimal(rateFils, q);
+}
+
 /** Local fmt helper for inline use: bigint -> formatted string with commas. */
 export function fmt(fils: bigint): string {
   return formatAED(fils);

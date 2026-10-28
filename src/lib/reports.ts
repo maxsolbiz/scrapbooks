@@ -12,32 +12,36 @@ export interface TrialBalanceRow {
 }
 
 export async function trialBalance(asOf: Date): Promise<TrialBalanceRow[]> {
-  const accounts = await prisma.account.findMany({ orderBy: { code: "asc" } });
-  const lines = await prisma.journalLine.findMany({
+  const grouped = await prisma.journalLine.groupBy({
+    by: ["accountId"],
+    _sum: { debit: true, credit: true },
     where: { entry: { status: "POSTED", date: { lte: asOf } } },
-    select: { accountId: true, debit: true, credit: true },
   });
-  const map = new Map<string, { debit: bigint; credit: bigint }>();
-  for (const l of lines) {
-    const row = map.get(l.accountId) ?? { debit: 0n, credit: 0n };
-    row.debit += l.debit ?? 0n;
-    row.credit += l.credit ?? 0n;
-    map.set(l.accountId, row);
-  }
-  return accounts
-    .map((acc) => {
-      const agg = map.get(acc.id) ?? { debit: 0n, credit: 0n };
-      return {
+  const accountIds = grouped.map((g) => g.accountId);
+  const accounts = await prisma.account.findMany({
+    where: { id: { in: accountIds } },
+    orderBy: { code: "asc" },
+  });
+  const groupedMap = new Map(grouped.map((g) => [g.accountId, g]));
+  const result: TrialBalanceRow[] = [];
+  for (const acc of accounts) {
+    const g = groupedMap.get(acc.id);
+    if (!g) continue;
+    const debit = g._sum.debit ?? 0n;
+    const credit = g._sum.credit ?? 0n;
+    if (debit !== 0n || credit !== 0n) {
+      result.push({
         id: acc.id,
         code: acc.code,
         nameEn: acc.nameEn,
         nameAr: acc.nameAr,
         type: acc.type,
-        debitTotal: agg.debit,
-        creditTotal: agg.credit,
-      };
-    })
-    .filter((r) => r.debitTotal !== 0n || r.creditTotal !== 0n);
+        debitTotal: debit,
+        creditTotal: credit,
+      });
+    }
+  }
+  return result;
 }
 
 export interface AccountLedgerRow {

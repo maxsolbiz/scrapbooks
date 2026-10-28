@@ -251,6 +251,16 @@ const en = {
   error: {
     generic: "Something went wrong",
   },
+  partyLedgerKind: {
+    invoice: "Sales Invoice",
+    purchaseInvoice: "Purchase Invoice",
+    receipt: "Receipt",
+    payment: "Payment",
+    reversal: "Reversal",
+    journal: "Journal",
+    opening: "Opening Balance",
+    yearEnd: "Year-End Close"
+  },
 };
 
 const ar: typeof en = {
@@ -494,6 +504,16 @@ const ar: typeof en = {
   },
   error: {
     generic: "حدث خطأ ما",
+  },
+  partyLedgerKind: {
+    invoice: "فاتورة مبيعات",
+    purchaseInvoice: "فاتورة مشتريات",
+    receipt: "سند قبض",
+    payment: "سند صرف",
+    reversal: "قيد عكسي",
+    journal: "قيد يومية",
+    opening: "رصيد افتتاحي",
+    yearEnd: "قيد إقفال"
   },
 };
 

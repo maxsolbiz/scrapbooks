@@ -1,40 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { roundFils } from "@/lib/invoices";
-import { roundHalfUpDiv, RATE_SCALE, vatForLine, multiplyFilsByDecimal } from "@/lib/money";
-
-describe("roundFils (current behavior: truncates)", () => {
-  // At 5% (rate 0.05), vat = value * 5 / 100 fils:
-  it.each([
-    [8n, 0.05, 0n], // 0.4 -> truncates to 0
-    [10n, 0.05, 0n], // 0.5 -> truncates to 0
-    [12n, 0.05, 0n], // 0.6 -> truncates to 0
-    [18n, 0.05, 0n], // 0.9 -> truncates to 0
-    [20n, 0.05, 1n], // 1.0 -> exactly 1
-    [30n, 0.05, 1n], // 1.5 -> truncates to 1
-    [46n, 0.05, 2n], // 2.3 -> truncates to 2
-    [99n, 0.05, 4n], // 4.95 -> truncates to 4
-    [2000n, 0.05, 100n], // 100.0 -> exactly 100
-  ])("5%% VAT: %s fils -> %s fils", (value, rate, expected) => {
-    expect(roundFils(value, rate)).toBe(expected);
-  });
-
-  it("exact division is unchanged", () => {
-    expect(roundFils(100n, 0.05)).toBe(5n); // 5.0
-    expect(roundFils(400n, 0.25)).toBe(100n); // 100.0
-  });
-
-  it("zero value yields zero vat", () => {
-    expect(roundFils(0n, 0.05)).toBe(0n);
-  });
-
-  it("rate 0 yields zero vat", () => {
-    expect(roundFils(1234n, 0)).toBe(0n);
-  });
-
-  it("100% rate keeps the value", () => {
-    expect(roundFils(777n, 1)).toBe(777n);
-  });
-});
+import { roundHalfUpDiv, RATE_SCALE, vatForLine, multiplyFilsByDecimal, vatOf } from "@/lib/money";
 
 describe("multiplyFilsByDecimal (current behavior: truncates)", () => {
   it.each([
@@ -124,6 +89,69 @@ describe("vatForLine", () => {
 
   it("uses integer math only (no float drift)", () => {
     expect(vatForLine(123456789n, 0.075)).toBe(9259259n); // 9,259,259.175 -> 9,259,259
+  });
+});
+
+describe("client/server VAT parity", () => {
+  // Client: multiply(toFils(rate), qty) then vatOf(value, vatRateStr)
+  // Server: multiplyFilsByDecimal(rateFils, qty) then vatForLine(value, vatRate)
+  // Both use the same integer math; this test pins the parity for line sets
+  // that include .5-fil VAT fractions.
+  it.each([
+    // [rateFils, qty, vatRate, expectedVat, expectedTotal]
+    [10n, "1", 0.05, 1n, 11n], // 0.5 -> 1 (half-up)
+    [8n, "1", 0.05, 0n, 8n], // 0.4 -> 0
+    [30n, "1", 0.05, 2n, 32n], // 1.5 -> 2
+    [99n, "1", 0.05, 5n, 104n], // 4.95 -> 5
+    [2000n, "1", 0.05, 100n, 2100n], // 100.0 -> 100
+    [1000n, "2.5", 0.05, 125n, 2625n], // qty 2.5, value 2500, vat 125
+    [2650n, "35.5", 0.05, 4704n, 98779n], // Copper Scrap: 94075 + 4704 = 98779
+    [120000n, "1.2", 0.05, 7200n, 151200n], // Old Iron: 144000 + 7200 = 151200
+  ])("rate %s fils x qty %s @ %s VAT -> vat=%s total=%s", (rateFils, qty, vatRate, expectedVat, expectedTotal) => {
+    const value = multiplyFilsByDecimal(rateFils, qty);
+    const vat = vatForLine(value, vatRate);
+    expect(vat).toBe(expectedVat);
+    expect(value + vat).toBe(expectedTotal);
+  });
+
+  it("multi-line invoice totals match sum of per-line half-up VAT", () => {
+    const lines = [
+      { rateFils: 10n, qty: "1", vatRate: 0.05 }, // vat 1
+      { rateFils: 30n, qty: "1", vatRate: 0.05 }, // vat 2
+      { rateFils: 99n, qty: "1", vatRate: 0.05 }, // vat 5
+    ];
+    let subtotal = 0n;
+    let vatTotal = 0n;
+    for (const l of lines) {
+      const value = multiplyFilsByDecimal(l.rateFils, l.qty);
+      const vat = vatForLine(value, l.vatRate);
+      subtotal += value;
+      vatTotal += vat;
+    }
+    expect(subtotal).toBe(139n); // 10 + 30 + 99
+    expect(vatTotal).toBe(8n); // 1 + 2 + 5
+    expect(subtotal + vatTotal).toBe(147n);
+  });
+});
+
+describe("client vatOf vs server vatForLine parity", () => {
+  // Client vatOf (now half-up via vatForLine) must match server vatForLine
+  // for the same line, so the invoice preview never disagrees with the posted total.
+  it.each([
+    [10n, "0.05", 1n], // 0.5 -> 1
+    [8n, "0.05", 0n], // 0.4 -> 0
+    [30n, "0.05", 2n], // 1.5 -> 2
+    [99n, "0.05", 5n], // 4.95 -> 5
+    [10n, "5", 1n], // percent form 5% -> 0.5 -> 1
+    [10n, "0.075", 1n], // 0.75 -> 1
+    [100n, "0.075", 8n], // 7.5 -> 8 (half up)
+    [1000n, "20", 200n], // 20% -> 200
+  ])("client vatOf(%s, %s) == server vatForLine(%s, %s) = %s", (value, vatRateStr, expectedVat) => {
+    const fraction = parseFloat(vatRateStr) <= 1 ? parseFloat(vatRateStr) : parseFloat(vatRateStr) / 100;
+    const clientVat = vatOf(value, vatRateStr);
+    const serverVat = vatForLine(value, fraction);
+    expect(clientVat).toBe(serverVat);
+    expect(clientVat).toBe(expectedVat);
   });
 });
 

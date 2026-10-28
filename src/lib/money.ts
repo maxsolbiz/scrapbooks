@@ -58,6 +58,15 @@ export function vatForLine(valueFils: bigint, vatRate: number): bigint {
   return roundHalfUpDiv(valueFils * scaled, RATE_SCALE);
 }
 
+/** VAT for one line from a form-input vatRate string ("0.05" or "5").
+ * Delegates to vatForLine so client and server always agree. */
+export function vatOf(valueFils: bigint, vatRate: string): bigint {
+  const n = parseFloat(vatRate || "0");
+  if (Number.isNaN(n) || n <= 0) return 0n;
+  const fraction = n <= 1 ? n : n / 100;
+  return vatForLine(valueFils, fraction);
+}
+
 /** Format fils as AED with thousands separators and exactly 2 decimals. */
 export function formatAED(fils: bigint, withCurrency = false): string {
   const formatted = filsToDecimalString(fils);

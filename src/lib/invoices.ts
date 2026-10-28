@@ -46,13 +46,6 @@ const VAT_CODE = "2150";
 const SALES_INCOME_CODE = "4100";
 const PURCHASE_EXPENSE_CODE = "5100";
 
-export function roundFils(value: bigint, vatRate: number): bigint {
-  // vatRate scaled by 10^8 integer math: value * vatRate / 1
-  const RATE_SCALE = 100_000_000n;
-  const scaled = BigInt(Math.round(vatRate * Number(RATE_SCALE)));
-  return (value * scaled) / RATE_SCALE; // truncates toward zero
-}
-
 export async function createInvoice(input: CreateInvoiceInput) {
   const { tx, direction, date, partyId, createdById, lines } = input;
 

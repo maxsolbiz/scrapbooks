@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInvoiceAction } from "@/lib/invoice-actions";
-import { formatAED, filsToDecimalString } from "@/lib/money";
+import { formatAED, filsToDecimalString, vatOf, vatForLine } from "@/lib/money";
 import type { Dictionary } from "@/lib/i18n";
 
 export interface PartyOption {
@@ -62,15 +62,6 @@ function multiply(rateFils: bigint, qty: string): bigint {
   const [whole, part = ""] = q.split(".");
   const thousandths = BigInt(whole) * 1000n + BigInt((part + "000").slice(0, 3));
   return (rateFils * thousandths) / 1000n;
-}
-
-function vatOf(value: bigint, vatRate: string): bigint {
-  const n = parseFloat(vatRate || "0");
-  if (Number.isNaN(n) || n <= 0) return 0n;
-  const fraction = n <= 1 ? n : n / 100;
-  const scaled = 100_000_000n;
-  const scaledRate = BigInt(Math.round(fraction * Number(scaled)));
-  return (value * scaledRate) / scaled;
 }
 
 export function InvoiceForm({

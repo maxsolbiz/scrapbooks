@@ -35,8 +35,12 @@ describe("createInvoice qty precision (F12)", () => {
     expect(line.lineValueFils).toBe(100000n);
     expect(line.lineVatFils).toBe(5000n); // vatForLine(100000n, 0.05) = 5000n
     expect(line.lineTotalFils).toBe(105000n);
-    // Stored qty rounded by NUMERIC(18,3): 1.0005 -> 1.001
-    console.log(`Stored qty for 1.0005 input: ${line.qty}`);
+    // Stored qty rounded by NUMERIC(18,3): 1.0005 → 1.001
+    expect(line.qty.toString()).toBe("1.001");
+    // F12 invariant: stored qty × rate ≠ lineValue because lineValue was computed
+    // from the truncated (3-decimal) qty, not the rounded stored qty.
+    const storedValue = (line.rateFils * BigInt(Math.round(Number(line.qty) * 1000))) / 1000n;
+    expect(storedValue).not.toBe(line.lineValueFils); // F12 mismatch — observed, not fixed
   });
 
   it("qty 1.0004: stored qty rounded, lineValue computed from truncated qty", async () => {
@@ -54,9 +58,13 @@ describe("createInvoice qty precision (F12)", () => {
     const line = await prisma.invoiceLine.findFirstOrThrow({ where: { invoiceId: invoice.id } });
     // lineValue = 100000n * 1000 / 1000n = 100000n (1.0004 truncated to 3 decimals)
     expect(line.lineValueFils).toBe(100000n);
-    expect(line.lineVatFils).toBe(5000n);
+    expect(line.lineVatFils).toBe(5000n); // vatForLine(100000n, 0.05) = 5000n
     expect(line.lineTotalFils).toBe(105000n);
-    console.log(`Stored qty for 1.0004 input: ${line.qty}`);
+    // Stored qty rounded by NUMERIC(18,3): 1.0004 → 1
+    expect(line.qty.toString()).toBe("1");
+    // F12 invariant: stored qty × rate = lineValue (both computed from 3-decimal qty)
+    const storedValue = (line.rateFils * BigInt(Math.round(Number(line.qty) * 1000))) / 1000n;
+    expect(storedValue).toBe(line.lineValueFils); // match — no mismatch
   });
 
   it("qty 1.0006: stored qty rounded, lineValue computed from truncated qty", async () => {
@@ -76,7 +84,12 @@ describe("createInvoice qty precision (F12)", () => {
     expect(line.lineValueFils).toBe(100000n);
     expect(line.lineVatFils).toBe(5000n); // vatForLine(100000n, 0.05) = 5000n
     expect(line.lineTotalFils).toBe(105000n);
-    console.log(`Stored qty for 1.0006 input: ${line.qty}`);
+    // Stored qty rounded by NUMERIC(18,3): 1.0006 → 1.001
+    expect(line.qty.toString()).toBe("1.001");
+    // F12 invariant: stored qty × rate ≠ lineValue because lineValue was computed
+    // from the truncated (3-decimal) qty, not the rounded stored qty.
+    const storedValue = (line.rateFils * BigInt(Math.round(Number(line.qty) * 1000))) / 1000n;
+    expect(storedValue).not.toBe(line.lineValueFils); // F12 mismatch — observed, not fixed
   });
 
   it("qty 1.000: stored exactly, lineValue matches stored qty", async () => {
@@ -95,6 +108,10 @@ describe("createInvoice qty precision (F12)", () => {
     expect(line.lineValueFils).toBe(100000n);
     expect(line.lineVatFils).toBe(5000n);
     expect(line.lineTotalFils).toBe(105000n);
-    console.log(`Stored qty for 1.000 input: ${line.qty}`);
+    // Stored qty exactly 1.000
+    expect(line.qty.toString()).toBe("1");
+    // F12 invariant: stored qty × rate = lineValue (both computed from 3-decimal qty)
+    const storedValue = (line.rateFils * BigInt(Math.round(Number(line.qty) * 1000))) / 1000n;
+    expect(storedValue).toBe(line.lineValueFils); // match — no mismatch
   });
 });

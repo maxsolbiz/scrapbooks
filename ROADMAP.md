@@ -27,6 +27,7 @@
 | F10 | resetDemoDataAction deletes ALL payments, invoices, journals AND the AuditLog; gated only by SUPER_ADMIN role, no environment guard | CONFIRMED | settings/actions.ts:190-194; demo-data.ts:277-286 |
 | F11 | Manual journal void bypasses reversal: \`voidJournal\` flips entry status directly to VOID with no reversal entry, no FY check, and no mandatory reason — outside the P1.1 reversal-by-default rule | CONFIRMED — resolved in P1.1b (6e610ad): \`voidJournal\` now routes through \`reverseJournalEntry\` with a mandatory reason; only DRAFT MANUAL entries can be voided directly | src/app/(app)/journals/actions.ts:82-89 |
 | F2b | Allocation validation checks each row against outstandingForInvoice independently and the action schema has no duplicate guard, so two rows for one invoice (700+700 vs outstanding 1000) both pass | CONFIRMED | payments.ts:76-104; payments/actions.ts:24-25 |
+| F12 | Invoice line qty with more than 3 decimals: createInvoice computes lineValue from the first 3 decimals (multiplyFilsByDecimal truncates) while InvoiceLine.qty (NUMERIC(18,3)) is stored rounded, so stored qty x rate differs from stored lineValueFils (1.0005 -> stored 1.001, value computed from 1.000); the action schema is only z.string().min(1) | CONFIRMED (db test, observed) - OPEN, not fixed | src/lib/invoices.ts:79,121; src/lib/invoice-actions.ts:25; tests/db/invoice-qty-precision.test.ts |
 
 ---
 
@@ -47,6 +48,9 @@
 | D11 | Voided payments KEEP their PaymentAllocation rows (excluded everywhere by payment status filter, never hard-deleted) | reviewer default, NOT user-confirmed | 2026-10-27 |
 | D12 | Should the generic reversal apply to YEAR_END_CLOSE or OPENING_BALANCE entries? Reversing a year-end close is not a normal void | reviewer default: reverseJournalEntry REJECTS sourceType YEAR_END_CLOSE with a clear message — NOT user-confirmed; OPENING_BALANCE unaddressed so far | 2026-10-27 |
 | D13 | OPENING_BALANCE and all non-MANUAL entries cannot be voided from the journals screen | reviewer default, NOT user-confirmed | 2026-10-28 |
+| D14 | Line value (qty x rate) truncates to whole fils while VAT rounds half-up (D4), e.g. 333 fils x 0.333 = 110 | OPEN - no change proposed | 2026-10-28 |
+| D15 | F12 fix: reject more than 3 decimals vs round half-up to 3 first | recommended: reject; NOT user-confirmed | 2026-10-28 |
+| D16 | Reject zero quantity on invoice lines | recommended: reject; NOT user-confirmed (demo data qty always > 0) | 2026-10-28 |
 
 ---
 

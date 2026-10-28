@@ -2,7 +2,7 @@ import type { Tx } from "@/lib/tx";
 import type { EntrySource, PaymentMethod, PaymentType } from "@/generated/prisma/enums";
 import type { JournalEntry } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
-import { postJournalEntry, voidJournalEntry, reverseJournalEntry } from "@/lib/accounting";
+import { postJournalEntry, reverseJournalEntry } from "@/lib/accounting";
 
 const CASH_CODE = "1110";
 const BANK_CODE = "1120";
@@ -213,16 +213,6 @@ export async function createPayment(input: CreatePaymentInput) {
   });
 
   return payment;
-}
-
-export async function voidPayment(tx: Tx, paymentId: string): Promise<void> {
-  const payment = await tx.payment.findUnique({ where: { id: paymentId } });
-  if (!payment) throw new Error("Payment not found");
-  if (payment.status === "VOID") return;
-  await tx.payment.update({ where: { id: paymentId }, data: { status: "VOID" } });
-  if (payment.journalEntryId) {
-    await voidJournalEntry(payment.journalEntryId, tx);
-  }
 }
 
 export interface VoidPaymentWithReversalInput {

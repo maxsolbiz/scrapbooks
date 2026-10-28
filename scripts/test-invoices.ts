@@ -1,8 +1,9 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { createInvoice, voidInvoice } from "../src/lib/invoices";
+import { createInvoice, voidInvoiceWithReversal } from "../src/lib/invoices";
 import { accountBalance } from "../src/lib/accounting";
+import { todayDubai } from "../src/lib/dates";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -71,7 +72,15 @@ async function main() {
 
   // void the sales invoice and confirm balances roll back
   const before = await accountBalance(prisma, ar.id);
-  await prisma.$transaction(async (tx) => voidInvoice(tx, sales.id));
+  await prisma.$transaction(async (tx) =>
+    voidInvoiceWithReversal({
+      tx,
+      invoiceId: sales.id,
+      reason: "test void",
+      date: todayDubai(),
+      createdById: admin.id,
+    }),
+  );
   const after = await accountBalance(prisma, ar.id);
   console.log("AR before void:", before?.balance.toString(), "after void:", after?.balance.toString());
 }

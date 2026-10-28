@@ -144,11 +144,15 @@ export async function voidJournalEntry(entryId: string, tx?: Tx) {
   const client = tx ?? prisma;
   const entry = await client.journalEntry.findUnique({ where: { id: entryId } });
   if (!entry) throw new Error("Entry not found");
-  if (entry.status === "VOID") return entry;
-  return client.journalEntry.update({
-    where: { id: entryId },
-    data: { status: "VOID" },
-  });
+  if (entry.status === "DRAFT") {
+    return client.journalEntry.update({
+      where: { id: entryId },
+      data: { status: "VOID" },
+    });
+  }
+  throw new Error(
+    `Journal entry ${entryId} is ${entry.status.toLowerCase()}; only DRAFT entries can be voided without a reversal`,
+  );
 }
 
 export interface ReverseJournalInput {

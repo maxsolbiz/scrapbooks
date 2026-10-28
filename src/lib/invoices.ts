@@ -200,25 +200,6 @@ export async function createInvoice(input: CreateInvoiceInput) {
   return invoice;
 }
 
-export async function voidInvoice(
-  tx: Tx,
-  invoiceId: string,
-): Promise<void> {
-  const invoice = await tx.invoice.findUnique({
-    where: { id: invoiceId },
-    include: { allocations: true },
-  });
-  if (!invoice) throw new Error("Invoice not found");
-  if (invoice.status === "VOID") return;
-  if (invoice.allocations.length > 0) {
-    throw new Error("Invoice has payment allocations — remove them first");
-  }
-  await tx.invoice.update({ where: { id: invoiceId }, data: { status: "VOID" } });
-  if (invoice.journalEntryId) {
-    await voidJournalEntry(invoice.journalEntryId, tx);
-  }
-}
-
 export function invoiceWhereFilter(direction: InvoiceDirection): Prisma.InvoiceWhereInput {
   return { direction };
 }

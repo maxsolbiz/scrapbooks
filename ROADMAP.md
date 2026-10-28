@@ -100,9 +100,9 @@
 
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
-| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | IN_PROGRESS | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, 30ca9c5, (3a) | 2026-10-27 (checkpoint) | Original stays POSTED; reversal linked by reversesEntryId; sourceType REVERSAL with REV prefix; reversal lines copy partyId+description; FK ON DELETE NO ACTION; commit (2b) accepted — commit (3) next |
+| P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | DONE | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, 30ca9c5, ff04de4, e1f2b3f, 8bc24e3, c974ed0, 6054e32, 8e63b5b | 2026-10-28 | Complete: reversal-based void for invoices (voidInvoiceWithReversal) and payments (voidPaymentWithReversal), lock-first order invoices→payment→entries→Serial, D11 active-allocation guard (allocations kept, excluded by payment status everywhere), D12 YEAR_END_CLOSE reject (reviewer default), DRAFT-only legacy voidJournalEntry (accounting.ts:143), void actions in invoice-actions.ts/payments actions with mandatory reason + AuditLog, legacy voidInvoice/voidPayment removed (commit 5), UI dialogs EN+AR |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
-| P1.3 | voidPayment handles allocations explicitly | F3 | PENDING | P0.1, P0.2 | | | Consistent with voidInvoice |
+| P1.3 | voidPayment handles allocations explicitly | F3 | DONE | P0.1, P0.2 | 6054e32, 8e63b5b | 2026-10-28 | Allocations KEPT (D11); voidPaymentWithReversal reverses the payment entry and flips status; PaymentAllocation rows excluded everywhere by payment status filter |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |
 | P1.5 | trialBalance via groupBy; accountLedger uses normalBalance | F6 | PENDING | P0.1, P0.2 | | | Follow accountBalances pattern |
 | P1.6 | DB triggers: immutability + balance check | F7 | PENDING | P0.1, P0.2, D5 | | | Must not break reversal flow |
@@ -119,9 +119,9 @@ switches to the reversal-based functions in commit (4) (P1.1 actions/permissions
 |---|---|---|---|
 | `voidInvoice` | `src/lib/invoice-actions.ts:114-120` (`voidInvoiceAction` — permission check, audit, revalidate) | `voidInvoiceWithReversal` (+ AuditLog + reversal reason surfaced to the dialog) | (4) |
 | `voidPayment` | `src/app/(app)/payments/actions.ts:65-68` (`voidPaymentAction`) | `voidPaymentWithReversal` (+ AuditLog + reason) | (4) |
-| `voidJournalEntry` (legacy) | only called internally by legacy `voidInvoice` / `voidPayment` / tests (`accounting.test.ts` legacy characterization) | none — characterized as legacy, replaced by `reverseJournalEntry` | (5) |
+| `voidJournalEntry` (legacy) | now DRAFT-only (`src/lib/accounting.ts:143`); called only by `voidInvoiceWithReversal`'s DRAFT branch and `tests/db/accounting.test.ts` | removed — legacy callers gone | (5) |
 
-After commit (4) no UI path reaches the legacy voids; removal is commit (5).
+Removal complete in commit (5): `voidInvoice` and `voidPayment` deleted (no callers remain; `scripts/test-invoices.ts` re-pointed to `voidInvoiceWithReversal`); `voidJournalEntry` is DRAFT-only with POSTED/VOID rejections; no caller reaches the legacy voids outside `voidInvoiceWithReversal`'s DRAFT branch.
 
 ---
 

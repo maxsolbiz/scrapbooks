@@ -115,10 +115,35 @@ describe("assertBalanced (pure)", () => {
   });
 });
 
-// Reviewer-mandated characterization test: documents CURRENT void behavior.
-// P1.1 deliberately replaces this behavior with reversal-by-default — update then.
-describe("voidJournalEntry (LEGACY behavior — replaced in P1.1)", () => {
-  it("characterization: flips status to VOID without a reversal entry", async () => {
+// P1.1: voidJournalEntry is DRAFT-only. POSTED/VOID targets are rejected with a clear
+// message; reversal-based voids (voidInvoiceWithReversal / voidPaymentWithReversal) are
+// the only supported void paths for POSTED entries.
+describe("voidJournalEntry (P1.1: DRAFT-only)", () => {
+  it("DRAFT entry: voids to VOID without a reversal entry", async () => {
+    const ar = ctx.accountByCode.get("1130")!;
+    const income = ctx.accountByCode.get("4100")!;
+    const entry = await prisma.journalEntry.create({
+      data: {
+        entryNo: "MAN-2026-0001",
+        date: new Date("2026-06-01"),
+        narration: "Manual draft entry",
+        status: "DRAFT",
+        sourceType: "MANUAL",
+        createdById: ctx.userId,
+        lines: {
+          create: [
+            { accountId: ar, debit: 500n },
+            { accountId: income, credit: 500n },
+          ],
+        },
+      },
+    });
+    const after = await voidJournalEntry(entry.id);
+    expect(after.status).toBe("VOID");
+    expect(await prisma.journalEntry.count()).toBe(1); // no reversal entry created
+  });
+
+  it("POSTED entry: rejects with a clear message", async () => {
     const ar = ctx.accountByCode.get("1130")!;
     const income = ctx.accountByCode.get("4100")!;
     const entry = await prisma.$transaction(async (tx) =>
@@ -133,12 +158,36 @@ describe("voidJournalEntry (LEGACY behavior — replaced in P1.1)", () => {
         ],
       }),
     ); // committed: Mode B
+    await expect(voidJournalEntry(entry.id)).rejects.toThrow(/is posted/);
+    const after = await prisma.journalEntry.findUniqueOrThrow({ where: { id: entry.id } });
+    expect(after.status).toBe("POSTED");
+    expect(await prisma.journalEntry.count()).toBe(1); // untouched
+  });
+
+  it("VOID entry: rejects with a clear message", async () => {
+    const ar = ctx.accountByCode.get("1130")!;
+    const income = ctx.accountByCode.get("4100")!;
+    const entry = await prisma.journalEntry.create({
+      data: {
+        entryNo: "MAN-2026-0002",
+        date: new Date("2026-06-01"),
+        narration: "Manual draft entry",
+        status: "DRAFT",
+        sourceType: "MANUAL",
+        createdById: ctx.userId,
+        lines: {
+          create: [
+            { accountId: ar, debit: 500n },
+            { accountId: income, credit: 500n },
+          ],
+        },
+      },
+    });
     await voidJournalEntry(entry.id);
+    await expect(voidJournalEntry(entry.id)).rejects.toThrow(/is void/);
     const after = await prisma.journalEntry.findUniqueOrThrow({ where: { id: entry.id } });
     expect(after.status).toBe("VOID");
-    // legacy behavior: original is the ONLY entry — no reversal was created.
-    // (P1.1 changes this deliberately; this assertion is what detects the change.)
-    expect(await prisma.journalEntry.count()).toBe(1);
+    expect(await prisma.journalEntry.count()).toBe(1); // untouched by the second call
   });
 });
 

@@ -47,6 +47,22 @@ async function seedReceiptAgainst(invoiceId: string, amountFils: bigint, opts?: 
   );
 }
 
+async function seedDraftSalesInvoice() {
+  return prisma.invoice.create({
+    data: {
+      invoiceNo: "INV-DRAFT-0001",
+      direction: "SALES",
+      date: new Date("2026-06-01"),
+      partyId: ctx.customerId,
+      status: "DRAFT",
+      subtotalFils: 500n,
+      vatFils: 0n,
+      totalFils: 500n,
+      createdById: ctx.userId,
+    },
+  });
+}
+
 /** Polls pg_stat_activity until some OTHER connection blocks on an Invoice row lock query.
  * Returns the blocked query text, or "" if nothing blocked within the deadline. */
 function firstBlockedInvoiceLock(deadlineMs: number): Promise<string> {
@@ -167,6 +183,17 @@ describe("voidInvoiceWithReversal (P1.1 commit 3)", () => {
     );
     // allocation rows are KEPT (D11)
     expect(await prisma.paymentAllocation.count()).toBe(1);
+  });
+
+  it("draft invoice: voids without a reversal entry; returns null", async () => {
+    const invoice = await seedDraftSalesInvoice();
+    const before = await prisma.journalEntry.count();
+    const reversal = await prisma.$transaction((t) =>
+      voidInvoiceWithReversal({ invoiceId: invoice.id, reason: "draft mistake", date: June2026, createdById: ctx.userId, tx: t as Tx }),
+    );
+    expect(reversal).toBeNull();
+    expect((await prisma.invoice.findUniqueOrThrow({ where: { id: invoice.id } })).status).toBe("VOID");
+    expect(await prisma.journalEntry.count()).toBe(before); // no reversal entry created
   });
 });
 

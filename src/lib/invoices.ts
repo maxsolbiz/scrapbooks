@@ -2,7 +2,7 @@ import type { Prisma, InvoiceDirection, UnitType, JournalEntry } from "@/generat
 import type { Tx } from "@/lib/tx";
 import type { EntrySource } from "@/generated/prisma/enums";
 import { postJournalEntry, voidJournalEntry, reverseJournalEntry } from "@/lib/accounting";
-import { multiplyFilsByDecimal } from "@/lib/money";
+import { multiplyFilsByDecimal, vatForLine } from "@/lib/money";
 import { lockInvoices } from "@/lib/payments";
 
 export interface InvoiceLineInput {
@@ -84,7 +84,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
   let vatTotal = 0n;
   const computed = lines.map((line) => {
     const value = multiplyFilsByDecimal(line.rateFils, line.qty);
-    const vat = roundFils(value, line.vatRate);
+    const vat = vatForLine(value, line.vatRate); // half-up per line (P1.4, D4)
     subtotal += value;
     vatTotal += vat;
     return { ...line, lineValue: value, lineVat: vat, lineTotal: value + vat };

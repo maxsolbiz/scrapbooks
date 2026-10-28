@@ -261,9 +261,6 @@ export async function voidManualJournal(input: VoidManualJournalInput) {
   if (reason.length > 2000) throw new Error("Reason must be at most 2000 characters");
   if (Number.isNaN(date.getTime())) throw new Error("Reversal date is invalid");
 
-  // Serialize concurrent voids of the same target: lock BEFORE any reads.
-  await input.tx.$queryRaw(Prisma.sql`SELECT id FROM "JournalEntry" WHERE id = ${entryId} FOR UPDATE`);
-
   const target = await input.tx.journalEntry.findUnique({ where: { id: entryId } });
   if (!target) throw new Error("Journal entry not found");
   if (target.sourceType !== "MANUAL") {

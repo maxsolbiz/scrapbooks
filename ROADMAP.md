@@ -37,7 +37,7 @@
 | D1 | VAT treatment of deduction types (pre-VAT vs post-VAT) | | |
 | D2 | Inventory valuation method (weighted avg proposed) | | |
 | D3 | Who may amend posted invoices (ACCOUNTANT/ADMIN, second approval?) | | |
-| D4 | VAT calculation: per-line vs per-invoice | | |
+| D4 | VAT calculation: per-line vs per-invoice | per-line half-up (reviewer default, NOT user-confirmed); new invoices can differ from the old truncation by up to 1 fil per line; existing data untouched | 2026-10-28 |
 | D5 | Postgres trigger enforcement acceptable? | | |
 | D6 | Cheque/PDC scope | | |
 | D7 | Allow negative stock or block | | |
@@ -106,7 +106,7 @@
 | P1.1b | Manual journal void via reversal (F11): mandatory reason, Dubai date, MANUAL-only source guard, DRAFT-only direct voids | F11 | DONE | P1.1 | 6e610ad | 2026-10-28 | Manual journal void now routes through reverseJournalEntry (mirrored POSTED reversal, reversesEntryId link); POSTED entries reversed, DRAFT entries voided directly via voidJournalEntry without reversal, VOID entries rejected; non-MANUAL entries (invoice, payment, receipt, REVERSAL, OPENING_BALANCE, YEAR_END_CLOSE) rejected with "void the source document instead"; UI void dialog with mandatory reason textarea EN+AR; concurrency test on the entry row lock (double void serialized, exactly one reversal) |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
 | P1.3 | voidPayment handles allocations explicitly | F3 | DONE | P0.1, P0.2 | e1f2b3f, 6054e32, 8e63b5b | 2026-10-28 | Allocations KEPT (D11); voidPaymentWithReversal reverses the payment entry and flips status; PaymentAllocation rows excluded everywhere by payment status filter |
-| P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |
+| P1.4 | Half-up rounding helpers; document VAT method | F4 | DONE | P0.2, D4 | c3b549a, 4b2e17a | 2026-10-28 | roundHalfUpDiv + vatForLine in money.ts (half away from zero, BigInt only); createInvoice now uses vatForLine per line; new invoices can differ from the old truncation by up to 1 fil per line; existing stored invoices untouched; pinning tests in tests/unit/money-rounding.test.ts + tests/db/invoice-rounding.test.ts |
 | P1.5 | trialBalance via groupBy; accountLedger uses normalBalance | F6 | PENDING | P0.1, P0.2 | | | Follow accountBalances pattern |
 | P1.6 | DB triggers: immutability + balance check | F7 | PENDING | P0.1, P0.2, D5 | | | Must not break reversal flow |
 | P1.7 | Duplicate vendor invoice guard (partial unique index) | F7 | PENDING | P0.1, P0.2 | | | Scan existing data first |

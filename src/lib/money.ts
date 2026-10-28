@@ -50,7 +50,9 @@ export function roundHalfUpDiv(numerator: bigint, denominator: bigint): bigint {
   return numerator < 0n ? -magnitude : magnitude;
 }
 
-/** VAT for one line, half-up on fils: valueFils * vatRate / RATE_SCALE, no floats. */
+/** VAT for one line, rounded half away from zero: valueFils * vatRate / RATE_SCALE, no floats.
+ * P1.4 (D4, reviewer default): new invoices can differ from the old truncation by up to 1 fil per
+ * line; existing stored invoices are untouched. */
 export function vatForLine(valueFils: bigint, vatRate: number): bigint {
   const scaled = BigInt(Math.round(vatRate * Number(RATE_SCALE)));
   return roundHalfUpDiv(valueFils * scaled, RATE_SCALE);

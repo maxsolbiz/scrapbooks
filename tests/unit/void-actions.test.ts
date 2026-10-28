@@ -69,6 +69,25 @@ describe("voidInvoiceAction (commit 4)", () => {
     expect(res).toEqual({ ok: false, error: "Invoice has payment allocations — remove them first" });
     expect(logAudit).not.toHaveBeenCalled();
   });
+
+  it("audit failure after a committed void still returns ok:true", async () => {
+    voidInvoiceWithReversal.mockResolvedValue({ entryNo: "REV-FY2026-0005" });
+    logAudit.mockImplementation(() => {
+      throw new Error("audit down");
+    });
+    const res = await voidInvoiceAction("inv-1", "SALES", "why");
+    expect(res).toEqual({ ok: true });
+    expect(logAudit).toHaveBeenCalled();
+    expect(revalidatePath).toHaveBeenCalledWith("/sales-invoices");
+  });
+
+  it("DRAFT void: reversal null, audit still carries the reason and the no-journal note", async () => {
+    voidInvoiceWithReversal.mockResolvedValue(null);
+    const res = await voidInvoiceAction("inv-1", "SALES", "draft void");
+    expect(res).toEqual({ ok: true });
+    expect(String(logAudit.mock.calls[0][4])).toContain("(no journal entry)");
+    expect(String(logAudit.mock.calls[0][4])).toContain("draft void");
+  });
 });
 
 describe("voidPaymentAction (commit 4)", () => {
@@ -96,5 +115,23 @@ describe("voidPaymentAction (commit 4)", () => {
     });
     await expect(voidPaymentAction("pay-1", "why")).rejects.toThrow(/NEXT_REDIRECT/);
     expect(voidPaymentWithReversal).not.toHaveBeenCalled();
+  });
+
+  it("audit failure after a committed void still returns ok:true", async () => {
+    voidPaymentWithReversal.mockResolvedValue({ entryNo: "REV-FY2026-0009" });
+    logAudit.mockImplementation(() => {
+      throw new Error("audit down");
+    });
+    const res = await voidPaymentAction("pay-1", "why");
+    expect(res).toEqual({ ok: true });
+    expect(logAudit).toHaveBeenCalled();
+    expect(revalidatePath).toHaveBeenCalledWith("/payments");
+  });
+
+  it("ledger void failure returns ok:false without calling audit", async () => {
+    voidPaymentWithReversal.mockRejectedValue(new Error("already void"));
+    const res = await voidPaymentAction("pay-1", "why");
+    expect(res).toEqual({ ok: false, error: "already void" });
+    expect(logAudit).not.toHaveBeenCalled();
   });
 });

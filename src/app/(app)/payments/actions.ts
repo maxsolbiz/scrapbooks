@@ -79,15 +79,19 @@ export async function voidPaymentAction(paymentId: string, reason: string): Prom
     const reversal = await prisma.$transaction(async (tx) =>
       voidPaymentWithReversal({ paymentId, reason: parsed.data, date: todayDubai(), createdById: user.id, tx }),
     );
-    await logAudit(
-      user,
-      "PAYMENT_VOID",
-      "Payment",
-      paymentId,
-      `Voided payment ${
-        reversal ? `with reversal entry ${reversal.entryNo}` : "(no journal entry)"
-      } - reason: ${parsed.data}`,
-    );
+    try {
+      await logAudit(
+        user,
+        "PAYMENT_VOID",
+        "Payment",
+        paymentId,
+        `Voided payment ${
+          reversal ? `with reversal entry ${reversal.entryNo}` : "(no journal entry)"
+        } - reason: ${parsed.data}`,
+      );
+    } catch (auditErr) {
+      console.error("PAYMENT_VOID audit failed:", auditErr);
+    }
     revalidatePath("/payments");
     revalidatePath("/dashboard");
     return { ok: true };

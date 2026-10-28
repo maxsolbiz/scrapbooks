@@ -32,4 +32,13 @@ describe("utcMidnightOfDubaiDate", () => {
   it("leap-year Feb 29 (Dubai date) survives", () => {
     expect(dubaiDateString(utcMidnightOfDubaiDate(new Date("2028-02-28T20:30:00Z")))).toBe("2028-02-29");
   });
+
+  it("exact Dubai midnight 20:00:00Z maps to the NEXT calendar day", () => {
+    expect(dubaiDateString(utcMidnightOfDubaiDate(new Date("2026-10-27T20:00:00Z")))).toBe("2026-10-28");
+    expect(utcMidnightOfDubaiDate(new Date("2026-10-27T20:00:00Z")).toISOString()).toBe("2026-10-28T00:00:00.000Z");
+  });
+
+  it("21:00Z is 01:00 Dubai of the NEXT calendar day", () => {
+    expect(dubaiDateString(utcMidnightOfDubaiDate(new Date("2026-10-27T21:00:00Z")))).toBe("2026-10-28");
+  });
 });

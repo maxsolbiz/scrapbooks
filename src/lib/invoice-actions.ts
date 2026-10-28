@@ -132,15 +132,19 @@ export async function voidInvoiceAction(
     const reversal = await prisma.$transaction(async (tx) =>
       voidInvoiceWithReversal({ invoiceId, reason: parsed.data, date: todayDubai(), createdById: user.id, tx }),
     );
-    await logAudit(
-      user,
-      "INVOICE_VOID",
-      "Invoice",
-      invoiceId,
-      `Voided ${direction} invoice ${
-        reversal ? `with reversal entry ${reversal.entryNo}` : "(no journal entry)"
-      } - reason: ${parsed.data}`,
-    );
+    try {
+      await logAudit(
+        user,
+        "INVOICE_VOID",
+        "Invoice",
+        invoiceId,
+        `Voided ${direction} invoice ${
+          reversal ? `with reversal entry ${reversal.entryNo}` : "(no journal entry)"
+        } - reason: ${parsed.data}`,
+      );
+    } catch (auditErr) {
+      console.error("INVOICE_VOID audit failed:", auditErr);
+    }
     revalidatePath(direction === "SALES" ? "/sales-invoices" : "/purchase-invoices");
     revalidatePath("/dashboard");
     return { ok: true };

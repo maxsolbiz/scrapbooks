@@ -68,6 +68,7 @@ export default async function PaymentDetailPage({
               paymentId={payment.id}
               label={t.payments.voidPayment}
               confirmText={t.payments.voidConfirm}
+              cancelLabel={t.common.cancel}
               reasonLabel={t.payments.voidReason}
               reasonPlaceholder={t.payments.voidReasonPlaceholder}
             />

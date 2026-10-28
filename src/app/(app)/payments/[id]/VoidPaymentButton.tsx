@@ -11,12 +11,14 @@ export function VoidPaymentButton({
   paymentId,
   label,
   confirmText,
+  cancelLabel,
   reasonLabel,
   reasonPlaceholder,
 }: {
   paymentId: string;
   label: string;
   confirmText: string;
+  cancelLabel?: string;
   reasonLabel: string;
   reasonPlaceholder: string;
 }) {
@@ -32,6 +34,7 @@ export function VoidPaymentButton({
       title={label}
       description={confirmText}
       confirmLabel={label}
+      cancelLabel={cancelLabel ?? "Cancel"}
       reason={{ label: reasonLabel, placeholder: reasonPlaceholder }}
       onConfirm={async (reason) => {
         const res = await voidPaymentAction(paymentId, reason);

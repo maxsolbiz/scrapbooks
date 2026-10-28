@@ -93,6 +93,7 @@ export async function InvoiceDetailView({
               direction={direction}
               label={t.invoices.voidInvoice}
               confirmText={t.invoices.voidConfirm}
+              cancelLabel={t.common.cancel}
               reasonLabel={t.invoices.voidReason}
               reasonPlaceholder={t.invoices.voidReasonPlaceholder}
             />

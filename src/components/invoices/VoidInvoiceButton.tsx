@@ -13,6 +13,7 @@ export function VoidInvoiceButton({
   direction,
   label,
   confirmText,
+  cancelLabel,
   reasonLabel,
   reasonPlaceholder,
 }: {
@@ -20,6 +21,7 @@ export function VoidInvoiceButton({
   direction: InvoiceDirection;
   label: string;
   confirmText: string;
+  cancelLabel?: string;
   reasonLabel: string;
   reasonPlaceholder: string;
 }) {
@@ -35,6 +37,7 @@ export function VoidInvoiceButton({
       title={label}
       description={confirmText}
       confirmLabel={label}
+      cancelLabel={cancelLabel ?? "Cancel"}
       reason={{ label: reasonLabel, placeholder: reasonPlaceholder }}
       onConfirm={async (reason) => {
         const res = await voidInvoiceAction(invoiceId, direction, reason);

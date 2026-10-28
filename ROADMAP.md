@@ -25,7 +25,7 @@
 | F8 | src/generated/prisma committed; no real test runner; default README | CONFIRMED | repo structure; package.json; README.md |
 | F9 | No idempotency keys on financial endpoints (invoice/payment/journal create) | CONFIRMED | invoice-actions.ts:62-112; payments/actions.ts:29-63; journals/actions.ts:39-80 |
 | F10 | resetDemoDataAction deletes ALL payments, invoices, journals AND the AuditLog; gated only by SUPER_ADMIN role, no environment guard | CONFIRMED | settings/actions.ts:190-194; demo-data.ts:277-286 |
-| F11 | Manual journal void bypasses reversal: `voidJournal` flips entry status directly to VOID with no reversal entry, no FY check, and no mandatory reason — outside the P1.1 reversal-by-default rule | CONFIRMED | src/app/(app)/journals/actions.ts:82-89 |
+| F11 | Manual journal void bypasses reversal: \`voidJournal\` flips entry status directly to VOID with no reversal entry, no FY check, and no mandatory reason — outside the P1.1 reversal-by-default rule | CONFIRMED — resolved in P1.1b (6e610ad): \`voidJournal\` now routes through \`reverseJournalEntry\` with a mandatory reason; only DRAFT MANUAL entries can be voided directly | src/app/(app)/journals/actions.ts:82-89 |
 | F2b | Allocation validation checks each row against outstandingForInvoice independently and the action schema has no duplicate guard, so two rows for one invoice (700+700 vs outstanding 1000) both pass | CONFIRMED | payments.ts:76-104; payments/actions.ts:24-25 |
 
 ---
@@ -46,6 +46,7 @@
 | D10 | Reversal date policy: default today; must be >= original entry date; must fall in an OPEN fiscal year | reviewer default, NOT user-confirmed | 2026-10-27 |
 | D11 | Voided payments KEEP their PaymentAllocation rows (excluded everywhere by payment status filter, never hard-deleted) | reviewer default, NOT user-confirmed | 2026-10-27 |
 | D12 | Should the generic reversal apply to YEAR_END_CLOSE or OPENING_BALANCE entries? Reversing a year-end close is not a normal void | reviewer default: reverseJournalEntry REJECTS sourceType YEAR_END_CLOSE with a clear message — NOT user-confirmed; OPENING_BALANCE unaddressed so far | 2026-10-27 |
+| D13 | OPENING_BALANCE and all non-MANUAL entries cannot be voided from the journals screen | reviewer default, NOT user-confirmed | 2026-10-28 |
 
 ---
 
@@ -102,6 +103,7 @@
 | ID | Task | Finding | Status | Depends on | Commit(s) | Verified | Notes |
 |---|---|---|---|---|---|---|---|
 | P1.1 | Void by reversal: mirrored POSTED entry, FY check, AuditLog | F1 | DONE | P0.1, P0.2 | daa4563, a98412f, 93b5a8d, 418f730, bf733fb, 30ca9c5, ff04de4, e1f2b3f, 8bc24e3, c974ed0, 6054e32, 8e63b5b | 2026-10-28 | Complete: reversal-based void for invoices (voidInvoiceWithReversal) and payments (voidPaymentWithReversal), lock-first order invoices→payment→entries→Serial, D11 active-allocation guard (allocations kept, excluded by payment status everywhere), D12 YEAR_END_CLOSE reject (reviewer default), DRAFT-only legacy voidJournalEntry (accounting.ts:143), void actions in invoice-actions.ts/payments actions with mandatory reason + AuditLog, legacy voidInvoice/voidPayment removed (commit 5), UI dialogs EN+AR |
+| P1.1b | Manual journal void via reversal (F11): mandatory reason, Dubai date, MANUAL-only source guard, DRAFT-only direct voids | F11 | DONE | P1.1 | 6e610ad | 2026-10-28 | Manual journal void now routes through reverseJournalEntry (mirrored POSTED reversal, reversesEntryId link); POSTED entries reversed, DRAFT entries voided directly via voidJournalEntry without reversal, VOID entries rejected; non-MANUAL entries (invoice, payment, receipt, REVERSAL, OPENING_BALANCE, YEAR_END_CLOSE) rejected with "void the source document instead"; UI void dialog with mandatory reason textarea EN+AR; concurrency test on the entry row lock (double void serialized, exactly one reversal) |
 | P1.2 | Lock invoice row on allocation (FOR UPDATE) + per-invoice aggregation (F2, F2b) | DONE | F2 | P0.2 | 0e183dc, 9175dc6 | 2026-10-27 | lockInvoices helper (ORDER BY id FOR UPDATE, Prisma.join); SUM per invoice; concurrency via pg_stat_activity polling |
 | P1.3 | voidPayment handles allocations explicitly | F3 | DONE | P0.1, P0.2 | e1f2b3f, 6054e32, 8e63b5b | 2026-10-28 | Allocations KEPT (D11); voidPaymentWithReversal reverses the payment entry and flips status; PaymentAllocation rows excluded everywhere by payment status filter |
 | P1.4 | Half-up rounding helpers; document VAT method | F4 | PENDING | P0.2, D4 | | | Additive in money.ts |

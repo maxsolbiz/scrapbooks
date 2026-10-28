@@ -77,6 +77,7 @@ export function formatAED(fils: bigint, withCurrency = false): string {
 export function multiplyFilsByDecimal(rateFils: bigint, qty: string | number): bigint {
   const qtyStr = String(qty).trim();
   if (!/^\d+(\.\d+)?$/.test(qtyStr)) throw new Error(`Invalid quantity: ${qtyStr}`);
+  if (!/^\d+(\.\d{1,3})?$/.test(qtyStr)) throw new Error(`Quantity allows at most 3 decimal places: ${qtyStr}`);
   const [whole, part = ""] = qtyStr.split(".");
   const qtyThousandths = BigInt(whole) * 1000n + BigInt((part + "000").slice(0, 3));
   return (rateFils * qtyThousandths) / 1000n;

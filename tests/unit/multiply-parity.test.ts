@@ -45,7 +45,7 @@ describe("multiply parity: legacy client multiply vs multiplyFilsByDecimal", () 
     [1000n, "0.000", "0", "0"],
     [1000000000n, "1000", "1000000000000", "1000000000000"],
     // Boundary: more than 3 decimals — client rejects (0n), server accepts
-    [1000n, "1.2345", "0", "1234"], // DIVERGENCE: client rejects >3 decimals
+    [1000n, "1.2345", "0", "throws: Quantity allows at most 3 decimal places: 1.2345"], // DIVERGENCE: client rejects >3 decimals
     // Negative — client returns 0n (regex rejects), server throws
     [1000n, "-1", "0", "throws: Invalid quantity: -1"],
     // Empty / whitespace — client returns 0n (empty check first), server throws
@@ -59,7 +59,7 @@ describe("multiply parity: legacy client multiply vs multiplyFilsByDecimal", () 
     [1000n, "1.", "0", "throws: Invalid quantity: 1."],
     [1000n, "1e3", "0", "throws: Invalid quantity: 1e3"],
     [1000n, "00.5", "500", "500"],
-    [1000n, "1.0005", "0", "1000"], // DIVERGENCE: client rejects 4 decimals, server accepts
+    [1000n, "1.0005", "0", "throws: Quantity allows at most 3 decimal places: 1.0005"], // DIVERGENCE: client rejects 4 decimals, server accepts
     [1000n, ".5", "0", "throws: Invalid quantity: .5"], // client: no leading digit → 0n; server throws
     [1000n, " 2 ", "2000", "2000"], // trimmed → "2"
     [1n, "1000000000000000000000000000000000000000", "1000000000000000000000000000000000000000", "1000000000000000000000000000000000000000"], // 40-digit qty
@@ -99,7 +99,7 @@ describe("multiplyFilsByDecimal (server source of truth)", () => {
     expect(() => multiplyFilsByDecimal(100n, "abc")).toThrow("Invalid quantity: abc");
     expect(() => multiplyFilsByDecimal(100n, "")).toThrow("Invalid quantity: ");
     expect(() => multiplyFilsByDecimal(100n, "-1")).toThrow("Invalid quantity: -1");
-    expect(() => multiplyFilsByDecimal(100n, "1.2345")).not.toThrow(); // unlimited decimals OK
+    expect(() => multiplyFilsByDecimal(100n, "1.2345")).toThrow("Quantity allows at most 3 decimal places: 1.2345"); // F12: >3 decimals rejected
   });
 
   it("accepts number input", () => {

@@ -60,6 +60,9 @@ describe("multiply parity: legacy client multiply vs multiplyFilsByDecimal", () 
     [1000n, "1e3", "0", "throws: Invalid quantity: 1e3"],
     [1000n, "00.5", "500", "500"],
     [1000n, "1.0005", "0", "1000"], // DIVERGENCE: client rejects 4 decimals, server accepts
+    [1000n, ".5", "0", "throws: Invalid quantity: .5"], // client: no leading digit → 0n; server throws
+    [1000n, " 2 ", "2000", "2000"], // trimmed → "2"
+    [1n, "1000000000000000000000000000000000000000", "1000000000000000000000000000000000000000", "1000000000000000000000000000000000000000"], // 40-digit qty
     [BigInt("1234567890123456789012345678901234567890"), "1", "1234567890123456789012345678901234567890", "1234567890123456789012345678901234567890"],
   ])("rate %s x qty '%s'", (rateFils: bigint, qty: string, expectedLegacy: string, expectedServer: string) => {
     const client = callLegacy(rateFils, qty);

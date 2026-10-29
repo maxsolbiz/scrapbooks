@@ -352,14 +352,14 @@ export async function applyCreditToInvoice(input: ApplyCreditInput): Promise<voi
   const invoice = await tx.invoice.findUnique({ where: { id: invoiceId } });
   if (!invoice) throw new Error("Invoice not found");
 
-  // Check available credit
-  const available = await partyCreditBalance(invoice.partyId);
+  // Check available credit (use tx to see uncommitted changes in the same transaction)
+  const available = await partyCreditBalance(invoice.partyId, tx);
   if (amountFils > available) {
     throw new Error(`Insufficient credit: requested ${amountFils}, available ${available}`);
   }
 
-  // Get unallocated payments (FIFO)
-  const unallocated = await getUnallocatedPayments(invoice.partyId);
+  // Get unallocated payments (FIFO) - use tx to see uncommitted changes
+  const unallocated = await getUnallocatedPayments(invoice.partyId, tx);
 
   let remaining = amountFils;
   for (const payment of unallocated) {

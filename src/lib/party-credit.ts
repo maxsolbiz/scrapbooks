@@ -1,19 +1,22 @@
 import { prisma } from "@/lib/db";
+import type { Tx } from "@/lib/tx";
 
 /**
  * Calculate available credit for a party.
  * Available credit = sum of (payment.amountFils - allocated amount) for all POSTED payments.
  * Positive = customer has credit; Negative = customer owes money (outstanding invoices).
  */
-export async function partyCreditBalance(partyId: string): Promise<bigint> {
+export async function partyCreditBalance(partyId: string, tx?: Tx): Promise<bigint> {
+  const client = tx ?? prisma;
+  
   // Sum of all POSTED payment amounts for this party
-  const totalPayments = await prisma.payment.aggregate({
+  const totalPayments = await client.payment.aggregate({
     where: { partyId, status: "POSTED" },
     _sum: { amountFils: true },
   });
 
   // Sum of all allocations from this party's payments
-  const totalAllocated = await prisma.paymentAllocation.aggregate({
+  const totalAllocated = await client.paymentAllocation.aggregate({
     where: { payment: { partyId, status: "POSTED" } },
     _sum: { amountFils: true },
   });
@@ -28,8 +31,10 @@ export async function partyCreditBalance(partyId: string): Promise<bigint> {
  * Get list of unallocated payments for a party (FIFO by date).
  * Returns payments with their remaining unallocated amount.
  */
-export async function getUnallocatedPayments(partyId: string) {
-  const payments = await prisma.payment.findMany({
+export async function getUnallocatedPayments(partyId: string, tx?: Tx) {
+  const client = tx ?? prisma;
+  
+  const payments = await client.payment.findMany({
     where: { partyId, status: "POSTED" },
     include: {
       allocations: { select: { amountFils: true } },

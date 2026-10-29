@@ -58,6 +58,36 @@ describe("P2.2: Payment status derivation", () => {
     expect(updated?.paymentStatus).toBe("PARTIAL");
   });
 
+  it("partial payment + past dueDate makes status OVERDUE", async () => {
+    const invoice = await prisma.$transaction(async (tx) =>
+      createInvoice({
+        tx,
+        direction: "SALES",
+        date: new Date("2026-01-01"),
+        dueDate: new Date("2026-01-31"), // Past date
+        partyId: ctx.customerId,
+        createdById: ctx.userId,
+        lines: [{ description: "test", qty: "1", unit: "KG", rateFils: 100000n, vatRate: 0.05 }],
+      }),
+    );
+
+    await prisma.$transaction(async (tx) =>
+      createPayment({
+        tx,
+        date: new Date("2026-02-05"),
+        type: "RECEIPT",
+        method: "CASH",
+        partyId: ctx.customerId,
+        createdById: ctx.userId,
+        amountFils: 50000n, // Partial
+        allocations: [{ invoiceId: invoice.id, amountFils: 50000n }],
+      }),
+    );
+
+    const updated = await prisma.invoice.findUnique({ where: { id: invoice.id } });
+    expect(updated?.paymentStatus).toBe("OVERDUE");
+  });
+
   it("full payment makes status PAID", async () => {
     const invoice = await prisma.$transaction(async (tx) =>
       createInvoice({

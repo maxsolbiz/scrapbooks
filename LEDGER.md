@@ -420,12 +420,17 @@ Verification: tsc --noEmit EXIT=0; npm test 141/141; vitest --project db 89/89 (
 (5) src/components/invoices/InvoiceForm.tsx + InvoiceFormClient.tsx: new fields added to form grid (date picker for dueDate, number input for paymentTerms); useEffect auto-calculates dueDate when paymentTerms changes; submit passes both to action.
 (6) tests/db/invoice-due-date.test.ts (new, 5 tests): auto-calc from paymentTerms, explicit dueDate wins, null when neither provided, works for PURCHASE, zero paymentTerms stored as null.
 (7) Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 103/103 (14 files); npx next build EXIT=0 "Compiled successfully". No push, no deploy (prod at b102c67 lacks reversesEntryId column; apply ops/sql/20261027_p11_commit1_reversal_link.sql first).
-## 2026-10-30 - P2.2 c501650 - Payment Status Derivation (UNPAID/PARTIAL/PAID/OVERDUE)
+## 2026-10-30 - P2.2 c501650, 54f0c0b, daaca0a, a8f1a4e - Payment Status Derivation (UNPAID/PARTIAL/PAID/OVERDUE) COMPLETE
 (1) Schema: enum InvoicePaymentStatus added (UNPAID/PARTIAL/PAID/OVERDUE); Invoice model gains paymentStatus InvoicePaymentStatus @default(UNPAID); @@index([paymentStatus, dueDate]); migration 20261030120000_p22_payment_status applied.
 (2) src/lib/invoice-status.ts: derivePaymentStatus(totalFils, allocatedFils, dueDate) computes status; OVERDUE when dueDate < today + partial/unpaid.
-(3) src/lib/invoices.ts: createInvoice sets paymentStatus: "UNPAID" by default.
-(4) tests/db/payment-status.test.ts: asserts new invoice = UNPAID.
-Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 104/104; npm run build BUILD_EXIT=0. P2.3 (unallocated payments) and P2.4 (aging/statements) ready.
+(3) src/lib/invoices.ts: createInvoice sets paymentStatus via derivePaymentStatus(total, 0n, dueDate) — initial status correct even with past dueDate.
+(4) src/lib/payments.ts: createPayment and voidPaymentWithReversal recalculate invoice.paymentStatus after allocation/void using derivePaymentStatus with current allocatedFils and dueDate.
+(5) src/components/invoices/PaymentStatusBadge.tsx: new badge component with i18n labels (UNPAID/PARTIAL/PAID/OVERDUE).
+(6) src/components/invoices/InvoiceListPage.tsx + InvoiceDetailView.tsx: integrated PaymentStatusBadge column and header display.
+(7) src/lib/i18n.ts: EN/AR strings for paymentStatus, statusUnpaid, statusPartial, statusPaid, statusOverdue.
+(8) tests/db/payment-status.test.ts (6 tests): UNPAID (new invoice), PARTIAL (partial payment), PARTIAL+past dueDate→OVERDUE, PAID (full payment), OVERDUE (past dueDate), UNPAID after void.
+Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 109/109 (16 files); npx next build BUILD_EXIT=0.
+⚠️ paymentStatus is denormalized and computed at write time. An UNPAID invoice with dueDate < today becomes OVERDUE only after the next payment allocation/void on that invoice (or a manual refresh). For P2.4 aging reports, either add a cron job to refresh stale statuses or implement a DB trigger (see P1.6/D5). P2.3 (unallocated payments) and P2.4 (aging/statements) ready.
 ## 2026-10-30 - P1.5(b) + P1.5(c) 87681f6 - accountLedger sign-flip + F13 partyLedger mapping
 (1) P1.5(b): signFor(exported from accounting.ts) already applied in reports.ts accountLedger (lines 85, 90); tests/db/account-ledger.test.ts (3 tests) pins positive running balance for CREDIT-normal account after credit posting. No source change needed — code was already correct; TDD added.
 (2) P1.5(c): reports.ts F13 fix — removed outdated "KNOWN ISSUE" comment (manual journals mislabeled PAYMENT); partyLedgerKind (party-ledger-kind.ts) already handles MANUAL->JOURNAL, OPENING_BALANCE->OPENING, YEAR_END_CLOSE->YEAR_END correctly; page.tsx routing via partyLedgerHref works; i18n labels (journal, opening, yearEnd) present in EN/AR. tests/db/party-ledger-kind.test.ts (new, 1 test) asserts MANUAL entry kind = JOURNAL.

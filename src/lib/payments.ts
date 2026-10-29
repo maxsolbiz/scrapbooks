@@ -3,6 +3,7 @@ import type { EntrySource, PaymentMethod, PaymentType } from "@/generated/prisma
 import type { JournalEntry } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
 import { postJournalEntry, reverseJournalEntry } from "@/lib/accounting";
+import { derivePaymentStatus } from "@/lib/invoice-status";
 
 const CASH_CODE = "1110";
 const BANK_CODE = "1120";
@@ -214,6 +215,36 @@ export async function createPayment(input: CreatePaymentInput) {
     },
   });
 
+  // P2.2: Recalculate payment status for each allocated invoice
+  if (allocations.length > 0) {
+    for (const alloc of allocations) {
+      const invoice = await tx.invoice.findUnique({
+        where: { id: alloc.invoiceId },
+        include: {
+          allocations: {
+            where: { payment: { status: "POSTED" } },
+            select: { amountFils: true },
+          },
+        },
+      });
+      if (invoice) {
+        const allocatedFils = invoice.allocations.reduce(
+          (sum, a) => sum + a.amountFils,
+          0n,
+        );
+        const newStatus = derivePaymentStatus(
+          invoice.totalFils,
+          allocatedFils,
+          invoice.dueDate,
+        );
+        await tx.invoice.update({
+          where: { id: alloc.invoiceId },
+          data: { paymentStatus: newStatus },
+        });
+      }
+    }
+  }
+
   return payment;
 }
 
@@ -257,6 +288,36 @@ export async function voidPaymentWithReversal(input: VoidPaymentWithReversalInpu
   });
   if (!payment) throw new Error("Payment not found");
   if (payment.status === "VOID") throw new Error(`Payment ${payment.paymentNo} is already void`);
+
+  // P2.2: Recalculate payment status for all affected invoices after voiding
+  if (payment.allocations.length > 0) {
+    for (const alloc of payment.allocations) {
+      const invoice = await input.tx.invoice.findUnique({
+        where: { id: alloc.invoiceId },
+        include: {
+          allocations: {
+            where: { payment: { status: "POSTED" }, paymentId: { not: paymentId } },
+            select: { amountFils: true },
+          },
+        },
+      });
+      if (invoice) {
+        const allocatedFils = invoice.allocations.reduce(
+          (sum, a) => sum + a.amountFils,
+          0n,
+        );
+        const newStatus = derivePaymentStatus(
+          invoice.totalFils,
+          allocatedFils,
+          invoice.dueDate,
+        );
+        await input.tx.invoice.update({
+          where: { id: alloc.invoiceId },
+          data: { paymentStatus: newStatus },
+        });
+      }
+    }
+  }
 
   if (payment.journalEntryId) {
     const reversal = await reverseJournalEntry({

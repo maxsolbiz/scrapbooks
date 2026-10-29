@@ -7,18 +7,45 @@ import { formatAED } from "@/lib/money";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { prisma } from "@/lib/db";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default async function AgingPage() {
+export default async function AgingPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   await requireModule("reports");
   const locale = await getServerLocale();
   const t = getDictionary(locale);
+  const params = await searchParams;
+  const selected = params.party ? await prisma.party.findUnique({ where: { id: params.party } }) : undefined;
+  const partyId = selected?.id ?? "CUST-001"; // Default demo party; can be filtered
 
-  const aging = await calculateAgingBuckets("CUST-001"); // Default to demo customer for now; filter can be added
+  const aging = await calculateAgingBuckets(partyId);
+
+  const parties = await prisma.party.findMany({ orderBy: { code: "asc" } });
 
   return (
     <div className="space-y-4">
       <PageHeader title={t.invoices.aging || "Aging Report"} />
+      <form action="/reports/aging" method="get" className="flex items-center gap-2">
+        <Select name="party" defaultValue={selected?.id ?? ""}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Select party..." />
+          </SelectTrigger>
+          <SelectContent>
+            {parties.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                <span className="font-mono text-xs">{p.code}</span> {p.nameEn}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button type="submit" variant="outline">Filter</Button>
+      </form>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

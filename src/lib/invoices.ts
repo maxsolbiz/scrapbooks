@@ -48,7 +48,17 @@ const SALES_INCOME_CODE = "4100";
 const PURCHASE_EXPENSE_CODE = "5100";
 
 export async function createInvoice(input: CreateInvoiceInput) {
-  const { tx, direction, date, partyId, createdById, lines } = input;
+  const { tx, direction, date, partyId, createdById, lines, idempotencyKey } = input;
+
+  // Idempotency check: if key provided, check for existing invoice
+  if (idempotencyKey) {
+    const existing = await tx.invoice.findUnique({
+      where: { idempotencyKey },
+    });
+    if (existing) {
+      return existing;
+    }
+  }
 
   if (!lines.length) throw new Error("An invoice needs at least one line");
 

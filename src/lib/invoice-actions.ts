@@ -44,6 +44,8 @@ const invoiceSchema = z.object({
   vehicleNo: z.string().optional(),
   modeOfPayment: z.string().optional(),
   termsOfDelivery: z.string().optional(),
+  dueDate: z.string().optional(),
+  paymentTerms: z.coerce.number().int().positive().optional(),
   lines: z.array(lineSchema).min(1, "At least one line"),
   idempotencyKey: z.string().uuid().optional(),
 });
@@ -98,6 +100,8 @@ export async function createInvoiceAction(
         vehicleNo: v.vehicleNo,
         modeOfPayment: v.modeOfPayment,
         termsOfDelivery: v.termsOfDelivery,
+        dueDate: v.dueDate ? new Date(v.dueDate) : undefined,
+        paymentTerms: v.paymentTerms,
         createdById: user.id,
         idempotencyKey: v.idempotencyKey,
         lines: v.lines.map((l) => ({

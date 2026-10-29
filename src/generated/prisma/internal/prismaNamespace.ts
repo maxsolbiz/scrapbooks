@@ -1663,6 +1663,8 @@ export const InvoiceScalarFieldEnum = {
   vehicleNo: 'vehicleNo',
   modeOfPayment: 'modeOfPayment',
   termsOfDelivery: 'termsOfDelivery',
+  dueDate: 'dueDate',
+  paymentTerms: 'paymentTerms',
   subtotalFils: 'subtotalFils',
   vatFils: 'vatFils',
   totalFils: 'totalFils',

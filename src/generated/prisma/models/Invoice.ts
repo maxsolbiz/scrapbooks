@@ -27,12 +27,14 @@ export type AggregateInvoice = {
 }
 
 export type InvoiceAvgAggregateOutputType = {
+  paymentTerms: number | null
   subtotalFils: number | null
   vatFils: number | null
   totalFils: number | null
 }
 
 export type InvoiceSumAggregateOutputType = {
+  paymentTerms: number | null
   subtotalFils: bigint | null
   vatFils: bigint | null
   totalFils: bigint | null
@@ -53,6 +55,8 @@ export type InvoiceMinAggregateOutputType = {
   vehicleNo: string | null
   modeOfPayment: string | null
   termsOfDelivery: string | null
+  dueDate: Date | null
+  paymentTerms: number | null
   subtotalFils: bigint | null
   vatFils: bigint | null
   totalFils: bigint | null
@@ -80,6 +84,8 @@ export type InvoiceMaxAggregateOutputType = {
   vehicleNo: string | null
   modeOfPayment: string | null
   termsOfDelivery: string | null
+  dueDate: Date | null
+  paymentTerms: number | null
   subtotalFils: bigint | null
   vatFils: bigint | null
   totalFils: bigint | null
@@ -107,6 +113,8 @@ export type InvoiceCountAggregateOutputType = {
   vehicleNo: number
   modeOfPayment: number
   termsOfDelivery: number
+  dueDate: number
+  paymentTerms: number
   subtotalFils: number
   vatFils: number
   totalFils: number
@@ -122,12 +130,14 @@ export type InvoiceCountAggregateOutputType = {
 
 
 export type InvoiceAvgAggregateInputType = {
+  paymentTerms?: true
   subtotalFils?: true
   vatFils?: true
   totalFils?: true
 }
 
 export type InvoiceSumAggregateInputType = {
+  paymentTerms?: true
   subtotalFils?: true
   vatFils?: true
   totalFils?: true
@@ -148,6 +158,8 @@ export type InvoiceMinAggregateInputType = {
   vehicleNo?: true
   modeOfPayment?: true
   termsOfDelivery?: true
+  dueDate?: true
+  paymentTerms?: true
   subtotalFils?: true
   vatFils?: true
   totalFils?: true
@@ -175,6 +187,8 @@ export type InvoiceMaxAggregateInputType = {
   vehicleNo?: true
   modeOfPayment?: true
   termsOfDelivery?: true
+  dueDate?: true
+  paymentTerms?: true
   subtotalFils?: true
   vatFils?: true
   totalFils?: true
@@ -202,6 +216,8 @@ export type InvoiceCountAggregateInputType = {
   vehicleNo?: true
   modeOfPayment?: true
   termsOfDelivery?: true
+  dueDate?: true
+  paymentTerms?: true
   subtotalFils?: true
   vatFils?: true
   totalFils?: true
@@ -316,6 +332,8 @@ export type InvoiceGroupByOutputType = {
   vehicleNo: string | null
   modeOfPayment: string | null
   termsOfDelivery: string | null
+  dueDate: Date | null
+  paymentTerms: number | null
   subtotalFils: bigint
   vatFils: bigint
   totalFils: bigint
@@ -366,6 +384,8 @@ export type InvoiceWhereInput = {
   vehicleNo?: Prisma.StringNullableFilter<"Invoice"> | string | null
   modeOfPayment?: Prisma.StringNullableFilter<"Invoice"> | string | null
   termsOfDelivery?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  dueDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  paymentTerms?: Prisma.IntNullableFilter<"Invoice"> | number | null
   subtotalFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
   vatFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
   totalFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
@@ -398,6 +418,8 @@ export type InvoiceOrderByWithRelationInput = {
   vehicleNo?: Prisma.SortOrderInput | Prisma.SortOrder
   modeOfPayment?: Prisma.SortOrderInput | Prisma.SortOrder
   termsOfDelivery?: Prisma.SortOrderInput | Prisma.SortOrder
+  dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -436,6 +458,8 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   vehicleNo?: Prisma.StringNullableFilter<"Invoice"> | string | null
   modeOfPayment?: Prisma.StringNullableFilter<"Invoice"> | string | null
   termsOfDelivery?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  dueDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  paymentTerms?: Prisma.IntNullableFilter<"Invoice"> | number | null
   subtotalFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
   vatFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
   totalFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
@@ -466,6 +490,8 @@ export type InvoiceOrderByWithAggregationInput = {
   vehicleNo?: Prisma.SortOrderInput | Prisma.SortOrder
   modeOfPayment?: Prisma.SortOrderInput | Prisma.SortOrder
   termsOfDelivery?: Prisma.SortOrderInput | Prisma.SortOrder
+  dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -501,6 +527,8 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   vehicleNo?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   modeOfPayment?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
   termsOfDelivery?: Prisma.StringNullableWithAggregatesFilter<"Invoice"> | string | null
+  dueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+  paymentTerms?: Prisma.IntNullableWithAggregatesFilter<"Invoice"> | number | null
   subtotalFils?: Prisma.BigIntWithAggregatesFilter<"Invoice"> | bigint | number
   vatFils?: Prisma.BigIntWithAggregatesFilter<"Invoice"> | bigint | number
   totalFils?: Prisma.BigIntWithAggregatesFilter<"Invoice"> | bigint | number
@@ -527,6 +555,8 @@ export type InvoiceCreateInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -557,6 +587,8 @@ export type InvoiceUncheckedCreateInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -585,6 +617,8 @@ export type InvoiceUpdateInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -615,6 +649,8 @@ export type InvoiceUncheckedUpdateInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -644,6 +680,8 @@ export type InvoiceCreateManyInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -670,6 +708,8 @@ export type InvoiceUpdateManyMutationInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -695,6 +735,8 @@ export type InvoiceUncheckedUpdateManyInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -742,6 +784,8 @@ export type InvoiceCountOrderByAggregateInput = {
   vehicleNo?: Prisma.SortOrder
   modeOfPayment?: Prisma.SortOrder
   termsOfDelivery?: Prisma.SortOrder
+  dueDate?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -755,6 +799,7 @@ export type InvoiceCountOrderByAggregateInput = {
 }
 
 export type InvoiceAvgOrderByAggregateInput = {
+  paymentTerms?: Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -775,6 +820,8 @@ export type InvoiceMaxOrderByAggregateInput = {
   vehicleNo?: Prisma.SortOrder
   modeOfPayment?: Prisma.SortOrder
   termsOfDelivery?: Prisma.SortOrder
+  dueDate?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -802,6 +849,8 @@ export type InvoiceMinOrderByAggregateInput = {
   vehicleNo?: Prisma.SortOrder
   modeOfPayment?: Prisma.SortOrder
   termsOfDelivery?: Prisma.SortOrder
+  dueDate?: Prisma.SortOrder
+  paymentTerms?: Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -815,6 +864,7 @@ export type InvoiceMinOrderByAggregateInput = {
 }
 
 export type InvoiceSumOrderByAggregateInput = {
+  paymentTerms?: Prisma.SortOrder
   subtotalFils?: Prisma.SortOrder
   vatFils?: Prisma.SortOrder
   totalFils?: Prisma.SortOrder
@@ -949,6 +999,14 @@ export type EnumInvoiceStatusFieldUpdateOperationsInput = {
   set?: $Enums.InvoiceStatus
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type InvoiceCreateNestedOneWithoutLinesInput = {
   create?: Prisma.XOR<Prisma.InvoiceCreateWithoutLinesInput, Prisma.InvoiceUncheckedCreateWithoutLinesInput>
   connectOrCreate?: Prisma.InvoiceCreateOrConnectWithoutLinesInput
@@ -991,6 +1049,8 @@ export type InvoiceCreateWithoutCreatedByInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1020,6 +1080,8 @@ export type InvoiceUncheckedCreateWithoutCreatedByInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1077,6 +1139,8 @@ export type InvoiceScalarWhereInput = {
   vehicleNo?: Prisma.StringNullableFilter<"Invoice"> | string | null
   modeOfPayment?: Prisma.StringNullableFilter<"Invoice"> | string | null
   termsOfDelivery?: Prisma.StringNullableFilter<"Invoice"> | string | null
+  dueDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
+  paymentTerms?: Prisma.IntNullableFilter<"Invoice"> | number | null
   subtotalFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
   vatFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
   totalFils?: Prisma.BigIntFilter<"Invoice"> | bigint | number
@@ -1103,6 +1167,8 @@ export type InvoiceCreateWithoutJournalEntryInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1132,6 +1198,8 @@ export type InvoiceUncheckedCreateWithoutJournalEntryInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1175,6 +1243,8 @@ export type InvoiceUpdateWithoutJournalEntryInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1204,6 +1274,8 @@ export type InvoiceUncheckedUpdateWithoutJournalEntryInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1231,6 +1303,8 @@ export type InvoiceCreateWithoutPartyInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1259,6 +1333,8 @@ export type InvoiceUncheckedCreateWithoutPartyInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1313,6 +1389,8 @@ export type InvoiceCreateWithoutLinesInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1342,6 +1420,8 @@ export type InvoiceUncheckedCreateWithoutLinesInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1385,6 +1465,8 @@ export type InvoiceUpdateWithoutLinesInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1414,6 +1496,8 @@ export type InvoiceUncheckedUpdateWithoutLinesInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1441,6 +1525,8 @@ export type InvoiceCreateWithoutAllocationsInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1470,6 +1556,8 @@ export type InvoiceUncheckedCreateWithoutAllocationsInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1513,6 +1601,8 @@ export type InvoiceUpdateWithoutAllocationsInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1542,6 +1632,8 @@ export type InvoiceUncheckedUpdateWithoutAllocationsInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1570,6 +1662,8 @@ export type InvoiceCreateManyCreatedByInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1595,6 +1689,8 @@ export type InvoiceUpdateWithoutCreatedByInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1624,6 +1720,8 @@ export type InvoiceUncheckedUpdateWithoutCreatedByInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1652,6 +1750,8 @@ export type InvoiceUncheckedUpdateManyWithoutCreatedByInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1677,6 +1777,8 @@ export type InvoiceCreateManyPartyInput = {
   vehicleNo?: string | null
   modeOfPayment?: string | null
   termsOfDelivery?: string | null
+  dueDate?: Date | string | null
+  paymentTerms?: number | null
   subtotalFils?: bigint | number
   vatFils?: bigint | number
   totalFils?: bigint | number
@@ -1703,6 +1805,8 @@ export type InvoiceUpdateWithoutPartyInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1731,6 +1835,8 @@ export type InvoiceUncheckedUpdateWithoutPartyInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1759,6 +1865,8 @@ export type InvoiceUncheckedUpdateManyWithoutPartyInput = {
   vehicleNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modeOfPayment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsOfDelivery?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentTerms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   subtotalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -1826,6 +1934,8 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   vehicleNo?: boolean
   modeOfPayment?: boolean
   termsOfDelivery?: boolean
+  dueDate?: boolean
+  paymentTerms?: boolean
   subtotalFils?: boolean
   vatFils?: boolean
   totalFils?: boolean
@@ -1859,6 +1969,8 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   vehicleNo?: boolean
   modeOfPayment?: boolean
   termsOfDelivery?: boolean
+  dueDate?: boolean
+  paymentTerms?: boolean
   subtotalFils?: boolean
   vatFils?: boolean
   totalFils?: boolean
@@ -1889,6 +2001,8 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   vehicleNo?: boolean
   modeOfPayment?: boolean
   termsOfDelivery?: boolean
+  dueDate?: boolean
+  paymentTerms?: boolean
   subtotalFils?: boolean
   vatFils?: boolean
   totalFils?: boolean
@@ -1919,6 +2033,8 @@ export type InvoiceSelectScalar = {
   vehicleNo?: boolean
   modeOfPayment?: boolean
   termsOfDelivery?: boolean
+  dueDate?: boolean
+  paymentTerms?: boolean
   subtotalFils?: boolean
   vatFils?: boolean
   totalFils?: boolean
@@ -1931,7 +2047,7 @@ export type InvoiceSelectScalar = {
   idempotencyKey?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceNo" | "direction" | "date" | "partyId" | "status" | "trnSnapshot" | "supplierRef" | "purchaseOrder" | "deliveryNote" | "deliveryNoteDate" | "vehicleNo" | "modeOfPayment" | "termsOfDelivery" | "subtotalFils" | "vatFils" | "totalFils" | "notes" | "notesAr" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt" | "idempotencyKey", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceNo" | "direction" | "date" | "partyId" | "status" | "trnSnapshot" | "supplierRef" | "purchaseOrder" | "deliveryNote" | "deliveryNoteDate" | "vehicleNo" | "modeOfPayment" | "termsOfDelivery" | "dueDate" | "paymentTerms" | "subtotalFils" | "vatFils" | "totalFils" | "notes" | "notesAr" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt" | "idempotencyKey", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   party?: boolean | Prisma.PartyDefaultArgs<ExtArgs>
   journalEntry?: boolean | Prisma.Invoice$journalEntryArgs<ExtArgs>
@@ -1975,6 +2091,8 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     vehicleNo: string | null
     modeOfPayment: string | null
     termsOfDelivery: string | null
+    dueDate: Date | null
+    paymentTerms: number | null
     subtotalFils: bigint
     vatFils: bigint
     totalFils: bigint
@@ -2427,6 +2545,8 @@ export interface InvoiceFieldRefs {
   readonly vehicleNo: Prisma.FieldRef<"Invoice", 'String'>
   readonly modeOfPayment: Prisma.FieldRef<"Invoice", 'String'>
   readonly termsOfDelivery: Prisma.FieldRef<"Invoice", 'String'>
+  readonly dueDate: Prisma.FieldRef<"Invoice", 'DateTime'>
+  readonly paymentTerms: Prisma.FieldRef<"Invoice", 'Int'>
   readonly subtotalFils: Prisma.FieldRef<"Invoice", 'BigInt'>
   readonly vatFils: Prisma.FieldRef<"Invoice", 'BigInt'>
   readonly totalFils: Prisma.FieldRef<"Invoice", 'BigInt'>

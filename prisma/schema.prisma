@@ -270,6 +270,8 @@ model Invoice {
   vehicleNo       String?
   modeOfPayment   String?
   termsOfDelivery String?          @db.Text
+  dueDate         DateTime?
+  paymentTerms    Int?             // days, e.g. 30, 60, 90
   subtotalFils    BigInt           @default(0)
   vatFils         BigInt           @default(0)
   totalFils       BigInt           @default(0)
@@ -289,6 +291,7 @@ model Invoice {
   @@index([date])
   @@index([partyId])
   @@index([direction, status])
+  @@index([dueDate])
   @@unique([partyId, supplierRef], name: "purchase_invoice_supplier_ref_unique", map: "purchase_invoice_supplier_ref_unique", where: raw("\"direction\" = 'PURCHASE' AND \"supplierRef\" IS NOT NULL"))
 }
 

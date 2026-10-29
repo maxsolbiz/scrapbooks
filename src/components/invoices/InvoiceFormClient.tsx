@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -93,6 +93,8 @@ export function InvoiceFormClient({
 
   const [date, setDate] = useState(today);
   const [partyId, setPartyId] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("");
   const [lines, setLines] = useState<Line[]>([
     { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: defaultVatRate, wbtNo: "" },
   ]);
@@ -119,6 +121,21 @@ export function InvoiceFormClient({
     }
     return { subtotal, vat, total: subtotal + vat };
   }, [lines]);
+
+  // Auto-calculate dueDate when paymentTerms changes
+  useEffect(() => {
+    if (paymentTerms && date) {
+      const days = parseInt(paymentTerms, 10);
+      if (!Number.isNaN(days) && days > 0) {
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        const iso = d.toISOString().slice(0, 10);
+        if (iso !== dueDate) {
+          setDueDate(iso);
+        }
+      }
+    }
+  }, [paymentTerms, date]);
 
   function pickItem(lineId: string, itemId: string) {
     const item = items.find((i) => i.id === itemId);
@@ -176,6 +193,8 @@ export function InvoiceFormClient({
       vehicleNo: printDetails.vehicleNo || undefined,
       modeOfPayment: printDetails.modeOfPayment || undefined,
       termsOfDelivery: printDetails.termsOfDelivery || undefined,
+      dueDate: dueDate || undefined,
+      paymentTerms: paymentTerms ? parseInt(paymentTerms, 10) : undefined,
       lines: lines.map((l) => ({
         itemId: l.itemId || undefined,
         description: l.description,
@@ -224,6 +243,21 @@ export function InvoiceFormClient({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t.invoices.dueDate}</Label>
+              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t.invoices.paymentTerms}</Label>
+              <Input
+                type="number"
+                min="1"
+                max="365"
+                placeholder={t.invoices.paymentTermsPlaceholder}
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+              />
             </div>
           </div>
 

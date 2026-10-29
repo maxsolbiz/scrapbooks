@@ -35,6 +35,8 @@ export interface CreateInvoiceInput {
   vehicleNo?: string;
   modeOfPayment?: string;
   termsOfDelivery?: string;
+  dueDate?: Date;
+  paymentTerms?: number; // days, e.g. 30, 60, 90
   lines: InvoiceLineInput[];
   createdById: string;
   tx: Tx;
@@ -48,7 +50,7 @@ const SALES_INCOME_CODE = "4100";
 const PURCHASE_EXPENSE_CODE = "5100";
 
 export async function createInvoice(input: CreateInvoiceInput) {
-  const { tx, direction, date, partyId, createdById, lines, idempotencyKey } = input;
+  const { tx, direction, date, partyId, createdById, lines, idempotencyKey, dueDate, paymentTerms } = input;
 
   // Idempotency check: if key provided, check for existing invoice
   if (idempotencyKey) {
@@ -95,6 +97,13 @@ export async function createInvoice(input: CreateInvoiceInput) {
   });
   const total = subtotal + vatTotal;
 
+  // Auto-calculate dueDate from paymentTerms if not explicitly provided
+  let computedDueDate: Date | null = dueDate || null;
+  if (!computedDueDate && paymentTerms && paymentTerms > 0) {
+    computedDueDate = new Date(date);
+    computedDueDate.setDate(computedDueDate.getDate() + paymentTerms);
+  }
+
   const prefix = direction === "SALES" ? "INV" : "PINV";
   const serial = await tx.serial.upsert({
     where: { key: `${fiscalYear.name}:${prefix}` },
@@ -123,6 +132,8 @@ export async function createInvoice(input: CreateInvoiceInput) {
       vehicleNo: input.vehicleNo || null,
       modeOfPayment: input.modeOfPayment || null,
       termsOfDelivery: input.termsOfDelivery || null,
+      dueDate: computedDueDate,
+      paymentTerms: input.paymentTerms || null,
       createdById,
       idempotencyKey: input.idempotencyKey || null,
       lines: {

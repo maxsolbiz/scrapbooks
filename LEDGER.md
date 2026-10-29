@@ -412,3 +412,11 @@ Verification: tsc --noEmit EXIT=0; npm test 141/141; vitest --project db 89/89 (
 (3) c9f0f82: src/lib/invoices.ts createInvoice reads existing by idempotencyKey (Prisma findUnique) and returns early if found.
 (4) ffaea6b then 8d6e81f: tests/db/idempotency-keys.test.ts (2 tests) — same key returns same invoice, different keys create different invoices; 100ms delay between transactions for commit visibility. Debug test removed.
 (5) Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 80/80 (10 files); npx next build EXIT=0 "Compiled successfully". Open: D5 (Postgres trigger enforcement for idempotency) blocked, D9 (resetDemoData env-gate) pending. No push, no deploy (prod at b102c67 lacks reversesEntryId column; apply ops/sql/20261027_p11_commit1_reversal_link.sql first).
+## 2026-10-30 - P2.1 - Invoice dueDate + Payment Terms
+(1) prisma/schema.prisma: added dueDate DateTime? and paymentTerms Int? to Invoice model; @@index([dueDate]) for aging queries; migration 20261030100000_p21_invoice_due_date created via Node.js script (manual migration creation required due to PowerShell BOM issues).
+(2) src/lib/invoices.ts: CreateInvoiceInput gains dueDate? and paymentTerms?; createInvoice auto-calculates dueDate = date + paymentTerms days when dueDate not provided and paymentTerms > 0.
+(3) src/lib/invoice-actions.ts: Zod schema updated with dueDate (string date) and paymentTerms (coerce.number().int().positive().optional()); createInvoiceAction passes both to createInvoice.
+(4) src/lib/i18n.ts: EN/AR strings added for dueDate, paymentTerms, paymentTermsPlaceholder.
+(5) src/components/invoices/InvoiceForm.tsx + InvoiceFormClient.tsx: new fields added to form grid (date picker for dueDate, number input for paymentTerms); useEffect auto-calculates dueDate when paymentTerms changes; submit passes both to action.
+(6) tests/db/invoice-due-date.test.ts (new, 5 tests): auto-calc from paymentTerms, explicit dueDate wins, null when neither provided, works for PURCHASE, zero paymentTerms stored as null.
+(7) Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 103/103 (14 files); npx next build EXIT=0 "Compiled successfully". No push, no deploy (prod at b102c67 lacks reversesEntryId column; apply ops/sql/20261027_p11_commit1_reversal_link.sql first).

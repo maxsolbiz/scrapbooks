@@ -222,6 +222,9 @@ const en = {
     termsOfDelivery: "Terms Of Delivery",
     editPrintDetails: "Edit print details",
     printDetailsUpdated: "Print details updated",
+    dueDate: "Due Date",
+    paymentTerms: "Payment Terms (days)",
+    paymentTermsPlaceholder: "e.g. 30, 60, 90",
   },
   payments: {
     new: "New payment / receipt",
@@ -477,6 +480,9 @@ const ar: typeof en = {
     termsOfDelivery: "شروط التسليم",
     editPrintDetails: "تعديل بيانات الطباعة",
     printDetailsUpdated: "تم تحديث بيانات الطباعة",
+    dueDate: "تاريخ الاستحقاق",
+    paymentTerms: "شروط الدفع (أيام)",
+    paymentTermsPlaceholder: "مثال: 30، 60، 90",
   },
   payments: {
     new: "سند سداد / مقبوضات",

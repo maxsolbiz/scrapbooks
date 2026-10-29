@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -184,10 +185,23 @@ export function PartiesClient({
                 </TableCell>
                 <TableCell>
                   {canWrite ? (
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
-                      <Pencil className="size-4" />
-                    </Button>
-                  ) : null}
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Link href={`/parties/${p.id}/statement`}>
+                        <Button variant="ghost" size="sm" className="ml-1">
+                          Statement
+                        </Button>
+                      </Link>
+                    </>
+                  ) : (
+                    <Link href={`/parties/${p.id}/statement`}>
+                      <Button variant="ghost" size="sm">
+                        Statement
+                      </Button>
+                    </Link>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

@@ -4,6 +4,7 @@ import type { JournalEntry } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
 import { postJournalEntry, reverseJournalEntry } from "@/lib/accounting";
 import { derivePaymentStatus } from "@/lib/invoice-status";
+import { partyCreditBalance, getUnallocatedPayments } from "@/lib/party-credit";
 
 const CASH_CODE = "1110";
 const BANK_CODE = "1120";
@@ -333,4 +334,61 @@ export async function voidPaymentWithReversal(input: VoidPaymentWithReversalInpu
   // No journal entry (DRAFT payment): just flip the status; no reversal entry.
   await input.tx.payment.update({ where: { id: paymentId }, data: { status: "VOID" } });
   return null;
+}
+
+export interface ApplyCreditInput {
+  tx: Tx;
+  invoiceId: string;
+  amountFils: bigint;
+}
+
+/**
+ * Apply available credit from unallocated payments to an invoice.
+ * Uses FIFO (oldest payment first) to create allocations.
+ */
+export async function applyCreditToInvoice(input: ApplyCreditInput): Promise<void> {
+  const { tx, invoiceId, amountFils } = input;
+
+  const invoice = await tx.invoice.findUnique({ where: { id: invoiceId } });
+  if (!invoice) throw new Error("Invoice not found");
+
+  // Check available credit
+  const available = await partyCreditBalance(invoice.partyId);
+  if (amountFils > available) {
+    throw new Error(`Insufficient credit: requested ${amountFils}, available ${available}`);
+  }
+
+  // Get unallocated payments (FIFO)
+  const unallocated = await getUnallocatedPayments(invoice.partyId);
+
+  let remaining = amountFils;
+  for (const payment of unallocated) {
+    if (remaining <= 0n) break;
+
+    const allocateFromThis = remaining < payment.remaining ? remaining : payment.remaining;
+    await tx.paymentAllocation.create({
+      data: {
+        paymentId: payment.id,
+        invoiceId,
+        amountFils: allocateFromThis,
+      },
+    });
+    remaining -= allocateFromThis;
+  }
+
+  // Recalculate invoice payment status
+  const updatedInvoice = await tx.invoice.findUnique({
+    where: { id: invoiceId },
+    include: {
+      allocations: { where: { payment: { status: "POSTED" } }, select: { amountFils: true } },
+    },
+  });
+  if (updatedInvoice) {
+    const allocatedFils = updatedInvoice.allocations.reduce((sum, a) => sum + a.amountFils, 0n);
+    const newStatus = derivePaymentStatus(updatedInvoice.totalFils, allocatedFils, updatedInvoice.dueDate);
+    await tx.invoice.update({
+      where: { id: invoiceId },
+      data: { paymentStatus: newStatus },
+    });
+  }
 }

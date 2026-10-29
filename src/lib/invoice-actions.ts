@@ -107,8 +107,12 @@ export async function createInvoiceAction(
     revalidatePath(direction === "SALES" ? "/sales-invoices" : "/purchase-invoices");
     revalidatePath("/dashboard");
     return { ok: true, data: { id: invoice.id, invoiceNo: invoice.invoiceNo } };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to post invoice" };
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (errorMessage.includes("P2002")) {
+      return { ok: false, error: "A purchase invoice with this supplier reference already exists for this vendor." };
+    }
+    return { ok: false, error: errorMessage };
   }
 }
 

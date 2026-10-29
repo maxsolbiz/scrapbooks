@@ -45,6 +45,7 @@ const invoiceSchema = z.object({
   modeOfPayment: z.string().optional(),
   termsOfDelivery: z.string().optional(),
   lines: z.array(lineSchema).min(1, "At least one line"),
+  idempotencyKey: z.string().uuid().optional(),
 });
 
 const invoicePrintDetailsSchema = z.object({
@@ -70,6 +71,17 @@ export async function createInvoiceAction(
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const v = parsed.data;
+
+  // Idempotency check: if key provided, return existing invoice
+  if (v.idempotencyKey) {
+    const existing = await prisma.invoice.findUnique({
+      where: { idempotencyKey: v.idempotencyKey },
+    });
+    if (existing) {
+      return { ok: true, data: { id: existing.id, invoiceNo: existing.invoiceNo } };
+    }
+  }
+
   try {
     const invoice = await prisma.$transaction(async (tx) =>
       createInvoice({
@@ -87,6 +99,7 @@ export async function createInvoiceAction(
         modeOfPayment: v.modeOfPayment,
         termsOfDelivery: v.termsOfDelivery,
         createdById: user.id,
+        idempotencyKey: v.idempotencyKey,
         lines: v.lines.map((l) => ({
           itemId: l.itemId || undefined,
           description: l.description,

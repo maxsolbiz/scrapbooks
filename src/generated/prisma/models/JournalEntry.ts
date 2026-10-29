@@ -38,6 +38,7 @@ export type JournalEntryMinAggregateOutputType = {
   postedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  idempotencyKey: string | null
   reversesEntryId: string | null
 }
 
@@ -55,6 +56,7 @@ export type JournalEntryMaxAggregateOutputType = {
   postedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  idempotencyKey: string | null
   reversesEntryId: string | null
 }
 
@@ -72,6 +74,7 @@ export type JournalEntryCountAggregateOutputType = {
   postedAt: number
   createdAt: number
   updatedAt: number
+  idempotencyKey: number
   reversesEntryId: number
   _all: number
 }
@@ -91,6 +94,7 @@ export type JournalEntryMinAggregateInputType = {
   postedAt?: true
   createdAt?: true
   updatedAt?: true
+  idempotencyKey?: true
   reversesEntryId?: true
 }
 
@@ -108,6 +112,7 @@ export type JournalEntryMaxAggregateInputType = {
   postedAt?: true
   createdAt?: true
   updatedAt?: true
+  idempotencyKey?: true
   reversesEntryId?: true
 }
 
@@ -125,6 +130,7 @@ export type JournalEntryCountAggregateInputType = {
   postedAt?: true
   createdAt?: true
   updatedAt?: true
+  idempotencyKey?: true
   reversesEntryId?: true
   _all?: true
 }
@@ -215,6 +221,7 @@ export type JournalEntryGroupByOutputType = {
   postedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  idempotencyKey: string | null
   reversesEntryId: string | null
   _count: JournalEntryCountAggregateOutputType | null
   _min: JournalEntryMinAggregateOutputType | null
@@ -253,6 +260,7 @@ export type JournalEntryWhereInput = {
   postedAt?: Prisma.DateTimeNullableFilter<"JournalEntry"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"JournalEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"JournalEntry"> | Date | string
+  idempotencyKey?: Prisma.StringNullableFilter<"JournalEntry"> | string | null
   reversesEntryId?: Prisma.StringNullableFilter<"JournalEntry"> | string | null
   fiscalYear?: Prisma.XOR<Prisma.FiscalYearNullableScalarRelationFilter, Prisma.FiscalYearWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -277,6 +285,7 @@ export type JournalEntryOrderByWithRelationInput = {
   postedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   reversesEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   fiscalYear?: Prisma.FiscalYearOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
@@ -290,6 +299,7 @@ export type JournalEntryOrderByWithRelationInput = {
 export type JournalEntryWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   entryNo?: string
+  idempotencyKey?: string
   reversesEntryId?: string
   AND?: Prisma.JournalEntryWhereInput | Prisma.JournalEntryWhereInput[]
   OR?: Prisma.JournalEntryWhereInput[]
@@ -312,7 +322,7 @@ export type JournalEntryWhereUniqueInput = Prisma.AtLeast<{
   lines?: Prisma.JournalLineListRelationFilter
   invoiceFor?: Prisma.XOR<Prisma.InvoiceNullableScalarRelationFilter, Prisma.InvoiceWhereInput> | null
   paymentFor?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
-}, "id" | "entryNo" | "reversesEntryId">
+}, "id" | "entryNo" | "idempotencyKey" | "reversesEntryId">
 
 export type JournalEntryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -328,6 +338,7 @@ export type JournalEntryOrderByWithAggregationInput = {
   postedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   reversesEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.JournalEntryCountOrderByAggregateInput
   _max?: Prisma.JournalEntryMaxOrderByAggregateInput
@@ -351,6 +362,7 @@ export type JournalEntryScalarWhereWithAggregatesInput = {
   postedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"JournalEntry"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"JournalEntry"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"JournalEntry"> | Date | string
+  idempotencyKey?: Prisma.StringNullableWithAggregatesFilter<"JournalEntry"> | string | null
   reversesEntryId?: Prisma.StringNullableWithAggregatesFilter<"JournalEntry"> | string | null
 }
 
@@ -366,6 +378,7 @@ export type JournalEntryCreateInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
@@ -389,6 +402,7 @@ export type JournalEntryUncheckedCreateInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
@@ -408,6 +422,7 @@ export type JournalEntryUpdateInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
@@ -431,6 +446,7 @@ export type JournalEntryUncheckedUpdateInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
@@ -452,6 +468,7 @@ export type JournalEntryCreateManyInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
 }
 
@@ -467,6 +484,7 @@ export type JournalEntryUpdateManyMutationInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type JournalEntryUncheckedUpdateManyInput = {
@@ -483,6 +501,7 @@ export type JournalEntryUncheckedUpdateManyInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -515,6 +534,7 @@ export type JournalEntryCountOrderByAggregateInput = {
   postedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   reversesEntryId?: Prisma.SortOrder
 }
 
@@ -532,6 +552,7 @@ export type JournalEntryMaxOrderByAggregateInput = {
   postedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   reversesEntryId?: Prisma.SortOrder
 }
 
@@ -549,6 +570,7 @@ export type JournalEntryMinOrderByAggregateInput = {
   postedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   reversesEntryId?: Prisma.SortOrder
 }
 
@@ -759,6 +781,7 @@ export type JournalEntryCreateWithoutCreatedByInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
   reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
@@ -780,6 +803,7 @@ export type JournalEntryUncheckedCreateWithoutCreatedByInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
@@ -830,6 +854,7 @@ export type JournalEntryScalarWhereInput = {
   postedAt?: Prisma.DateTimeNullableFilter<"JournalEntry"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"JournalEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"JournalEntry"> | Date | string
+  idempotencyKey?: Prisma.StringNullableFilter<"JournalEntry"> | string | null
   reversesEntryId?: Prisma.StringNullableFilter<"JournalEntry"> | string | null
 }
 
@@ -845,6 +870,7 @@ export type JournalEntryCreateWithoutFiscalYearInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
   reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
@@ -866,6 +892,7 @@ export type JournalEntryUncheckedCreateWithoutFiscalYearInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
@@ -911,6 +938,7 @@ export type JournalEntryCreateWithoutReversedByInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
@@ -933,6 +961,7 @@ export type JournalEntryUncheckedCreateWithoutReversedByInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
@@ -956,6 +985,7 @@ export type JournalEntryCreateWithoutReversesEntryInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
@@ -978,6 +1008,7 @@ export type JournalEntryUncheckedCreateWithoutReversesEntryInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
@@ -1012,6 +1043,7 @@ export type JournalEntryUpdateWithoutReversedByInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
@@ -1034,6 +1066,7 @@ export type JournalEntryUncheckedUpdateWithoutReversedByInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
@@ -1063,6 +1096,7 @@ export type JournalEntryUpdateWithoutReversesEntryInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
@@ -1085,6 +1119,7 @@ export type JournalEntryUncheckedUpdateWithoutReversesEntryInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
@@ -1103,6 +1138,7 @@ export type JournalEntryCreateWithoutLinesInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
@@ -1125,6 +1161,7 @@ export type JournalEntryUncheckedCreateWithoutLinesInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
@@ -1159,6 +1196,7 @@ export type JournalEntryUpdateWithoutLinesInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
@@ -1181,6 +1219,7 @@ export type JournalEntryUncheckedUpdateWithoutLinesInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
@@ -1199,6 +1238,7 @@ export type JournalEntryCreateWithoutInvoiceForInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
@@ -1221,6 +1261,7 @@ export type JournalEntryUncheckedCreateWithoutInvoiceForInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
@@ -1255,6 +1296,7 @@ export type JournalEntryUpdateWithoutInvoiceForInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
@@ -1277,6 +1319,7 @@ export type JournalEntryUncheckedUpdateWithoutInvoiceForInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
@@ -1295,6 +1338,7 @@ export type JournalEntryCreateWithoutPaymentForInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
   reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
@@ -1317,6 +1361,7 @@ export type JournalEntryUncheckedCreateWithoutPaymentForInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
@@ -1351,6 +1396,7 @@ export type JournalEntryUpdateWithoutPaymentForInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
@@ -1373,6 +1419,7 @@ export type JournalEntryUncheckedUpdateWithoutPaymentForInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
@@ -1392,6 +1439,7 @@ export type JournalEntryCreateManyCreatedByInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
 }
 
@@ -1407,6 +1455,7 @@ export type JournalEntryUpdateWithoutCreatedByInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
   reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
@@ -1428,6 +1477,7 @@ export type JournalEntryUncheckedUpdateWithoutCreatedByInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
@@ -1448,6 +1498,7 @@ export type JournalEntryUncheckedUpdateManyWithoutCreatedByInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -1464,6 +1515,7 @@ export type JournalEntryCreateManyFiscalYearInput = {
   postedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   reversesEntryId?: string | null
 }
 
@@ -1479,6 +1531,7 @@ export type JournalEntryUpdateWithoutFiscalYearInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
   reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
   reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
@@ -1500,6 +1553,7 @@ export type JournalEntryUncheckedUpdateWithoutFiscalYearInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
@@ -1520,6 +1574,7 @@ export type JournalEntryUncheckedUpdateManyWithoutFiscalYearInput = {
   postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -1568,6 +1623,7 @@ export type JournalEntrySelect<ExtArgs extends runtime.Types.Extensions.Internal
   postedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   reversesEntryId?: boolean
   fiscalYear?: boolean | Prisma.JournalEntry$fiscalYearArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1593,6 +1649,7 @@ export type JournalEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   postedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   reversesEntryId?: boolean
   fiscalYear?: boolean | Prisma.JournalEntry$fiscalYearArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1613,6 +1670,7 @@ export type JournalEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   postedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   reversesEntryId?: boolean
   fiscalYear?: boolean | Prisma.JournalEntry$fiscalYearArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1633,10 +1691,11 @@ export type JournalEntrySelectScalar = {
   postedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   reversesEntryId?: boolean
 }
 
-export type JournalEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "entryNo" | "date" | "narration" | "narrationAr" | "status" | "sourceType" | "sourceId" | "fiscalYearId" | "createdById" | "postedAt" | "createdAt" | "updatedAt" | "reversesEntryId", ExtArgs["result"]["journalEntry"]>
+export type JournalEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "entryNo" | "date" | "narration" | "narrationAr" | "status" | "sourceType" | "sourceId" | "fiscalYearId" | "createdById" | "postedAt" | "createdAt" | "updatedAt" | "idempotencyKey" | "reversesEntryId", ExtArgs["result"]["journalEntry"]>
 export type JournalEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fiscalYear?: boolean | Prisma.JournalEntry$fiscalYearArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1686,6 +1745,7 @@ export type $JournalEntryPayload<ExtArgs extends runtime.Types.Extensions.Intern
     postedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    idempotencyKey: string | null
     /**
      * Authoritative link for reversal-by-default (P1.1): on a REVERSAL entry this is
      * the reversed entry; on an original entry, null. Unique prevents two reversals.
@@ -2134,6 +2194,7 @@ export interface JournalEntryFieldRefs {
   readonly postedAt: Prisma.FieldRef<"JournalEntry", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"JournalEntry", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"JournalEntry", 'DateTime'>
+  readonly idempotencyKey: Prisma.FieldRef<"JournalEntry", 'String'>
   readonly reversesEntryId: Prisma.FieldRef<"JournalEntry", 'String'>
 }
     

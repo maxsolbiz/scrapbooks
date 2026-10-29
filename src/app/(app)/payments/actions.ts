@@ -25,6 +25,7 @@ const schema = z.object({
   allocations: z
     .array(z.object({ invoiceId: z.string().min(1), amount: z.string().min(1) }))
     .optional(),
+  idempotencyKey: z.string().uuid().optional(),
 });
 
 export async function createPaymentAction(
@@ -36,6 +37,17 @@ export async function createPaymentAction(
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const v = parsed.data;
+
+  // Idempotency check
+  if (v.idempotencyKey) {
+    const existing = await prisma.payment.findUnique({
+      where: { idempotencyKey: v.idempotencyKey },
+    });
+    if (existing) {
+      return { ok: true, data: { id: existing.id } };
+    }
+  }
+
   try {
     const payment = await prisma.$transaction(async (tx) =>
       createPayment({
@@ -48,6 +60,7 @@ export async function createPaymentAction(
         reference: v.reference || null,
         notes: v.notes || null,
         createdById: user.id,
+        idempotencyKey: v.idempotencyKey,
         allocations: (v.allocations ?? []).map((a) => ({
           invoiceId: a.invoiceId,
           amountFils: decimalStringToFils(a.amount),
@@ -59,6 +72,10 @@ export async function createPaymentAction(
     revalidatePath("/dashboard");
     return { ok: true, data: { id: payment.id } };
   } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (errorMessage.includes("P2002")) {
+      return { ok: false, error: "A payment with this idempotency key already exists." };
+    }
     return { ok: false, error: e instanceof Error ? e.message : "Failed to post payment" };
   }
 }

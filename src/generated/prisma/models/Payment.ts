@@ -50,6 +50,7 @@ export type PaymentMinAggregateOutputType = {
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  idempotencyKey: string | null
 }
 
 export type PaymentMaxAggregateOutputType = {
@@ -68,6 +69,7 @@ export type PaymentMaxAggregateOutputType = {
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  idempotencyKey: string | null
 }
 
 export type PaymentCountAggregateOutputType = {
@@ -86,6 +88,7 @@ export type PaymentCountAggregateOutputType = {
   createdById: number
   createdAt: number
   updatedAt: number
+  idempotencyKey: number
   _all: number
 }
 
@@ -114,6 +117,7 @@ export type PaymentMinAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  idempotencyKey?: true
 }
 
 export type PaymentMaxAggregateInputType = {
@@ -132,6 +136,7 @@ export type PaymentMaxAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  idempotencyKey?: true
 }
 
 export type PaymentCountAggregateInputType = {
@@ -150,6 +155,7 @@ export type PaymentCountAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  idempotencyKey?: true
   _all?: true
 }
 
@@ -255,6 +261,7 @@ export type PaymentGroupByOutputType = {
   createdById: string
   createdAt: Date
   updatedAt: Date
+  idempotencyKey: string | null
   _count: PaymentCountAggregateOutputType | null
   _avg: PaymentAvgAggregateOutputType | null
   _sum: PaymentSumAggregateOutputType | null
@@ -296,6 +303,7 @@ export type PaymentWhereInput = {
   createdById?: Prisma.StringFilter<"Payment"> | string
   createdAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
+  idempotencyKey?: Prisma.StringNullableFilter<"Payment"> | string | null
   party?: Prisma.XOR<Prisma.PartyNullableScalarRelationFilter, Prisma.PartyWhereInput> | null
   journalEntry?: Prisma.XOR<Prisma.JournalEntryNullableScalarRelationFilter, Prisma.JournalEntryWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -318,6 +326,7 @@ export type PaymentOrderByWithRelationInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   party?: Prisma.PartyOrderByWithRelationInput
   journalEntry?: Prisma.JournalEntryOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
@@ -328,6 +337,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   paymentNo?: string
   journalEntryId?: string
+  idempotencyKey?: string
   AND?: Prisma.PaymentWhereInput | Prisma.PaymentWhereInput[]
   OR?: Prisma.PaymentWhereInput[]
   NOT?: Prisma.PaymentWhereInput | Prisma.PaymentWhereInput[]
@@ -347,7 +357,7 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   journalEntry?: Prisma.XOR<Prisma.JournalEntryNullableScalarRelationFilter, Prisma.JournalEntryWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   allocations?: Prisma.PaymentAllocationListRelationFilter
-}, "id" | "paymentNo" | "journalEntryId">
+}, "id" | "paymentNo" | "journalEntryId" | "idempotencyKey">
 
 export type PaymentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -365,6 +375,7 @@ export type PaymentOrderByWithAggregationInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PaymentCountOrderByAggregateInput
   _avg?: Prisma.PaymentAvgOrderByAggregateInput
   _max?: Prisma.PaymentMaxOrderByAggregateInput
@@ -391,6 +402,7 @@ export type PaymentScalarWhereWithAggregatesInput = {
   createdById?: Prisma.StringWithAggregatesFilter<"Payment"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Payment"> | Date | string
+  idempotencyKey?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
 }
 
 export type PaymentCreateInput = {
@@ -406,6 +418,7 @@ export type PaymentCreateInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   party?: Prisma.PartyCreateNestedOneWithoutPaymentsInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutPaymentForInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedPaymentsInput
@@ -428,6 +441,7 @@ export type PaymentUncheckedCreateInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutPaymentInput
 }
 
@@ -444,6 +458,7 @@ export type PaymentUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   party?: Prisma.PartyUpdateOneWithoutPaymentsNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutPaymentForNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedPaymentsNestedInput
@@ -466,6 +481,7 @@ export type PaymentUncheckedUpdateInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutPaymentNestedInput
 }
 
@@ -485,6 +501,7 @@ export type PaymentCreateManyInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
 }
 
 export type PaymentUpdateManyMutationInput = {
@@ -500,6 +517,7 @@ export type PaymentUpdateManyMutationInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PaymentUncheckedUpdateManyInput = {
@@ -518,6 +536,7 @@ export type PaymentUncheckedUpdateManyInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PaymentListRelationFilter = {
@@ -551,6 +570,7 @@ export type PaymentCountOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
 }
 
 export type PaymentAvgOrderByAggregateInput = {
@@ -573,6 +593,7 @@ export type PaymentMaxOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
 }
 
 export type PaymentMinOrderByAggregateInput = {
@@ -591,6 +612,7 @@ export type PaymentMinOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
 }
 
 export type PaymentSumOrderByAggregateInput = {
@@ -757,6 +779,7 @@ export type PaymentCreateWithoutCreatedByInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   party?: Prisma.PartyCreateNestedOneWithoutPaymentsInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutPaymentForInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutPaymentInput
@@ -777,6 +800,7 @@ export type PaymentUncheckedCreateWithoutCreatedByInput = {
   journalEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutPaymentInput
 }
 
@@ -825,6 +849,7 @@ export type PaymentScalarWhereInput = {
   createdById?: Prisma.StringFilter<"Payment"> | string
   createdAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
+  idempotencyKey?: Prisma.StringNullableFilter<"Payment"> | string | null
 }
 
 export type PaymentCreateWithoutJournalEntryInput = {
@@ -840,6 +865,7 @@ export type PaymentCreateWithoutJournalEntryInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   party?: Prisma.PartyCreateNestedOneWithoutPaymentsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedPaymentsInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutPaymentInput
@@ -860,6 +886,7 @@ export type PaymentUncheckedCreateWithoutJournalEntryInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutPaymentInput
 }
 
@@ -892,6 +919,7 @@ export type PaymentUpdateWithoutJournalEntryInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   party?: Prisma.PartyUpdateOneWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedPaymentsNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutPaymentNestedInput
@@ -912,6 +940,7 @@ export type PaymentUncheckedUpdateWithoutJournalEntryInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutPaymentNestedInput
 }
 
@@ -928,6 +957,7 @@ export type PaymentCreateWithoutPartyInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutPaymentForInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedPaymentsInput
   allocations?: Prisma.PaymentAllocationCreateNestedManyWithoutPaymentInput
@@ -948,6 +978,7 @@ export type PaymentUncheckedCreateWithoutPartyInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   allocations?: Prisma.PaymentAllocationUncheckedCreateNestedManyWithoutPaymentInput
 }
 
@@ -990,6 +1021,7 @@ export type PaymentCreateWithoutAllocationsInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
   party?: Prisma.PartyCreateNestedOneWithoutPaymentsInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutPaymentForInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedPaymentsInput
@@ -1011,6 +1043,7 @@ export type PaymentUncheckedCreateWithoutAllocationsInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
 }
 
 export type PaymentCreateOrConnectWithoutAllocationsInput = {
@@ -1042,6 +1075,7 @@ export type PaymentUpdateWithoutAllocationsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   party?: Prisma.PartyUpdateOneWithoutPaymentsNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutPaymentForNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedPaymentsNestedInput
@@ -1063,6 +1097,7 @@ export type PaymentUncheckedUpdateWithoutAllocationsInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PaymentCreateManyCreatedByInput = {
@@ -1080,6 +1115,7 @@ export type PaymentCreateManyCreatedByInput = {
   journalEntryId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
 }
 
 export type PaymentUpdateWithoutCreatedByInput = {
@@ -1095,6 +1131,7 @@ export type PaymentUpdateWithoutCreatedByInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   party?: Prisma.PartyUpdateOneWithoutPaymentsNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutPaymentForNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutPaymentNestedInput
@@ -1115,6 +1152,7 @@ export type PaymentUncheckedUpdateWithoutCreatedByInput = {
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutPaymentNestedInput
 }
 
@@ -1133,6 +1171,7 @@ export type PaymentUncheckedUpdateManyWithoutCreatedByInput = {
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PaymentCreateManyPartyInput = {
@@ -1150,6 +1189,7 @@ export type PaymentCreateManyPartyInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  idempotencyKey?: string | null
 }
 
 export type PaymentUpdateWithoutPartyInput = {
@@ -1165,6 +1205,7 @@ export type PaymentUpdateWithoutPartyInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutPaymentForNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedPaymentsNestedInput
   allocations?: Prisma.PaymentAllocationUpdateManyWithoutPaymentNestedInput
@@ -1185,6 +1226,7 @@ export type PaymentUncheckedUpdateWithoutPartyInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allocations?: Prisma.PaymentAllocationUncheckedUpdateManyWithoutPaymentNestedInput
 }
 
@@ -1203,6 +1245,7 @@ export type PaymentUncheckedUpdateManyWithoutPartyInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1252,6 +1295,7 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   party?: boolean | Prisma.Payment$partyArgs<ExtArgs>
   journalEntry?: boolean | Prisma.Payment$journalEntryArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1275,6 +1319,7 @@ export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   party?: boolean | Prisma.Payment$partyArgs<ExtArgs>
   journalEntry?: boolean | Prisma.Payment$journalEntryArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1296,6 +1341,7 @@ export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
   party?: boolean | Prisma.Payment$partyArgs<ExtArgs>
   journalEntry?: boolean | Prisma.Payment$journalEntryArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1317,9 +1363,10 @@ export type PaymentSelectScalar = {
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  idempotencyKey?: boolean
 }
 
-export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentNo" | "type" | "method" | "date" | "partyId" | "status" | "amountFils" | "reference" | "referenceAr" | "notes" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentNo" | "type" | "method" | "date" | "partyId" | "status" | "amountFils" | "reference" | "referenceAr" | "notes" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt" | "idempotencyKey", ExtArgs["result"]["payment"]>
 export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   party?: boolean | Prisma.Payment$partyArgs<ExtArgs>
   journalEntry?: boolean | Prisma.Payment$journalEntryArgs<ExtArgs>
@@ -1362,6 +1409,7 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdById: string
     createdAt: Date
     updatedAt: Date
+    idempotencyKey: string | null
   }, ExtArgs["result"]["payment"]>
   composites: {}
 }
@@ -1804,6 +1852,7 @@ export interface PaymentFieldRefs {
   readonly createdById: Prisma.FieldRef<"Payment", 'String'>
   readonly createdAt: Prisma.FieldRef<"Payment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Payment", 'DateTime'>
+  readonly idempotencyKey: Prisma.FieldRef<"Payment", 'String'>
 }
     
 

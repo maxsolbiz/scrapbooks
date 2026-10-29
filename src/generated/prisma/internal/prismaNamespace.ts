@@ -1585,6 +1585,7 @@ export const JournalEntryScalarFieldEnum = {
   postedAt: 'postedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  idempotencyKey: 'idempotencyKey',
   reversesEntryId: 'reversesEntryId'
 } as const
 
@@ -1670,7 +1671,8 @@ export const InvoiceScalarFieldEnum = {
   journalEntryId: 'journalEntryId',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  idempotencyKey: 'idempotencyKey'
 } as const
 
 export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
@@ -1710,7 +1712,8 @@ export const PaymentScalarFieldEnum = {
   journalEntryId: 'journalEntryId',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  idempotencyKey: 'idempotencyKey'
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]

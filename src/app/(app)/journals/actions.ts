@@ -26,6 +26,7 @@ const createSchema = z.object({
       }),
     )
     .min(2, "At least two lines"),
+  idempotencyKey: z.string().uuid().optional(),
 });
 
 function toFils(value: string): bigint {
@@ -44,6 +45,17 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
   const v = parsed.data;
+
+  // Idempotency check
+  if (v.idempotencyKey) {
+    const existing = await prisma.journalEntry.findUnique({
+      where: { idempotencyKey: v.idempotencyKey },
+    });
+    if (existing) {
+      return { ok: true, data: { id: existing.id } };
+    }
+  }
+
   try {
     const lines = v.lines.map((l) => {
       const debit = toFils(l.debit);
@@ -64,6 +76,7 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
         narrationAr: v.narrationAr || null,
         sourceType: "MANUAL" as EntrySource,
         createdById: user.id,
+        idempotencyKey: v.idempotencyKey,
         lines: lines.map((l) => ({
           accountId: l.accountId,
           debit: l.debit > 0n ? l.debit : undefined,
@@ -75,8 +88,12 @@ export async function createJournal(input: z.input<typeof createSchema>): Promis
     revalidatePath("/journals");
     revalidatePath("/dashboard");
     return { ok: true, data: { id: entry.id } };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Failed to post journal" };
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (errorMessage.includes("P2002")) {
+      return { ok: false, error: "A journal entry with this idempotency key already exists." };
+    }
+    return { ok: false, error: errorMessage };
   }
 }
 

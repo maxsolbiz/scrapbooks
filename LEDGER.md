@@ -441,15 +441,6 @@ Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 109/109
 (7) tests/db/aging.test.ts (4 tests): Aging bucket calculation, statement generation, zero-invoice edge case, unallocated credit display.
 Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 119/119 (17 files); npx next build BUILD_EXIT=0. P2.4 complete.
 ⚠️ OVERDUE staleness caveat: aging reports use on-the-fly derivation for accuracy; denormalized column may become stale if no allocations occur after due date passes. DB trigger or cron refresh deferred to P1.6/D5.
-(1) src/lib/aging.ts: calculateAgingBuckets(partyId) computes aging buckets (current=0-30, 31-60, 61-90, 90+ days) using derivePaymentStatus on-the-fly (avoids staleness).
-(2) src/lib/party-statement.ts: partyStatement(partyId) aggregates total invoiced, paid, outstanding, available credit; aging breakdown; chronological transaction history; summary cards.
-(3) src/app/(app)/parties/[id]/statement/page.tsx: Server-rendered statement UI with aging visualization, transaction table, summary cards, PDF download link.
-(4) src/app/api/parties/[id]/statement/pdf/route.ts: Server-side PDF generation via @react-pdf/renderer (StatementPDF component).
-(5) src/app/(app)/parties/PartiesClient.tsx: Added "Statement" link to party list actions.
-(6) src/lib/i18n.ts: EN/AR strings for aging buckets (current, 31-60 days, 61-90 days, 90+ days), statement labels (summary, aging, transactions, PDF download).
-(7) tests/db/aging.test.ts (4 tests): Aging bucket calculation, statement generation, zero-invoice edge case, unallocated credit display.
-(8) Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 119/119 (17 files); npx next build BUILD_EXIT=0. P2.4 complete.
-⚠️ OVERDUE staleness caveat: aging reports use on-the-fly derivation; denormalized column may become stale if no allocations occur after due date passes. DB trigger or cron refresh deferred to P1.6/D5.
 ## 2026-10-30 - P2.3 70eb6a7, b1e5f8c, b2bd32a, b9f6868, 150b57f, 3c26939 - Unallocated Payment / Credit Tracking
 (1) src/lib/party-credit.ts: partyCreditBalance(partyId, tx?) computes available credit = total POSTED payments - total allocations; getUnallocatedPayments(partyId, tx?) returns FIFO-ordered payments with remaining unallocated amounts.
 (2) src/lib/payments.ts: applyCreditToInvoice(Invoice, amountFils) applies credit FIFO from oldest unallocated payments; creates PaymentAllocation rows; recalculates invoice paymentStatus.

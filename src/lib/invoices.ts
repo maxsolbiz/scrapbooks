@@ -3,6 +3,7 @@ import type { Tx } from "@/lib/tx";
 import type { EntrySource } from "@/generated/prisma/enums";
 import { postJournalEntry, voidJournalEntry, reverseJournalEntry } from "@/lib/accounting";
 import { multiplyFilsByDecimal, vatForLine } from "@/lib/money";
+import { derivePaymentStatus } from "@/lib/invoice-status";
 import { lockInvoices } from "@/lib/payments";
 
 export interface InvoiceLineInput {
@@ -134,6 +135,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
       termsOfDelivery: input.termsOfDelivery || null,
       dueDate: computedDueDate,
       paymentTerms: input.paymentTerms || null,
+      paymentStatus: "UNPAID",
       createdById,
       idempotencyKey: input.idempotencyKey || null,
       lines: {

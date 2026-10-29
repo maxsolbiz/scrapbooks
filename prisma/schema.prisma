@@ -254,6 +254,13 @@ enum InvoiceStatus {
   VOID
 }
 
+enum InvoicePaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
 model Invoice {
   id              String           @id @default(cuid())
   invoiceNo       String           @unique
@@ -284,6 +291,7 @@ model Invoice {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   idempotencyKey  String?          @unique
+  paymentStatus   InvoicePaymentStatus @default(UNPAID)
 
   lines           InvoiceLine[]
   allocations     PaymentAllocation[]
@@ -292,6 +300,7 @@ model Invoice {
   @@index([partyId])
   @@index([direction, status])
   @@index([dueDate])
+  @@index([paymentStatus, dueDate])
   @@unique([partyId, supplierRef], name: "purchase_invoice_supplier_ref_unique", map: "purchase_invoice_supplier_ref_unique", where: raw("\"direction\" = 'PURCHASE' AND \"supplierRef\" IS NOT NULL"))
 }
 

@@ -252,7 +252,8 @@ export const InvoiceScalarFieldEnum = {
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  idempotencyKey: 'idempotencyKey'
+  idempotencyKey: 'idempotencyKey',
+  paymentStatus: 'paymentStatus'
 } as const
 
 export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]

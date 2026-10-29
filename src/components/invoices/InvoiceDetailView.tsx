@@ -6,6 +6,7 @@ import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
+import { ApplyCreditDialog } from "./ApplyCreditDialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,6 +19,7 @@ import {
 import { VoidInvoiceButton } from "./VoidInvoiceButton";
 import { PrintDetailsForm } from "./PrintDetailsForm";
 import { formatAED } from "@/lib/money";
+import { partyCreditBalance } from "@/lib/party-credit";
 
 export async function InvoiceDetailView({
   invoiceId,
@@ -40,6 +42,13 @@ export async function InvoiceDetailView({
     },
   });
   if (!invoice) notFound();
+
+  // Fetch available credit for the party
+  const availableCredit = await partyCreditBalance(invoice.partyId);
+  const totalDue = invoice.totalFils - invoice.allocations
+    .filter((a) => a.payment.status !== "VOID")
+    .reduce((sum, a) => sum + a.amountFils, 0n);
+
   const canVoid =
     (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
     invoice.status === "POSTED";
@@ -59,6 +68,8 @@ export async function InvoiceDetailView({
       <PaymentStatusBadge status={invoice.paymentStatus} dict={t} />
     </>
   );
+
+  const showApplyCredit = (invoice.paymentStatus === "UNPAID" || invoice.paymentStatus === "PARTIAL") && availableCredit > 0n;
 
   return (
     <div className="space-y-4">
@@ -100,6 +111,15 @@ export async function InvoiceDetailView({
               cancelLabel={t.common.cancel}
               reasonLabel={t.invoices.voidReason}
               reasonPlaceholder={t.invoices.voidReasonPlaceholder}
+            />
+          )}
+          {showApplyCredit && (
+            <ApplyCreditDialog
+              invoiceId={invoice.id}
+              availableCredit={availableCredit}
+              totalDue={totalDue}
+              dict={t}
+              onSuccess={() => window.location.reload()}
             />
           )}
         </div>

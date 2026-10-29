@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createInvoiceAction } from "@/lib/invoice-actions";
+import { applyCreditAction } from "@/lib/apply-credit-action";
 import { formatAED, filsToDecimalString, multiplyFilsLenient, vatOf, vatForLine } from "@/lib/money";
 import type { Dictionary } from "@/lib/i18n";
 
@@ -176,6 +177,7 @@ export function InvoiceForm({
   const [partyId, setPartyId] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("");
+  const [availableCredit, setAvailableCredit] = useState<bigint>(0n);
   const [lines, setLines] = useState<Line[]>([
     { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: "5" },
   ]);
@@ -208,6 +210,22 @@ export function InvoiceForm({
       }
     }
   }, [paymentTerms, date]);
+
+  // Fetch available credit when partyId changes
+  useEffect(() => {
+    if (partyId) {
+      fetch(`/api/parties/${partyId}/credit`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.ok) {
+            setAvailableCredit(BigInt(data.creditFils));
+          }
+        })
+        .catch(() => setAvailableCredit(0n));
+    } else {
+      setAvailableCredit(0n);
+    }
+  }, [partyId]);
 
   function pickItem(lineId: string, itemId: string) {
     const item = items.find((i) => i.id === itemId);
@@ -306,6 +324,15 @@ export function InvoiceForm({
                 </SelectContent>
               </Select>
             </div>
+            {availableCredit > 0n && (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{t.invoices.availableCredit}</Label>
+                <div className="text-lg font-semibold text-green-600">
+                  {formatAED(availableCredit)}
+                </div>
+                <p className="text-xs text-muted-foreground">{t.invoices.applyCreditDialog}</p>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label>{t.invoices.dueDate}</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />

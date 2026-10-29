@@ -33,6 +33,7 @@ export interface PostJournalInput {
   /** Reversal path ONLY: skip the isActive check (a deactivated historic account
    * must not make a voidable document un-voidable). Normal posting never sets it. */
   allowInactive?: boolean;
+  idempotencyKey?: string;
 }
 
 const SOURCE_PREFIX: Record<string, string> = {
@@ -125,6 +126,7 @@ export async function postJournalEntry(input: PostJournalInput) {
       fiscalYearId: fiscalYear.id,
       createdById,
       postedAt: new Date(),
+      idempotencyKey: input.idempotencyKey,
       lines: {
         create: lines.map((line) => ({
           accountId: line.accountId,

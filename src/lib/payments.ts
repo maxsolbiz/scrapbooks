@@ -26,6 +26,7 @@ export interface CreatePaymentInput {
   allocations?: PaymentAllocationInput[];
   createdById: string;
   tx: Tx;
+  idempotencyKey?: string;
 }
 
 /**
@@ -203,6 +204,7 @@ export async function createPayment(input: CreatePaymentInput) {
       notes: input.notes || null,
       journalEntryId: jeId,
       createdById,
+      idempotencyKey: input.idempotencyKey || null,
       allocations: {
         create: allocations.map((a) => ({
           invoiceId: a.invoiceId,

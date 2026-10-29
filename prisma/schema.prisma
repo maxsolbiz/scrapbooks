@@ -147,6 +147,7 @@ model JournalEntry {
   postedAt      DateTime?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  idempotencyKey String?       @unique
 
   /// Authoritative link for reversal-by-default (P1.1): on a REVERSAL entry this is
   /// the reversed entry; on an original entry, null. Unique prevents two reversals.
@@ -280,6 +281,7 @@ model Invoice {
   createdBy       User             @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: Restrict)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  idempotencyKey  String?          @unique
 
   lines           InvoiceLine[]
   allocations     PaymentAllocation[]
@@ -348,6 +350,7 @@ model Payment {
   createdBy      User          @relation("PaymentCreator", fields: [createdById], references: [id], onDelete: Restrict)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  idempotencyKey String?       @unique
 
   allocations    PaymentAllocation[]
 

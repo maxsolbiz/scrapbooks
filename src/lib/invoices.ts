@@ -38,6 +38,7 @@ export interface CreateInvoiceInput {
   lines: InvoiceLineInput[];
   createdById: string;
   tx: Tx;
+  idempotencyKey?: string;
 }
 
 const AR_CODE = "1130";
@@ -113,6 +114,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
       modeOfPayment: input.modeOfPayment || null,
       termsOfDelivery: input.termsOfDelivery || null,
       createdById,
+      idempotencyKey: input.idempotencyKey || null,
       lines: {
         create: computed.map((c) => ({
           itemId: c.itemId || null,

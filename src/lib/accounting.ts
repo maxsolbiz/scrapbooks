@@ -287,7 +287,7 @@ export interface AccountBalance {
   normalBalance: string;
 }
 
-function signFor(normalBalance: string, debit: bigint, credit: bigint) {
+export function signFor(normalBalance: string, debit: bigint, credit: bigint) {
   return normalBalance === "DEBIT" ? debit - credit : credit - debit;
 }
 

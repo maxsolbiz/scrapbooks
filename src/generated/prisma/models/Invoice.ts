@@ -410,6 +410,7 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   invoiceNo?: string
   journalEntryId?: string
+  purchase_invoice_supplier_ref_unique?: Prisma.InvoicePurchase_invoice_supplier_ref_uniqueCompoundUniqueInput
   AND?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
   OR?: Prisma.InvoiceWhereInput[]
   NOT?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
@@ -438,7 +439,7 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   lines?: Prisma.InvoiceLineListRelationFilter
   allocations?: Prisma.PaymentAllocationListRelationFilter
-}, "id" | "invoiceNo" | "journalEntryId">
+}, "id" | "invoiceNo" | "journalEntryId" | "purchase_invoice_supplier_ref_unique">
 
 export type InvoiceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -700,6 +701,11 @@ export type InvoiceOrderByRelationAggregateInput = {
 export type InvoiceNullableScalarRelationFilter = {
   is?: Prisma.InvoiceWhereInput | null
   isNot?: Prisma.InvoiceWhereInput | null
+}
+
+export type InvoicePurchase_invoice_supplier_ref_uniqueCompoundUniqueInput = {
+  partyId: string
+  supplierRef: string
 }
 
 export type InvoiceCountOrderByAggregateInput = {

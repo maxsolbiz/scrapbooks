@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import { partyLedger } from "@/lib/reports";
+import { partyLedgerHref, partyLedgerLabelKey } from "@/lib/party-ledger-kind";
 import {
   Select,
   SelectContent,
@@ -90,10 +91,10 @@ await requireModule("reports");
                 {rows.map((r, i) => (
                   <TableRow key={i}>
                     <TableCell>{r.date}</TableCell>
-                    <TableCell className="hidden text-xs sm:table-cell">{r.kind}</TableCell>
+                    <TableCell className="hidden text-xs sm:table-cell">{(t as any).partyLedgerKind ? (t as any).partyLedgerKind[partyLedgerLabelKey(r.kind as any)] : r.kind}</TableCell>
                     <TableCell>
                       <Link
-                        href={r.kind === "INVOICE" ? `/sales-invoices/${r.docId}` : r.kind === "REVERSAL" ? `/journals/${r.docId}` : `/payments/${r.docId}`}
+                        href={partyLedgerHref(r.kind as any, r.docId)}
                         className="hover:underline font-mono text-xs"
                       >
                         {r.docNo}

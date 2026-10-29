@@ -1,3 +1,4 @@
+import { partyLedgerKind } from "@/lib/party-ledger-kind";
 import { prisma } from "@/lib/db";
 import type { Account, FiscalYear } from "@/generated/prisma/client";
 
@@ -150,7 +151,7 @@ export async function partyLedger(
     // would have been mislabeled "PAYMENT" because invoiceFor/paymentFor are both null.
     // KNOWN ISSUE (recorded in ROADMAP): entries that are neither an invoice nor a
     // payment (manual journals, opening balances) still fall back to kind PAYMENT.
-    const kind = l.entry.sourceType === "REVERSAL" ? "REVERSAL" : invoice ? "INVOICE" : "PAYMENT";
+    const kind = partyLedgerKind(l.entry.sourceType, !!invoice, !!payment);
     rows.push({
       date: l.entry.date.toISOString().slice(0, 10),
       kind,

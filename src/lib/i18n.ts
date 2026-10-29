@@ -225,6 +225,11 @@ const en = {
     dueDate: "Due Date",
     paymentTerms: "Payment Terms (days)",
     paymentTermsPlaceholder: "e.g. 30, 60, 90",
+    paymentStatus: "Payment Status",
+    statusUnpaid: "Unpaid",
+    statusPartial: "Partial",
+    statusPaid: "Paid",
+    statusOverdue: "Overdue",
   },
   payments: {
     new: "New payment / receipt",
@@ -483,6 +488,11 @@ const ar: typeof en = {
     dueDate: "تاريخ الاستحقاق",
     paymentTerms: "شروط الدفع (أيام)",
     paymentTermsPlaceholder: "مثال: 30، 60، 90",
+    paymentStatus: "حالة الدفع",
+    statusUnpaid: "غير مدفوع",
+    statusPartial: "جزئي",
+    statusPaid: "مدفوع",
+    statusOverdue: "متأخر",
   },
   payments: {
     new: "سند سداد / مقبوضات",

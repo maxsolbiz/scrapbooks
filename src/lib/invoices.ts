@@ -135,7 +135,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
       termsOfDelivery: input.termsOfDelivery || null,
       dueDate: computedDueDate,
       paymentTerms: input.paymentTerms || null,
-      paymentStatus: "UNPAID",
+      paymentStatus: derivePaymentStatus(total, 0n, computedDueDate),
       createdById,
       idempotencyKey: input.idempotencyKey || null,
       lines: {

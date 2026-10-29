@@ -5,6 +5,7 @@ import { moduleCan, requireUser } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
+import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -47,13 +48,16 @@ export async function InvoiceDetailView({
     invoice.status !== "VOID";
 
   const statusBadge = (
-    <Badge
-      variant={
-        invoice.status === "POSTED" ? "default" : invoice.status === "DRAFT" ? "secondary" : "outline"
-      }
-    >
-      {invoice.status}
-    </Badge>
+    <>
+      <Badge
+        variant={
+          invoice.status === "POSTED" ? "default" : invoice.status === "DRAFT" ? "secondary" : "outline"
+        }
+      >
+        {invoice.status}
+      </Badge>
+      <PaymentStatusBadge status={invoice.paymentStatus} dict={t} />
+    </>
   );
 
   return (

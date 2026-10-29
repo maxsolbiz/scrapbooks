@@ -6,6 +6,7 @@ import { MODULE_PATH, type ModuleKey } from "@/lib/permissions";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
+import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -37,6 +38,7 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
       invoiceNo: true,
       date: true,
       status: true,
+      paymentStatus: true,
       subtotalFils: true,
       vatFils: true,
       totalFils: true,
@@ -70,6 +72,7 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
                 <TableHead className="hidden text-end sm:table-cell">{t.common.subtotal}</TableHead>
                 <TableHead className="hidden text-end sm:table-cell">{t.common.vat}</TableHead>
                 <TableHead className="text-end">{t.common.total}</TableHead>
+                <TableHead>{t.invoices.paymentStatus}</TableHead>
                 <TableHead>{t.common.status}</TableHead>
               </TableRow>
             </TableHeader>
@@ -103,6 +106,9 @@ export async function InvoiceListPage({ direction }: { direction: InvoiceDirecti
                   </TableCell>
                   <TableCell className="text-end tabular-nums font-medium">
                     {formatAED(inv.totalFils)}
+                  </TableCell>
+                  <TableCell>
+                    <PaymentStatusBadge status={inv.paymentStatus} dict={t} />
                   </TableCell>
                   <TableCell>
                     <Badge

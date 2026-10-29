@@ -23,9 +23,9 @@ export default async function StatementPage({
   return (
     <div className="space-y-4">
       <PageHeader title={t.invoices.statementTitle} className="mb-0" actions={
-        <Button variant="outline" onClick={() => window.print()}>
+        <a href={`/api/parties/${id}/statement/pdf`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium h-10 px-4 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
           {t.invoices.downloadPDF}
-        </Button>
+        </a>
       } />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

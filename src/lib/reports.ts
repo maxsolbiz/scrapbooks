@@ -285,6 +285,77 @@ export interface AgingEntry {
   d90plus: bigint;
 }
 
+export interface InvoiceRegisterFilter {
+  fromDate?: Date;
+  toDate?: Date;
+  partyId?: string;
+  direction?: "SALES" | "PURCHASE" | "ALL";
+  status?: "POSTED" | "VOID" | "ALL";
+}
+
+export interface InvoiceRegisterRow {
+  id: string;
+  invoiceNo: string;
+  date: Date;
+  partyName: string;
+  direction: "SALES" | "PURCHASE";
+  totalFils: bigint;
+  paidFils: bigint;
+  outstandingFils: bigint;
+  paymentStatus: "UNPAID" | "PARTIAL" | "PAID" | "OVERDUE";
+  status: "POSTED" | "VOID" | "DRAFT";
+}
+
+export async function getInvoiceRegister(filters: InvoiceRegisterFilter): Promise<InvoiceRegisterRow[]> {
+  const where: any = {};
+  if (filters.direction && filters.direction !== "ALL") {
+    where.direction = filters.direction;
+  }
+  if (filters.status && filters.status !== "ALL") {
+    where.status = filters.status;
+  }
+  if (filters.partyId) {
+    where.partyId = filters.partyId;
+  }
+  if (filters.fromDate || filters.toDate) {
+    where.date = {};
+    if (filters.fromDate) where.date.gte = filters.fromDate;
+    if (filters.toDate) where.date.lte = filters.toDate;
+  }
+
+  const invoices = await prisma.invoice.findMany({
+    where,
+    orderBy: [{ date: "desc" }, { invoiceNo: "desc" }],
+    include: {
+      party: { select: { nameEn: true, nameAr: true, code: true } },
+      allocations: {
+        where: { payment: { status: "POSTED" } },
+        select: { amountFils: true },
+      },
+    },
+  });
+
+  const result: InvoiceRegisterRow[] = [];
+  for (const inv of invoices) {
+    const paidFils = inv.allocations.reduce((sum, a) => sum + a.amountFils, 0n);
+    const outstandingFils = inv.totalFils - paidFils;
+    const status = await import("@/lib/invoice-status").then((m) => m.derivePaymentStatus(inv.totalFils, paidFils, inv.dueDate));
+    result.push({
+      id: inv.id,
+      invoiceNo: inv.invoiceNo,
+      date: inv.date,
+      partyName: inv.party.nameEn,
+      direction: inv.direction as "SALES" | "PURCHASE",
+      totalFils: inv.totalFils,
+      paidFils,
+      outstandingFils,
+      paymentStatus: status,
+      status: inv.status,
+    });
+  }
+  return result;
+}
+
 export async function agingReport(direction: "SALES" | "PURCHASE"): Promise<AgingEntry[]> {
   const invoices = await prisma.invoice.findMany({
     where: { status: "POSTED", direction },

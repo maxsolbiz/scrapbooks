@@ -41,3 +41,16 @@ export function partyLedgerHref(kind: PartyLedgerKind, docId: string): string {
       return `/journals/${docId}`;
   }
 }
+
+export function partyLedgerLabelKey(kind: PartyLedgerKind): string {
+  switch (kind) {
+    case "INVOICE": return "invoice";
+    case "PURCHASE_INVOICE": return "purchaseInvoice";
+    case "RECEIPT": return "receipt";
+    case "PAYMENT": return "payment";
+    case "REVERSAL": return "reversal";
+    case "JOURNAL": return "journal";
+    case "OPENING": return "opening";
+    case "YEAR_END": return "yearEnd";
+  }
+}

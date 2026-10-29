@@ -1,6 +1,8 @@
-import { partyLedgerKind } from "@/lib/party-ledger-kind";
+import { partyLedgerKind, type PartyLedgerKind } from "@/lib/party-ledger-kind";
+import { partyLedgerHref, partyLedgerLabelKey } from "@/lib/party-ledger-kind";
 import { prisma } from "@/lib/db";
 import type { Account, FiscalYear } from "@/generated/prisma/client";
+import { signFor } from "@/lib/accounting";
 
 export interface TrialBalanceRow {
   id: string;
@@ -64,6 +66,7 @@ export async function accountLedger(
   accountId: string,
   fiscalYear: FiscalYear,
 ): Promise<AccountLedgerResult> {
+  const account = await prisma.account.findUniqueOrThrow({ where: { id: accountId } });
   const lines = await prisma.journalLine.findMany({
     where: {
       accountId,
@@ -79,12 +82,12 @@ export async function accountLedger(
     select: { debit: true, credit: true },
   });
   const starting = before.reduce(
-    (acc, l) => acc + (l.debit ?? 0n) - (l.credit ?? 0n),
+    (acc, l) => acc + signFor(account.normalBalance, l.debit ?? 0n, l.credit ?? 0n),
     0n,
   );
   let running = starting;
   const rows: AccountLedgerRow[] = lines.map((l) => {
-    running += (l.debit ?? 0n) - (l.credit ?? 0n);
+    running += signFor(account.normalBalance, l.debit ?? 0n, l.credit ?? 0n);
     return {
       date: l.entry.date.toISOString().slice(0, 10),
       entryNo: l.entry.entryNo,
@@ -99,7 +102,7 @@ export async function accountLedger(
 
 export interface PartyLedgerRow {
   date: string;
-  kind: "INVOICE" | "PAYMENT" | "REVERSAL";
+  kind: PartyLedgerKind;
   docNo: string;
   docId: string;
   narration: string | null;

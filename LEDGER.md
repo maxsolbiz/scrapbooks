@@ -431,6 +431,18 @@ Verification: tsc --noEmit EXIT=0; npm test 141/141; vitest --project db 89/89 (
 (8) tests/db/payment-status.test.ts (6 tests): UNPAID (new invoice), PARTIAL (partial payment), PARTIAL+past dueDate→OVERDUE, PAID (full payment), OVERDUE (past dueDate), UNPAID after void.
 Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 109/109 (16 files); npx next build BUILD_EXIT=0.
 ⚠️ paymentStatus is denormalized and computed at write time. An UNPAID invoice with dueDate < today becomes OVERDUE only after the next payment allocation/void on that invoice (or a manual refresh). For P2.4 aging reports, either add a cron job to refresh stale statuses or implement a DB trigger (see P1.6/D5). P2.3 (unallocated payments) and P2.4 (aging/statements) ready.
+## 2026-10-30 - P2.3 70eb6a7, b1e5f8c, b2bd32a, b9f6868, 150b57f, 3c26939 - Unallocated Payment / Credit Tracking
+(1) src/lib/party-credit.ts: partyCreditBalance(partyId) computes available credit = total POSTED payments - total allocations; getUnallocatedPayments(partyId) returns FIFO-ordered payments with remaining unallocated amounts.
+(2) src/lib/payments.ts: applyCreditToInvoice(Invoice, amountFils) applies credit FIFO from oldest unallocated payments; creates PaymentAllocation rows; recalculates invoice paymentStatus.
+(3) src/lib/apply-credit-action.ts: Server action with Zod validation; calls applyCreditToInvoice in transaction; revalidates paths.
+(4) src/app/api/parties/[id]/credit/route.ts: GET endpoint returning party credit balance in fils.
+(5) src/app/api/invoices/[id]/apply-credit/route.ts: POST endpoint for applying credit to invoice.
+(6) src/components/invoices/InvoiceForm.tsx: Fetches party credit on party selection; displays available credit badge.
+(7) src/components/invoices/ApplyCreditDialog.tsx: Dialog with amount input, max = min(availableCredit, totalDue); calls /api/invoices/[id]/apply-credit.
+(8) src/components/invoices/InvoiceDetailView.tsx: Fetches party credit; shows ApplyCreditDialog when invoice is UNPAID/PARTIAL and credit > 0.
+(9) src/lib/i18n.ts: EN/AR strings for availableCredit, applyCredit, applyCreditDialog, creditApplied, insufficientCredit, unallocatedPayments.
+(10) tests/db/party-credit.test.ts (6 tests): unallocated payment credit, partial allocation remaining, FIFO application, over-application rejection, void removes credit, getUnallocatedPayments FIFO order.
+Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 115/115 (17 files); npx next build BUILD_EXIT=0. P2.4 (aging/statements) ready.
 ## 2026-10-30 - P1.5(b) + P1.5(c) 87681f6 - accountLedger sign-flip + F13 partyLedger mapping
 (1) P1.5(b): signFor(exported from accounting.ts) already applied in reports.ts accountLedger (lines 85, 90); tests/db/account-ledger.test.ts (3 tests) pins positive running balance for CREDIT-normal account after credit posting. No source change needed — code was already correct; TDD added.
 (2) P1.5(c): reports.ts F13 fix — removed outdated "KNOWN ISSUE" comment (manual journals mislabeled PAYMENT); partyLedgerKind (party-ledger-kind.ts) already handles MANUAL->JOURNAL, OPENING_BALANCE->OPENING, YEAR_END_CLOSE->YEAR_END correctly; page.tsx routing via partyLedgerHref works; i18n labels (journal, opening, yearEnd) present in EN/AR. tests/db/party-ledger-kind.test.ts (new, 1 test) asserts MANUAL entry kind = JOURNAL.

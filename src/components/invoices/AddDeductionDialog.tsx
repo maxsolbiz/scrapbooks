@@ -16,13 +16,19 @@ import type { DeductionReason } from "@/generated/prisma/enums";
 interface AddDeductionDialogProps {
   invoiceId: string;
   outstanding: bigint;
+  deduction?: {
+    id: string;
+    reason: DeductionReason;
+    amountFils: bigint;
+    notes: string | null;
+  } | null;
   dict: Dictionary;
 }
 
-export function AddDeductionDialog({ invoiceId, outstanding, dict }: AddDeductionDialogProps) {
-  const [reason, setReason] = useState<DeductionReason>("SHORTAGE");
-  const [amount, setAmount] = useState("");
-  const [notes, setNotes] = useState("");
+export function AddDeductionDialog({ invoiceId, outstanding, deduction, dict }: AddDeductionDialogProps) {
+  const [reason, setReason] = useState<DeductionReason>(deduction?.reason ?? "SHORTAGE");
+  const [amount, setAmount] = useState(deduction ? (Number(deduction.amountFils) / 100).toFixed(2) : "");
+  const [notes, setNotes] = useState(deduction?.notes ?? "");
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
   const t = dict;
@@ -42,20 +48,23 @@ export function AddDeductionDialog({ invoiceId, outstanding, dict }: AddDeductio
 
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/invoices/${invoiceId}/deduction`, {
-        method: "POST",
+      const url = deduction
+        ? `/api/invoices/${invoiceId}/deduction/${deduction.id}`
+        : `/api/invoices/${invoiceId}/deduction`;
+      const res = await fetch(url, {
+        method: deduction ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason, amountFils: amountFils.toString(), notes: notes || undefined }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        toast.error(data.error ?? "Failed to post deduction");
+        toast.error(data.error ?? (deduction ? "Failed to update deduction" : "Failed to post deduction"));
         return;
       }
-      toast.success(t.invoices.deductionPosted);
+      toast.success(deduction ? t.invoices.deductionUpdated : t.invoices.deductionPosted);
       router.refresh();
     } catch {
-      toast.error("Failed to post deduction");
+      toast.error(deduction ? "Failed to update deduction" : "Failed to post deduction");
     } finally {
       setSubmitting(false);
     }
@@ -66,12 +75,12 @@ export function AddDeductionDialog({ invoiceId, outstanding, dict }: AddDeductio
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <MinusCircle className="size-4" />
-          {t.invoices.addDeduction}
+          {deduction ? t.invoices.editDeduction : t.invoices.addDeduction}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t.invoices.addDeductionDialog}</DialogTitle>
+          <DialogTitle>{deduction ? t.invoices.editDeductionDialog : t.invoices.addDeductionDialog}</DialogTitle>
         </DialogHeader>
         <Card className="p-4">
           <div className="space-y-4">
@@ -108,7 +117,7 @@ export function AddDeductionDialog({ invoiceId, outstanding, dict }: AddDeductio
                 <X className="size-4" /> {t.common.cancel}
               </Button>
               <Button onClick={handleSubmit} disabled={submitting || !amount}>
-                {submitting ? <Loader2 className="size-4 animate-spin" /> : t.invoices.addDeduction}
+                {submitting ? <Loader2 className="size-4 animate-spin" /> : deduction ? t.invoices.updateDeduction : t.invoices.addDeduction}
               </Button>
             </div>
           </div>

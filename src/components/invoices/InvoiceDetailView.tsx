@@ -131,6 +131,7 @@ export async function InvoiceDetailView({
             <AddDeductionDialog
               invoiceId={invoice.id}
               outstanding={outstanding}
+              deduction={null}
               dict={t}
             />
           )}
@@ -206,11 +207,17 @@ export async function InvoiceDetailView({
           <h3 className="text-sm font-semibold">{t.invoices.deductions}</h3>
           <div className="text-sm text-muted-foreground">
             {invoice.deductions.map((d) => (
-              <div key={d.id} className="flex justify-between">
+              <div key={d.id} className="flex items-center justify-between gap-2">
                 <span>
                   {d.reason} {d.notes ? `— ${d.notes}` : ""}
                 </span>
                 <span className="tabular-nums">{formatAED(d.amountFils)} AED</span>
+                <AddDeductionDialog
+                  invoiceId={invoice.id}
+                  outstanding={outstanding}
+                  deduction={d}
+                  dict={t}
+                />
               </div>
             ))}
           </div>

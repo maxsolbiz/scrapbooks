@@ -36,7 +36,7 @@
 
 | ID | Decision | Answer | Date |
 |---|---|---|---|
-| D1 | VAT treatment of deduction types (pre-VAT vs post-VAT) | | |
+| D1 | VAT treatment of deduction types (pre-VAT vs post-VAT) | Proportional VAT adjustment: Input is VAT-exclusive base; system calculates proportional VAT using original line's rate; posts balanced JE adjusting Base + VAT + AR/AP per FTA rules. | 2026-10-30 |
 | D2 | Inventory valuation method (weighted avg proposed) | | |
 | D3 | Who may amend posted invoices (ACCOUNTANT/ADMIN, second approval?) | | |
 | D4 | VAT calculation: per-line vs per-invoice | per-line half-up (reviewer default, NOT user-confirmed); new invoices can differ from the old truncation by up to 1 fil per line; existing data untouched | 2026-10-28 |

@@ -52,7 +52,7 @@ export async function calculateVAT201(filters: VAT201Filter): Promise<VAT201Retu
     purchaseDeductionVat = 0n;
 
   for (const inv of invoices) {
-    const isZeroRate = Number(inv.vatFils) === 0n && Number(inv.subtotalFils) > 0n;
+    const isZeroRate = Number(inv.vatFils) === 0 && Number(inv.subtotalFils) > 0;
     if (inv.direction === "SALES") {
       if (isZeroRate) {
         zeroRatedSales += inv.subtotalFils;

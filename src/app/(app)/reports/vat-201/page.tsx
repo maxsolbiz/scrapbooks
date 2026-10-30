@@ -81,7 +81,7 @@ export default async function VAT201Page({
                 <Input type="date" id="toDate" name="toDate" defaultValue={toDateParam || fy.ends.toISOString().slice(0, 10)} />
               </div>
             </div>
-            <Button type="submit" variant="outline">{t.reports.filters || "Filter"}</Button>
+              <Button type="submit" variant="outline">{t.reports.vat201.filters || "Filter"}</Button>
           </form>
         </CardContent>
       </Card>
@@ -105,7 +105,7 @@ export default async function VAT201Page({
                 </tr>
               ))}
               <tr className="font-bold">
-                <td className="py-2">{t.reports.auditTrail?.netAmountDue || "Net VAT Payable (Recoverable)"}</td>
+                <td className="py-2">{t.reports.vat201.netVatPayable || "Net VAT Payable (Recoverable)"}</td>
                 <td />
                 <td className="text-right py-2 font-mono">{formatAED(vat.netVatPayable)}</td>
               </tr>

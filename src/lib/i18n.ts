@@ -301,6 +301,7 @@ const en = {
     },
     vat201: {
       title: "VAT 201 Return",
+      filters: "Filters",
       fiscalYear: "Fiscal Year",
       period: "Period",
       box1: "Standard-rated supplies",
@@ -678,6 +679,7 @@ paymentStatus: "حالة الدفع",
     },
     vat201: {
       title: "إقرار ضريبة القيمة المضافة 201",
+      filters: "تصفية",
       fiscalYear: "السنة المالية",
       period: "الفترة",
       box1: "التوريدات الخاضعة للنسبة الأساسية",

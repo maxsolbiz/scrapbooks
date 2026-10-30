@@ -476,3 +476,8 @@ Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 127/127
 (6) src/lib/i18n.ts: Added reports.invoiceRegister namespace (EN/AR): title, filters, fromDate, toDate, direction, exportCsv, colDate, colInvoiceNo, colParty, colDirection, colTotal, colPaid, colOutstanding, colPaymentStatus, colStatus.
 (7) tests/db/invoice-register.test.ts (4 tests): direction filtering, future date-range empty, outstanding/paymentStatus net of deductions, CSV BOM/headers.
 Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 131/131 (21 files); npx next build BUILD_EXIT=0 (route /api/reports/invoice-register/csv registered). P5.2 complete. Phase 2 now fully complete (P2.1-P2.6).
+## 2026-10-30 - P5.2-hotfix 9b9761c - Server->Client Function Prop Fix
+(1) src/components/invoices/AddDeductionDialog.tsx: removed `onSuccess` prop; success handler now calls `router.refresh()` internally (client component, no server->client function props).
+(2) src/components/invoices/ApplyCreditDialog.tsx: removed `onSuccess` prop; success handler now calls `router.refresh()` internally.
+(3) src/components/invoices/InvoiceDetailView.tsx: removed inline `onSuccess={() => window.location.reload()}` from both client dialogs (Server Component -> Client Component function prop violation).
+Verification: tsc --noEmit EXIT=0; npm test 149/149; npx next build BUILD_EXIT=0. Fix verified post-HMR error "Event handlers cannot be passed to Client Component props".

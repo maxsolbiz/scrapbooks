@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VoidInvoiceButton } from "./VoidInvoiceButton";
+import { AmendInvoiceButton } from "./AmendInvoiceButton";
 import { PrintDetailsForm } from "./PrintDetailsForm";
 import { formatAED } from "@/lib/money";
 import { partyCreditBalance } from "@/lib/party-credit";
@@ -41,6 +42,8 @@ export async function InvoiceDetailView({
       lines: { orderBy: { id: "asc" } },
       allocations: { include: { payment: { select: { paymentNo: true, id: true, status: true } } } },
       deductions: { orderBy: { createdAt: "asc" } },
+      revisesInvoice: { select: { id: true, invoiceNo: true } },
+      revisedBy: { select: { id: true, invoiceNo: true }, orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
   if (!invoice) notFound();
@@ -55,12 +58,23 @@ export async function InvoiceDetailView({
   const canDeduct =
     invoice.status === "POSTED" && outstanding > 0n;
 
-  const canVoid =
-    (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
-    invoice.status === "POSTED";
-  const canEditPrintDetails =
-    (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
-    invoice.status !== "VOID";
+  const canWrite = await moduleCan(
+    user,
+    direction === "SALES" ? "sales-invoices" : "purchase-invoices",
+    "write",
+  );
+  const canVoid = canWrite && invoice.status === "POSTED";
+  const canEditPrintDetails = canWrite && invoice.status !== "VOID";
+  // P3.2: amend only a POSTED original that is not itself a revision (amend the
+  // chain root instead) and has no ACTIVE payment allocations — amend reverses
+  // the invoice, which rejects active allocations, so block here rather than
+  // sending the user through a doomed form (void the payments first).
+  const activeAllocations = invoice.allocations.filter((a) => a.payment.status !== "VOID");
+  const canAmend =
+    canWrite &&
+    invoice.status === "POSTED" &&
+    !invoice.revisesInvoiceId &&
+    activeAllocations.length === 0;
 
   const statusBadge = (
     <>
@@ -72,6 +86,11 @@ export async function InvoiceDetailView({
         {invoice.status}
       </Badge>
       <PaymentStatusBadge status={invoice.paymentStatus} dict={t} />
+      {invoice.revisionNumber > 0 && (
+        <Badge variant="outline">
+          {t.invoices.revisionNumber} {invoice.revisionNumber}
+        </Badge>
+      )}
     </>
   );
 
@@ -93,6 +112,27 @@ export async function InvoiceDetailView({
               ({invoice.party.code})
             </span>
           </div>
+          {(invoice.revisesInvoice || (invoice.status === "VOID" && invoice.revisedBy[0])) && (
+            <div className="mt-1 text-sm text-muted-foreground">
+              {invoice.revisesInvoice && (
+                <span>
+                  {t.invoices.revisionOf}{" "}
+                  <Link className="underline underline-offset-2" href={`${path}/${invoice.revisesInvoice.id}`}>
+                    {invoice.revisesInvoice.invoiceNo}
+                  </Link>
+                </span>
+              )}
+              {invoice.revisesInvoice && invoice.status === "VOID" && invoice.revisedBy[0] ? " · " : ""}
+              {invoice.status === "VOID" && invoice.revisedBy[0] && (
+                <span>
+                  {t.invoices.revisedBy}{" "}
+                  <Link className="underline underline-offset-2" href={`${path}/${invoice.revisedBy[0].id}`}>
+                    {invoice.revisedBy[0].invoiceNo}
+                  </Link>
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -107,6 +147,18 @@ export async function InvoiceDetailView({
             <Button asChild variant="outline">
               <Link href={`/journals/${invoice.journalEntryId}`}>{t.journals.viewEntry}</Link>
             </Button>
+          )}
+          {canAmend && (
+            <AmendInvoiceButton
+              invoiceId={invoice.id}
+              direction={direction}
+              path={path}
+              label={t.invoices.amendInvoice}
+              confirmText={t.invoices.amendConfirm}
+              cancelLabel={t.common.cancel}
+              reasonLabel={t.invoices.amendReason}
+              reasonPlaceholder={t.invoices.amendReasonPlaceholder}
+            />
           )}
           {canVoid && (
             <VoidInvoiceButton

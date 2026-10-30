@@ -1,6 +1,6 @@
 "use client";
 
-import { InvoiceFormClient } from "@/components/invoices/InvoiceFormClient";
+import { InvoiceFormClient, type ReviseFromData } from "@/components/invoices/InvoiceFormClient";
 
 interface InvoiceFormWrapperProps {
   direction: "SALES" | "PURCHASE";
@@ -9,6 +9,8 @@ interface InvoiceFormWrapperProps {
   dict: any;
   today: string;
   defaultVatRate: string;
+  reviseFrom?: ReviseFromData | null;
+  amendReason?: string;
 }
 
 export function InvoiceFormWrapper({
@@ -18,6 +20,19 @@ export function InvoiceFormWrapper({
   dict,
   today,
   defaultVatRate,
+  reviseFrom,
+  amendReason,
 }: InvoiceFormWrapperProps) {
-  return <InvoiceFormClient direction={direction} parties={parties} items={items} dict={dict} today={today} defaultVatRate={defaultVatRate} />;
+  return (
+    <InvoiceFormClient
+      direction={direction}
+      parties={parties}
+      items={items}
+      dict={dict}
+      today={today}
+      defaultVatRate={defaultVatRate}
+      reviseFrom={reviseFrom}
+      amendReason={amendReason}
+    />
+  );
 }

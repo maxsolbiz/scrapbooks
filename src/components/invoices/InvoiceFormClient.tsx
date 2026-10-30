@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createInvoiceAction } from "@/lib/invoice-actions";
+import { createInvoiceAction, amendInvoiceAction } from "@/lib/invoice-actions";
 import { formatAED, filsToDecimalString, multiplyFilsLenient, vatOf, vatForLine } from "@/lib/money";
 import type { Dictionary } from "@/lib/i18n";
 
@@ -37,6 +37,35 @@ export interface ItemOption {
   unit: string;
   defaultRate: string | null;
   vatRate: number;
+}
+
+/** P3.2: serializable snapshot of the original invoice used to prefill the amend
+ * form (built server-side in NewInvoicePage). Party and direction are locked. */
+export interface ReviseFromData {
+  id: string;
+  invoiceNo: string;
+  partyId: string;
+  date: string;
+  notes: string;
+  dueDate: string;
+  paymentTerms: string;
+  lines: Array<{
+    itemId: string;
+    description: string;
+    qty: string;
+    unit: string;
+    rate: string;
+    vatRate: string;
+    wbtNo: string;
+  }>;
+  printDetails: {
+    purchaseOrder: string;
+    deliveryNote: string;
+    deliveryNoteDate: string;
+    vehicleNo: string;
+    modeOfPayment: string;
+    termsOfDelivery: string;
+  };
 }
 
 interface Line {
@@ -74,6 +103,8 @@ interface InvoiceFormClientProps {
   dict: Dictionary;
   today: string;
   defaultVatRate: string;
+  reviseFrom?: ReviseFromData | null;
+  amendReason?: string;
 }
 
 export function InvoiceFormClient({
@@ -83,31 +114,37 @@ export function InvoiceFormClient({
   dict,
   today,
   defaultVatRate,
+  reviseFrom,
+  amendReason: initialAmendReason,
 }: InvoiceFormClientProps) {
   const t = dict;
   const router = useRouter();
   const isSales = direction === "SALES";
+  const isRevision = Boolean(reviseFrom);
   const eligible = parties.filter(
     (p) => p.type === "BOTH" || (isSales ? p.type === "CUSTOMER" : p.type === "VENDOR"),
   );
 
-  const [date, setDate] = useState(today);
-  const [partyId, setPartyId] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [paymentTerms, setPaymentTerms] = useState("");
-  const [lines, setLines] = useState<Line[]>([
-    { id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: defaultVatRate, wbtNo: "" },
-  ]);
-  const [notes, setNotes] = useState("");
+  const [date, setDate] = useState(reviseFrom?.date ?? today);
+  const [partyId, setPartyId] = useState(reviseFrom?.partyId ?? "");
+  const [dueDate, setDueDate] = useState(reviseFrom?.dueDate ?? "");
+  const [paymentTerms, setPaymentTerms] = useState(reviseFrom?.paymentTerms ?? "");
+  const [lines, setLines] = useState<Line[]>(() =>
+    reviseFrom
+      ? reviseFrom.lines.map((l, i) => ({ id: `rev${i + 1}`, ...l }))
+      : [{ id: "l1", itemId: "", description: "", qty: "", unit: "KG", rate: "", vatRate: defaultVatRate, wbtNo: "" }],
+  );
+  const [notes, setNotes] = useState(reviseFrom?.notes ?? "");
   const [printDetails, setPrintDetails] = useState<PrintDetails>({
     supplierRef: "",
-    purchaseOrder: "",
-    deliveryNote: "",
-    deliveryNoteDate: "",
-    vehicleNo: "",
-    modeOfPayment: "",
-    termsOfDelivery: "",
+    purchaseOrder: reviseFrom?.printDetails.purchaseOrder ?? "",
+    deliveryNote: reviseFrom?.printDetails.deliveryNote ?? "",
+    deliveryNoteDate: reviseFrom?.printDetails.deliveryNoteDate ?? "",
+    vehicleNo: reviseFrom?.printDetails.vehicleNo ?? "",
+    modeOfPayment: reviseFrom?.printDetails.modeOfPayment ?? "",
+    termsOfDelivery: reviseFrom?.printDetails.termsOfDelivery ?? "",
   });
+  const [amendReason, setAmendReason] = useState(initialAmendReason ?? "");
   const [submitting, setSubmitting] = useState(false);
 
   const totals = useMemo(() => {
@@ -122,8 +159,15 @@ export function InvoiceFormClient({
     return { subtotal, vat, total: subtotal + vat };
   }, [lines]);
 
-  // Auto-calculate dueDate when paymentTerms changes
+  // Auto-calculate dueDate when paymentTerms changes. When amending an invoice
+  // that already had an explicit dueDate, skip the mount-time recalculation so
+  // the original due date is not silently replaced by date+terms.
+  const skipAutoDueOnMount = useRef(Boolean(reviseFrom?.dueDate));
   useEffect(() => {
+    if (skipAutoDueOnMount.current) {
+      skipAutoDueOnMount.current = false;
+      return;
+    }
     if (paymentTerms && date) {
       const days = parseInt(paymentTerms, 10);
       if (!Number.isNaN(days) && days > 0) {
@@ -181,36 +225,59 @@ export function InvoiceFormClient({
       toast.error(t.common.required);
       return;
     }
+    if (isRevision && !amendReason.trim()) {
+      toast.error(t.common.required);
+      return;
+    }
     setSubmitting(true);
-    const res = await createInvoiceAction(direction, {
-      date,
-      partyId,
-      notes,
-      supplierRef: printDetails.supplierRef || undefined,
-      purchaseOrder: printDetails.purchaseOrder || undefined,
-      deliveryNote: printDetails.deliveryNote || undefined,
-      deliveryNoteDate: printDetails.deliveryNoteDate || undefined,
-      vehicleNo: printDetails.vehicleNo || undefined,
-      modeOfPayment: printDetails.modeOfPayment || undefined,
-      termsOfDelivery: printDetails.termsOfDelivery || undefined,
-      dueDate: dueDate || undefined,
-      paymentTerms: paymentTerms ? parseInt(paymentTerms, 10) : undefined,
-      lines: lines.map((l) => ({
-        itemId: l.itemId || undefined,
-        description: l.description,
-        qty: l.qty,
-        unit: l.unit as "KG",
-        rate: l.rate,
-        vatRate: l.vatRate,
-        wbtNo: l.wbtNo.trim() || undefined,
-      })),
-    });
+    const linePayload = lines.map((l) => ({
+      itemId: l.itemId || undefined,
+      description: l.description,
+      qty: l.qty,
+      unit: l.unit as "KG",
+      rate: l.rate,
+      vatRate: l.vatRate,
+      wbtNo: l.wbtNo.trim() || undefined,
+    }));
+    // P3.2: revision submit reverses the original (+ VOID) and posts the new
+    // invoice in ONE server transaction; party/direction are copied from the
+    // original server-side. supplierRef is never sent (P1.7 unique guard keeps
+    // the original row's reference reserved while it is VOID).
+    const res = isRevision && reviseFrom
+      ? await amendInvoiceAction(reviseFrom.id, direction, amendReason, {
+          date,
+          notes,
+          dueDate: dueDate || undefined,
+          paymentTerms: paymentTerms ? parseInt(paymentTerms, 10) : undefined,
+          purchaseOrder: printDetails.purchaseOrder || undefined,
+          deliveryNote: printDetails.deliveryNote || undefined,
+          deliveryNoteDate: printDetails.deliveryNoteDate || undefined,
+          vehicleNo: printDetails.vehicleNo || undefined,
+          modeOfPayment: printDetails.modeOfPayment || undefined,
+          termsOfDelivery: printDetails.termsOfDelivery || undefined,
+          lines: linePayload,
+        })
+      : await createInvoiceAction(direction, {
+          date,
+          partyId,
+          notes,
+          supplierRef: printDetails.supplierRef || undefined,
+          purchaseOrder: printDetails.purchaseOrder || undefined,
+          deliveryNote: printDetails.deliveryNote || undefined,
+          deliveryNoteDate: printDetails.deliveryNoteDate || undefined,
+          vehicleNo: printDetails.vehicleNo || undefined,
+          modeOfPayment: printDetails.modeOfPayment || undefined,
+          termsOfDelivery: printDetails.termsOfDelivery || undefined,
+          dueDate: dueDate || undefined,
+          paymentTerms: paymentTerms ? parseInt(paymentTerms, 10) : undefined,
+          lines: linePayload,
+        });
     setSubmitting(false);
     if (!res.ok || !res.data) {
       if (!res.ok) toast.error(res.error);
       return;
     }
-    toast.success(t.invoices.posted);
+    toast.success(isRevision ? t.invoices.revisionPosted : t.invoices.posted);
     router.push(`${isSales ? "/sales-invoices" : "/purchase-invoices"}/${res.data.id}`);
   }
 
@@ -221,6 +288,31 @@ export function InvoiceFormClient({
           <CardTitle className="text-base">{t.invoices.new}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {reviseFrom && (
+            <div className="space-y-1.5 rounded-md border border-amber-500/50 bg-amber-500/10 p-3 text-sm">
+              <p className="font-medium">
+                {t.invoices.revisionOf} <span className="font-mono">{reviseFrom.invoiceNo}</span>
+              </p>
+              {initialAmendReason ? (
+                <p className="text-muted-foreground">
+                  {t.invoices.amendReason}: {amendReason}
+                </p>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="amend-reason" className="whitespace-nowrap">
+                    {t.invoices.amendReason}
+                  </Label>
+                  <Input
+                    id="amend-reason"
+                    value={amendReason}
+                    onChange={(e) => setAmendReason(e.target.value)}
+                    placeholder={t.invoices.amendReasonPlaceholder}
+                    maxLength={2000}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <Label>{t.common.date}</Label>
@@ -228,7 +320,7 @@ export function InvoiceFormClient({
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>{isSales ? t.nav.parties : t.nav.parties}</Label>
-              <Select value={partyId} onValueChange={setPartyId}>
+              <Select value={partyId} onValueChange={setPartyId} disabled={isRevision}>
                 <SelectTrigger>
                   <SelectValue placeholder="—" />
                 </SelectTrigger>
@@ -518,7 +610,7 @@ const value = multiplyFilsLenient(toFils(l.rate), l.qty);
               <Plus className="size-4" /> {t.invoices.addLine}
             </Button>
             <Button onClick={submit} disabled={submitting || totals.total === 0n}>
-              {t.common.post}
+              {isRevision ? t.invoices.postRevision : t.common.post}
             </Button>
           </div>
         </CardContent>

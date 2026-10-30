@@ -27,18 +27,27 @@ export type AggregateInvoiceDeduction = {
 }
 
 export type InvoiceDeductionAvgAggregateOutputType = {
-  amountFils: number | null
+  baseAmountFils: number | null
+  vatRate: runtime.Decimal | null
+  vatFils: number | null
+  totalFils: number | null
 }
 
 export type InvoiceDeductionSumAggregateOutputType = {
-  amountFils: bigint | null
+  baseAmountFils: bigint | null
+  vatRate: runtime.Decimal | null
+  vatFils: bigint | null
+  totalFils: bigint | null
 }
 
 export type InvoiceDeductionMinAggregateOutputType = {
   id: string | null
   invoiceId: string | null
   reason: $Enums.DeductionReason | null
-  amountFils: bigint | null
+  baseAmountFils: bigint | null
+  vatRate: runtime.Decimal | null
+  vatFils: bigint | null
+  totalFils: bigint | null
   notes: string | null
   journalEntryId: string | null
   createdById: string | null
@@ -50,7 +59,10 @@ export type InvoiceDeductionMaxAggregateOutputType = {
   id: string | null
   invoiceId: string | null
   reason: $Enums.DeductionReason | null
-  amountFils: bigint | null
+  baseAmountFils: bigint | null
+  vatRate: runtime.Decimal | null
+  vatFils: bigint | null
+  totalFils: bigint | null
   notes: string | null
   journalEntryId: string | null
   createdById: string | null
@@ -62,7 +74,10 @@ export type InvoiceDeductionCountAggregateOutputType = {
   id: number
   invoiceId: number
   reason: number
-  amountFils: number
+  baseAmountFils: number
+  vatRate: number
+  vatFils: number
+  totalFils: number
   notes: number
   journalEntryId: number
   createdById: number
@@ -73,18 +88,27 @@ export type InvoiceDeductionCountAggregateOutputType = {
 
 
 export type InvoiceDeductionAvgAggregateInputType = {
-  amountFils?: true
+  baseAmountFils?: true
+  vatRate?: true
+  vatFils?: true
+  totalFils?: true
 }
 
 export type InvoiceDeductionSumAggregateInputType = {
-  amountFils?: true
+  baseAmountFils?: true
+  vatRate?: true
+  vatFils?: true
+  totalFils?: true
 }
 
 export type InvoiceDeductionMinAggregateInputType = {
   id?: true
   invoiceId?: true
   reason?: true
-  amountFils?: true
+  baseAmountFils?: true
+  vatRate?: true
+  vatFils?: true
+  totalFils?: true
   notes?: true
   journalEntryId?: true
   createdById?: true
@@ -96,7 +120,10 @@ export type InvoiceDeductionMaxAggregateInputType = {
   id?: true
   invoiceId?: true
   reason?: true
-  amountFils?: true
+  baseAmountFils?: true
+  vatRate?: true
+  vatFils?: true
+  totalFils?: true
   notes?: true
   journalEntryId?: true
   createdById?: true
@@ -108,7 +135,10 @@ export type InvoiceDeductionCountAggregateInputType = {
   id?: true
   invoiceId?: true
   reason?: true
-  amountFils?: true
+  baseAmountFils?: true
+  vatRate?: true
+  vatFils?: true
+  totalFils?: true
   notes?: true
   journalEntryId?: true
   createdById?: true
@@ -207,7 +237,10 @@ export type InvoiceDeductionGroupByOutputType = {
   id: string
   invoiceId: string
   reason: $Enums.DeductionReason
-  amountFils: bigint
+  baseAmountFils: bigint
+  vatRate: runtime.Decimal
+  vatFils: bigint
+  totalFils: bigint
   notes: string | null
   journalEntryId: string | null
   createdById: string
@@ -242,7 +275,10 @@ export type InvoiceDeductionWhereInput = {
   id?: Prisma.StringFilter<"InvoiceDeduction"> | string
   invoiceId?: Prisma.StringFilter<"InvoiceDeduction"> | string
   reason?: Prisma.EnumDeductionReasonFilter<"InvoiceDeduction"> | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  baseAmountFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  vatRate?: Prisma.DecimalFilter<"InvoiceDeduction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  totalFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
   notes?: Prisma.StringNullableFilter<"InvoiceDeduction"> | string | null
   journalEntryId?: Prisma.StringNullableFilter<"InvoiceDeduction"> | string | null
   createdById?: Prisma.StringFilter<"InvoiceDeduction"> | string
@@ -257,7 +293,10 @@ export type InvoiceDeductionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   invoiceId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   journalEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -276,7 +315,10 @@ export type InvoiceDeductionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.InvoiceDeductionWhereInput | Prisma.InvoiceDeductionWhereInput[]
   invoiceId?: Prisma.StringFilter<"InvoiceDeduction"> | string
   reason?: Prisma.EnumDeductionReasonFilter<"InvoiceDeduction"> | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  baseAmountFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  vatRate?: Prisma.DecimalFilter<"InvoiceDeduction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  totalFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
   notes?: Prisma.StringNullableFilter<"InvoiceDeduction"> | string | null
   createdById?: Prisma.StringFilter<"InvoiceDeduction"> | string
   createdAt?: Prisma.DateTimeFilter<"InvoiceDeduction"> | Date | string
@@ -290,7 +332,10 @@ export type InvoiceDeductionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   invoiceId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   journalEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -310,7 +355,10 @@ export type InvoiceDeductionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"InvoiceDeduction"> | string
   invoiceId?: Prisma.StringWithAggregatesFilter<"InvoiceDeduction"> | string
   reason?: Prisma.EnumDeductionReasonWithAggregatesFilter<"InvoiceDeduction"> | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceDeduction"> | bigint | number
+  baseAmountFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceDeduction"> | bigint | number
+  vatRate?: Prisma.DecimalWithAggregatesFilter<"InvoiceDeduction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceDeduction"> | bigint | number
+  totalFils?: Prisma.BigIntWithAggregatesFilter<"InvoiceDeduction"> | bigint | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"InvoiceDeduction"> | string | null
   journalEntryId?: Prisma.StringNullableWithAggregatesFilter<"InvoiceDeduction"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"InvoiceDeduction"> | string
@@ -321,7 +369,10 @@ export type InvoiceDeductionScalarWhereWithAggregatesInput = {
 export type InvoiceDeductionCreateInput = {
   id?: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -334,7 +385,10 @@ export type InvoiceDeductionUncheckedCreateInput = {
   id?: string
   invoiceId: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -345,7 +399,10 @@ export type InvoiceDeductionUncheckedCreateInput = {
 export type InvoiceDeductionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -358,7 +415,10 @@ export type InvoiceDeductionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   invoiceId?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -370,7 +430,10 @@ export type InvoiceDeductionCreateManyInput = {
   id?: string
   invoiceId: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -381,7 +444,10 @@ export type InvoiceDeductionCreateManyInput = {
 export type InvoiceDeductionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -391,7 +457,10 @@ export type InvoiceDeductionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   invoiceId?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -418,7 +487,10 @@ export type InvoiceDeductionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   invoiceId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   journalEntryId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -427,14 +499,20 @@ export type InvoiceDeductionCountOrderByAggregateInput = {
 }
 
 export type InvoiceDeductionAvgOrderByAggregateInput = {
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
 }
 
 export type InvoiceDeductionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   invoiceId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   journalEntryId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -446,7 +524,10 @@ export type InvoiceDeductionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   invoiceId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   journalEntryId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -455,7 +536,10 @@ export type InvoiceDeductionMinOrderByAggregateInput = {
 }
 
 export type InvoiceDeductionSumOrderByAggregateInput = {
-  amountFils?: Prisma.SortOrder
+  baseAmountFils?: Prisma.SortOrder
+  vatRate?: Prisma.SortOrder
+  vatFils?: Prisma.SortOrder
+  totalFils?: Prisma.SortOrder
 }
 
 export type InvoiceDeductionCreateNestedManyWithoutCreatedByInput = {
@@ -581,7 +665,10 @@ export type EnumDeductionReasonFieldUpdateOperationsInput = {
 export type InvoiceDeductionCreateWithoutCreatedByInput = {
   id?: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -593,7 +680,10 @@ export type InvoiceDeductionUncheckedCreateWithoutCreatedByInput = {
   id?: string
   invoiceId: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   journalEntryId?: string | null
   createdAt?: Date | string
@@ -633,7 +723,10 @@ export type InvoiceDeductionScalarWhereInput = {
   id?: Prisma.StringFilter<"InvoiceDeduction"> | string
   invoiceId?: Prisma.StringFilter<"InvoiceDeduction"> | string
   reason?: Prisma.EnumDeductionReasonFilter<"InvoiceDeduction"> | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  baseAmountFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  vatRate?: Prisma.DecimalFilter<"InvoiceDeduction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
+  totalFils?: Prisma.BigIntFilter<"InvoiceDeduction"> | bigint | number
   notes?: Prisma.StringNullableFilter<"InvoiceDeduction"> | string | null
   journalEntryId?: Prisma.StringNullableFilter<"InvoiceDeduction"> | string | null
   createdById?: Prisma.StringFilter<"InvoiceDeduction"> | string
@@ -644,7 +737,10 @@ export type InvoiceDeductionScalarWhereInput = {
 export type InvoiceDeductionCreateWithoutJournalEntryInput = {
   id?: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -656,7 +752,10 @@ export type InvoiceDeductionUncheckedCreateWithoutJournalEntryInput = {
   id?: string
   invoiceId: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   createdById: string
   createdAt?: Date | string
@@ -682,7 +781,10 @@ export type InvoiceDeductionUpdateToOneWithWhereWithoutJournalEntryInput = {
 export type InvoiceDeductionUpdateWithoutJournalEntryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -694,7 +796,10 @@ export type InvoiceDeductionUncheckedUpdateWithoutJournalEntryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   invoiceId?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -704,7 +809,10 @@ export type InvoiceDeductionUncheckedUpdateWithoutJournalEntryInput = {
 export type InvoiceDeductionCreateWithoutInvoiceInput = {
   id?: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -715,7 +823,10 @@ export type InvoiceDeductionCreateWithoutInvoiceInput = {
 export type InvoiceDeductionUncheckedCreateWithoutInvoiceInput = {
   id?: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -753,7 +864,10 @@ export type InvoiceDeductionCreateManyCreatedByInput = {
   id?: string
   invoiceId: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   journalEntryId?: string | null
   createdAt?: Date | string
@@ -763,7 +877,10 @@ export type InvoiceDeductionCreateManyCreatedByInput = {
 export type InvoiceDeductionUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -775,7 +892,10 @@ export type InvoiceDeductionUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   invoiceId?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -786,7 +906,10 @@ export type InvoiceDeductionUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   invoiceId?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -796,7 +919,10 @@ export type InvoiceDeductionUncheckedUpdateManyWithoutCreatedByInput = {
 export type InvoiceDeductionCreateManyInvoiceInput = {
   id?: string
   reason: $Enums.DeductionReason
-  amountFils: bigint | number
+  baseAmountFils: bigint | number
+  vatRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils: bigint | number
+  totalFils: bigint | number
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -807,7 +933,10 @@ export type InvoiceDeductionCreateManyInvoiceInput = {
 export type InvoiceDeductionUpdateWithoutInvoiceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -818,7 +947,10 @@ export type InvoiceDeductionUpdateWithoutInvoiceInput = {
 export type InvoiceDeductionUncheckedUpdateWithoutInvoiceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -829,7 +961,10 @@ export type InvoiceDeductionUncheckedUpdateWithoutInvoiceInput = {
 export type InvoiceDeductionUncheckedUpdateManyWithoutInvoiceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.EnumDeductionReasonFieldUpdateOperationsInput | $Enums.DeductionReason
-  amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  baseAmountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  vatRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  vatFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  totalFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -843,7 +978,10 @@ export type InvoiceDeductionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id?: boolean
   invoiceId?: boolean
   reason?: boolean
-  amountFils?: boolean
+  baseAmountFils?: boolean
+  vatRate?: boolean
+  vatFils?: boolean
+  totalFils?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -858,7 +996,10 @@ export type InvoiceDeductionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   invoiceId?: boolean
   reason?: boolean
-  amountFils?: boolean
+  baseAmountFils?: boolean
+  vatRate?: boolean
+  vatFils?: boolean
+  totalFils?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -873,7 +1014,10 @@ export type InvoiceDeductionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   invoiceId?: boolean
   reason?: boolean
-  amountFils?: boolean
+  baseAmountFils?: boolean
+  vatRate?: boolean
+  vatFils?: boolean
+  totalFils?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -888,7 +1032,10 @@ export type InvoiceDeductionSelectScalar = {
   id?: boolean
   invoiceId?: boolean
   reason?: boolean
-  amountFils?: boolean
+  baseAmountFils?: boolean
+  vatRate?: boolean
+  vatFils?: boolean
+  totalFils?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -896,7 +1043,7 @@ export type InvoiceDeductionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type InvoiceDeductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "reason" | "amountFils" | "notes" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["invoiceDeduction"]>
+export type InvoiceDeductionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoiceId" | "reason" | "baseAmountFils" | "vatRate" | "vatFils" | "totalFils" | "notes" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["invoiceDeduction"]>
 export type InvoiceDeductionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   journalEntry?: boolean | Prisma.InvoiceDeduction$journalEntryArgs<ExtArgs>
@@ -924,7 +1071,22 @@ export type $InvoiceDeductionPayload<ExtArgs extends runtime.Types.Extensions.In
     id: string
     invoiceId: string
     reason: $Enums.DeductionReason
-    amountFils: bigint
+    /**
+     * D1: VAT-exclusive base amount entered by the user.
+     */
+    baseAmountFils: bigint
+    /**
+     * D1: rate used for the proportional VAT adjustment (invoice effective rate by default).
+     */
+    vatRate: runtime.Decimal
+    /**
+     * D1: roundHalfUp(baseAmountFils * vatRate).
+     */
+    vatFils: bigint
+    /**
+     * D1: baseAmountFils + vatFils (the AR/AP impact).
+     */
+    totalFils: bigint
     notes: string | null
     journalEntryId: string | null
     createdById: string
@@ -1359,7 +1521,10 @@ export interface InvoiceDeductionFieldRefs {
   readonly id: Prisma.FieldRef<"InvoiceDeduction", 'String'>
   readonly invoiceId: Prisma.FieldRef<"InvoiceDeduction", 'String'>
   readonly reason: Prisma.FieldRef<"InvoiceDeduction", 'DeductionReason'>
-  readonly amountFils: Prisma.FieldRef<"InvoiceDeduction", 'BigInt'>
+  readonly baseAmountFils: Prisma.FieldRef<"InvoiceDeduction", 'BigInt'>
+  readonly vatRate: Prisma.FieldRef<"InvoiceDeduction", 'Decimal'>
+  readonly vatFils: Prisma.FieldRef<"InvoiceDeduction", 'BigInt'>
+  readonly totalFils: Prisma.FieldRef<"InvoiceDeduction", 'BigInt'>
   readonly notes: Prisma.FieldRef<"InvoiceDeduction", 'String'>
   readonly journalEntryId: Prisma.FieldRef<"InvoiceDeduction", 'String'>
   readonly createdById: Prisma.FieldRef<"InvoiceDeduction", 'String'>

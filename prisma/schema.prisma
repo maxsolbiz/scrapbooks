@@ -343,7 +343,7 @@ model InvoiceLine {
 enum DeductionReason {
   SHORTAGE
   DAMAGE
-  DISCOUNT
+  COMMERCIAL_DISCOUNT
   RETURN
   OTHER
 }
@@ -353,7 +353,14 @@ model InvoiceDeduction {
   invoiceId       String
   invoice         Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   reason          DeductionReason
-  amountFils      BigInt
+  /// D1: VAT-exclusive base amount entered by the user.
+  baseAmountFils  BigInt
+  /// D1: rate used for the proportional VAT adjustment (invoice effective rate by default).
+  vatRate         Decimal         @db.Decimal(5, 4)
+  /// D1: roundHalfUp(baseAmountFils * vatRate).
+  vatFils         BigInt
+  /// D1: baseAmountFils + vatFils (the AR/AP impact).
+  totalFils       BigInt
   notes           String?         @db.Text
   journalEntryId  String?         @unique
   journalEntry    JournalEntry?   @relation("InvoiceDeductionToJournalEntry", fields: [journalEntryId], references: [id], onDelete: SetNull)

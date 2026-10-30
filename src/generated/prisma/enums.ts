@@ -129,7 +129,7 @@ export type InvoicePaymentStatus = (typeof InvoicePaymentStatus)[keyof typeof In
 export const DeductionReason = {
   SHORTAGE: 'SHORTAGE',
   DAMAGE: 'DAMAGE',
-  DISCOUNT: 'DISCOUNT',
+  COMMERCIAL_DISCOUNT: 'COMMERCIAL_DISCOUNT',
   RETURN: 'RETURN',
   OTHER: 'OTHER'
 } as const

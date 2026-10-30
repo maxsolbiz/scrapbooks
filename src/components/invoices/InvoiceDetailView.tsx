@@ -125,7 +125,6 @@ export async function InvoiceDetailView({
               availableCredit={availableCredit}
               totalDue={totalDue}
               dict={t}
-              onSuccess={() => window.location.reload()}
             />
           )}
           {canDeduct && (
@@ -133,7 +132,6 @@ export async function InvoiceDetailView({
               invoiceId={invoice.id}
               outstanding={outstanding}
               dict={t}
-              onSuccess={() => window.location.reload()}
             />
           )}
         </div>

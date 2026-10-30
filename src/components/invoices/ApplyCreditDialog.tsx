@@ -17,7 +17,6 @@ interface ApplyCreditDialogProps {
   availableCredit: bigint;
   totalDue: bigint;
   dict: Dictionary;
-  onSuccess: () => void;
 }
 
 export function ApplyCreditDialog({
@@ -25,7 +24,6 @@ export function ApplyCreditDialog({
   availableCredit,
   totalDue,
   dict,
-  onSuccess,
 }: ApplyCreditDialogProps) {
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -58,7 +56,7 @@ export function ApplyCreditDialog({
         return;
       }
       toast.success(t.invoices.creditApplied);
-      onSuccess();
+      router.refresh();
     } catch {
       toast.error("Failed to apply credit");
     } finally {

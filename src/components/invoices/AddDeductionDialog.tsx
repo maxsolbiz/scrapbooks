@@ -17,10 +17,9 @@ interface AddDeductionDialogProps {
   invoiceId: string;
   outstanding: bigint;
   dict: Dictionary;
-  onSuccess: () => void;
 }
 
-export function AddDeductionDialog({ invoiceId, outstanding, dict, onSuccess }: AddDeductionDialogProps) {
+export function AddDeductionDialog({ invoiceId, outstanding, dict }: AddDeductionDialogProps) {
   const [reason, setReason] = useState<DeductionReason>("SHORTAGE");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
@@ -54,7 +53,7 @@ export function AddDeductionDialog({ invoiceId, outstanding, dict, onSuccess }: 
         return;
       }
       toast.success(t.invoices.deductionPosted);
-      onSuccess();
+      router.refresh();
     } catch {
       toast.error("Failed to post deduction");
     } finally {

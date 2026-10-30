@@ -14,9 +14,9 @@ const EXPORT_ROW_CAP = 50000;
 const FORMULA_PREFIXES = ["=", "+", "-", "@", "\t", "\r"];
 
 function escapeCsvCell(v: string | null): string {
-  const text = v ?? "";
+  let text = v ?? "";
   if (FORMULA_PREFIXES.some((p) => text.startsWith(p))) {
-    return `'${text}`;
+    text = `'${text}`;
   }
   if (/[",\r\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
   return text;
@@ -25,14 +25,35 @@ function escapeCsvCell(v: string | null): string {
 export async function POST(request: Request) {
   const user = await getAuditAccess();
   if (!user) {
+    await prisma.auditLog.create({
+      data: {
+        userId: null,
+        userEmail: "unknown",
+        action: "AUDIT_EXPORT_DENIED",
+        entityType: "AuditLog",
+        entityId: null,
+        detail: "Export attempted without audit-log read access",
+      },
+    });
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
   }
   try {
     const body = (await request.json()) as Record<string, string | undefined>;
     const parsed = parseAuditTrailParams(body);
-    const { rows, total } = await getAuditTrail({ ...parsed, page: 1, pageSize: EXPORT_ROW_CAP });
+    // Count first so oversized requests are rejected without loading any rows.
+    const { total } = await getAuditTrail({ ...parsed, page: 1, pageSize: 1 });
 
     if (total > EXPORT_ROW_CAP) {
+      await prisma.auditLog.create({
+        data: {
+          userId: user.id ?? null,
+          userEmail: user.email ?? "",
+          action: "AUDIT_EXPORT_DENIED",
+          entityType: "AuditLog",
+          entityId: null,
+          detail: `Export refused: ${total} rows exceed cap ${EXPORT_ROW_CAP}`,
+        },
+      });
       return NextResponse.json(
         {
           ok: false,
@@ -41,6 +62,8 @@ export async function POST(request: Request) {
         { status: 413 },
       );
     }
+
+    const { rows } = await getAuditTrail({ ...parsed, page: 1, pageSize: EXPORT_ROW_CAP });
 
     const BOM = "\uFEFF";
     const headers = ["Date", "User", "Action", "Entity Type", "Entity ID", "Detail"];
@@ -74,7 +97,9 @@ export async function POST(request: Request) {
         action: "AUDIT_EXPORTED",
         entityType: "AuditLog",
         entityId: null,
-        detail: `Exported ${rows.length} audit rows. Filters: ${filterSummary || "(none)"}`,
+        detail: `Exported ${rows.length} audit record${
+          rows.length === 1 ? "" : "s"
+        }. Filters: ${filterSummary || "(none)"}`,
       },
     });
 

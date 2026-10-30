@@ -296,10 +296,16 @@ describe("P5.9: Audit trail report", () => {
       const json = await res.json();
       expect(json.ok).toBe(false);
       expect(json.error).toContain("Too many rows");
+
+      const denied = await prisma.auditLog.findFirst({
+        where: { action: "AUDIT_EXPORT_DENIED" },
+      });
+      expect(denied).toBeTruthy();
+      expect(denied?.detail).toContain("50001 rows exceed cap");
       getAuditTrailMock.mockRestore();
     });
 
-    it("escapes CSV cells that start with formula prefixes", async () => {
+    it("round-trips formula-prefixed cells through CSV parsing", async () => {
       const mockAuth = vi.mocked(auth) as unknown as MockInstance<
         () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
       >;
@@ -309,9 +315,9 @@ describe("P5.9: Audit trail report", () => {
 
       await prisma.auditLog.create({
         data: {
-          userEmail: "formula@test.local",
-          action: "TEST_ACTION",
-          detail: "=1+1",
+          userEmail: `=SUM(A1,B1)`,
+          action: 'test"action',
+          detail: "plain detail",
           createdAt: new Date(),
         },
       });
@@ -325,10 +331,48 @@ describe("P5.9: Audit trail report", () => {
       );
       expect(res.status).toBe(200);
       const body = await res.text();
-      // The formula cell must be prefixed with a single quote so Excel treats it as text.
-      expect(body).toContain("'=1+1");
-      // It must NOT start a new line with =1+1 unquoted.
-      expect(body).not.toContain("\n=1+1");
+      const lines = body.split("\n");
+
+      // Header + 1 data row
+      expect(lines.length).toBe(2);
+      const cols = parseCsvLine(lines[1]);
+      expect(cols.length).toBe(6);
+      expect(cols[1]).toBe("'=SUM(A1,B1)");
+      expect(cols[2]).toBe('test"action');
+      expect(cols[5]).toBe("plain detail");
+    });
+
+    it("quotes formula-prefixed cells that also contain a comma", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "admin-1", email: "admin@test.local", role: "ADMIN" },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          userEmail: "user@test.local",
+          action: "=1+1,2",
+          detail: "plain",
+          createdAt: new Date(),
+        },
+      });
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.text();
+      const lines = body.split("\n");
+      expect(lines.length).toBe(2);
+      const cols = parseCsvLine(lines[1]);
+      expect(cols.length).toBe(6);
+      expect(cols[2]).toBe("'=1+1,2");
     });
 
     it("writes an AUDIT_EXPORTED audit row on successful export", async () => {
@@ -363,7 +407,68 @@ describe("P5.9: Audit trail report", () => {
       expect(exported).toBeTruthy();
       expect(exported?.userEmail).toBe("admin@test.local");
       expect(exported?.entityType).toBe("AuditLog");
-      expect(exported?.detail).toContain("Exported 1 audit rows");
+      expect(exported?.detail).toContain("Exported 1 audit record");
+    });
+
+    it("writes an AUDIT_EXPORT_DENIED audit row when access is denied", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "viewer-1", email: "viewer@test.local", role: "VIEWER" },
+      });
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(403);
+
+      const denied = await prisma.auditLog.findFirst({
+        where: { action: "AUDIT_EXPORT_DENIED" },
+      });
+      expect(denied).toBeTruthy();
+      expect(denied?.detail).toContain("without audit-log read access");
     });
   });
 });
+
+// Parse a single CSV line respecting quotes, returning the field values.
+function parseCsvLine(line: string): string[] {
+  const fields: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  let i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          field += '"';
+          i += 2;
+        } else {
+          inQuotes = false;
+          i += 1;
+        }
+      } else {
+        field += ch;
+        i += 1;
+      }
+    } else if (ch === ",") {
+      fields.push(field);
+      field = "";
+      i += 1;
+    } else if (ch === '"') {
+      inQuotes = true;
+      i += 1;
+    } else {
+      field += ch;
+      i += 1;
+    }
+  }
+  fields.push(field);
+  return fields;
+}

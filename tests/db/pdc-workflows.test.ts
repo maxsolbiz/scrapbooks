@@ -1,16 +1,19 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { prisma } from "@/lib/db";
 import { clearPDC, bouncePDC } from "@/lib/pdc-actions";
+import { truncateAll } from "./helpers";
+import { seedTestData, type TestContext } from "./seed";
 
 describe("P2.5 PDC Workflows", () => {
+  let userId: string;
   let testPartyId: string;
 
   beforeEach(async () => {
+    await truncateAll(prisma);
     await prisma.auditLog.deleteMany({ where: { action: { in: ["CLEAR_PDC", "BOUNCE_PDC"] } } });
-    const party = await prisma.party.create({
-      data: { code: "TEST-PDC", type: "CUSTOMER", nameEn: "Test PDC", nameAr: "اختبار" },
-    });
-    testPartyId = party.id;
+    const ctx = await seedTestData(prisma);
+    userId = ctx.userId;
+    testPartyId = ctx.customerId;
   });
 
   it("clearPDC creates a journal entry and updates status to CLEARED", async () => {
@@ -25,7 +28,7 @@ describe("P2.5 PDC Workflows", () => {
         amountFils: 50000n,
         partyId: testPartyId,
         pdcStatus: "PENDING",
-        createdById: "user-test",
+        createdById: userId,
       },
     });
 
@@ -34,7 +37,7 @@ describe("P2.5 PDC Workflows", () => {
         paymentId: payment.id,
         clearedDate: new Date(),
         bankAccountId: "1120-account-id",
-        createdById: "user-test",
+        createdById: userId,
         tx: await prisma.$transaction((tx: any) => tx),
       })
     ).rejects.toThrow(); // bank account ID is dummy; validates logic runs
@@ -51,7 +54,7 @@ describe("P2.5 PDC Workflows", () => {
         amountFils: 30000n,
         partyId: testPartyId,
         pdcStatus: "PENDING",
-        createdById: "user-test",
+        createdById: userId,
       },
     });
 
@@ -60,7 +63,7 @@ describe("P2.5 PDC Workflows", () => {
         paymentId: payment.id,
         bounceDate: new Date(),
         reason: "",
-        createdById: "user-test",
+        createdById: userId,
         tx: await prisma.$transaction((tx: any) => tx),
       })
     ).rejects.toThrow("Bounce reason is required");

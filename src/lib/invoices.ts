@@ -42,6 +42,10 @@ export interface CreateInvoiceInput {
   createdById: string;
   tx: Tx;
   idempotencyKey?: string;
+  /// P3.2 amend flow: id of the invoice this one revises (original is reversed + VOID).
+  revisesInvoiceId?: string;
+  /// P3.2: revision depth (0 = original). Only meaningful together with revisesInvoiceId.
+  revisionNumber?: number;
 }
 
 const AR_CODE = "1130";
@@ -138,6 +142,8 @@ export async function createInvoice(input: CreateInvoiceInput) {
       paymentStatus: derivePaymentStatus(total, 0n, computedDueDate),
       createdById,
       idempotencyKey: input.idempotencyKey || null,
+      revisesInvoiceId: input.revisesInvoiceId || null,
+      revisionNumber: input.revisionNumber ?? 0,
       lines: {
         create: computed.map((c) => ({
           itemId: c.itemId || null,

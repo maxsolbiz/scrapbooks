@@ -7,6 +7,7 @@ import { requireModule } from "@/lib/guard";
 import { logAudit } from "@/lib/audit";
 import { decimalStringToFils } from "@/lib/money";
 import { createInvoice, voidInvoiceWithReversal } from "@/lib/invoices";
+import { revisePostedInvoice } from "@/lib/invoice-revision";
 import { todayDubai } from "@/lib/dates";
 import type { InvoiceDirection, UnitType } from "@/generated/prisma/client";
 
@@ -227,5 +228,100 @@ export async function updateInvoicePrintDetailsAction(
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Failed to update print details" };
+  }
+}
+
+/** P3.2 amend updates: the editable subset of an invoice. partyId/direction are
+ * deliberately absent — the revision copies them from the original server-side.
+ * supplierRef is absent too: the P1.7 per-vendor unique guard keeps the original
+ * row's reference reserved even when it is VOID. */
+const amendUpdatesSchema = z.object({
+  date: z.string().min(1),
+  notes: z.string().optional(),
+  dueDate: z.string().optional(),
+  paymentTerms: z.coerce.number().int().positive().optional(),
+  purchaseOrder: z.string().optional(),
+  deliveryNote: z.string().optional(),
+  deliveryNoteDate: z.string().optional(),
+  vehicleNo: z.string().optional(),
+  modeOfPayment: z.string().optional(),
+  termsOfDelivery: z.string().optional(),
+  lines: z.array(lineSchema).min(1, "At least one line"),
+});
+
+export async function amendInvoiceAction(
+  originalInvoiceId: string,
+  direction: InvoiceDirection,
+  reason: string,
+  updates: z.input<typeof amendUpdatesSchema>,
+): Promise<ActionResult<{ id: string; invoiceNo: string; originalInvoiceNo: string; revisionNumber: number }>> {
+  const user = await requireModule(directionModule(direction), "write");
+  const parsedReason = voidReasonSchema.safeParse(reason);
+  if (!parsedReason.success) {
+    return { ok: false, error: parsedReason.error.issues[0]?.message ?? "Invalid reason" };
+  }
+  const parsed = amendUpdatesSchema.safeParse(updates);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+  const v = parsed.data;
+  try {
+    const result = await prisma.$transaction(async (tx) =>
+      revisePostedInvoice({
+        originalInvoiceId,
+        direction,
+        reason: parsedReason.data,
+        updates: {
+          date: new Date(v.date),
+          notes: v.notes,
+          dueDate: v.dueDate ? new Date(v.dueDate) : undefined,
+          paymentTerms: v.paymentTerms,
+          purchaseOrder: v.purchaseOrder,
+          deliveryNote: v.deliveryNote,
+          deliveryNoteDate: v.deliveryNoteDate ? new Date(v.deliveryNoteDate) : undefined,
+          vehicleNo: v.vehicleNo,
+          modeOfPayment: v.modeOfPayment,
+          termsOfDelivery: v.termsOfDelivery,
+          lines: v.lines.map((l) => ({
+            itemId: l.itemId || undefined,
+            description: l.description,
+            descriptionAr: l.descriptionAr || undefined,
+            qty: l.qty,
+            unit: l.unit as UnitType,
+            rateFils: decimalStringToFils(l.rate),
+            vatRate: (() => {
+              const n = parseFloat(l.vatRate);
+              if (Number.isNaN(n) || n < 0 || n > 100) throw new Error("Invalid VAT rate");
+              return n <= 1 ? n : n / 100;
+            })(),
+            wbtNo: l.wbtNo,
+          })),
+        },
+        createdById: user.id,
+        createdByEmail: user.email ?? undefined,
+        tx,
+      }),
+    );
+    // The INVOICE_REVISE audit row is written INSIDE the tx by revisePostedInvoice —
+    // intentionally not repeated here (the trail is part of the transaction).
+    revalidatePath(direction === "SALES" ? "/sales-invoices" : "/purchase-invoices");
+    revalidatePath(`/sales-invoices/${result.originalInvoice.id}`);
+    revalidatePath(`/purchase-invoices/${result.originalInvoice.id}`);
+    revalidatePath("/dashboard");
+    return {
+      ok: true,
+      data: {
+        id: result.newInvoice.id,
+        invoiceNo: result.newInvoice.invoiceNo,
+        originalInvoiceNo: result.originalInvoice.invoiceNo,
+        revisionNumber: result.newInvoice.revisionNumber,
+      },
+    };
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (errorMessage.includes("P2002")) {
+      return { ok: false, error: "A purchase invoice with this supplier reference already exists for this vendor." };
+    }
+    return { ok: false, error: errorMessage };
   }
 }

@@ -481,3 +481,6 @@ Verification: tsc --noEmit EXIT=0; npm test 149/149; vitest --project db 131/131
 (2) src/components/invoices/ApplyCreditDialog.tsx: removed `onSuccess` prop; success handler now calls `router.refresh()` internally.
 (3) src/components/invoices/InvoiceDetailView.tsx: removed inline `onSuccess={() => window.location.reload()}` from both client dialogs (Server Component -> Client Component function prop violation).
 Verification: tsc --noEmit EXIT=0; npm test 149/149; npx next build BUILD_EXIT=0. Fix verified post-HMR error "Event handlers cannot be passed to Client Component props".
+## 2026-10-30 - P5.2-hotfix2 6d61952 - Deduction API BigInt JSON Fix
+(1) src/app/api/invoices/[id]/deduction/route.ts: Return BigInt-safe JSON payload (`amountFils` as string; `createdAt`/`updatedAt` as dates); previously returned raw `createDeduction` result wrapper containing BigInt `amountFils` → JSON.stringify threw "don't know how to serialize the BigInt" → API returned 400.
+(2) Verified: tsc --noEmit EXIT=0; npm test 149/149; npm run build BUILD_EXIT=0. Deduction POST should now serialize successfully.

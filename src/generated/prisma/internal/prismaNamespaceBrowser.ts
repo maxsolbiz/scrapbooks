@@ -62,6 +62,7 @@ export const ModelName = {
   Item: 'Item',
   Invoice: 'Invoice',
   InvoiceLine: 'InvoiceLine',
+  InvoiceDeduction: 'InvoiceDeduction',
   Payment: 'Payment',
   PaymentAllocation: 'PaymentAllocation',
   AuditLog: 'AuditLog'
@@ -276,6 +277,21 @@ export const InvoiceLineScalarFieldEnum = {
 } as const
 
 export type InvoiceLineScalarFieldEnum = (typeof InvoiceLineScalarFieldEnum)[keyof typeof InvoiceLineScalarFieldEnum]
+
+
+export const InvoiceDeductionScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  reason: 'reason',
+  amountFils: 'amountFils',
+  notes: 'notes',
+  journalEntryId: 'journalEntryId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceDeductionScalarFieldEnum = (typeof InvoiceDeductionScalarFieldEnum)[keyof typeof InvoiceDeductionScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {

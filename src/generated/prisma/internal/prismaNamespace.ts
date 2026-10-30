@@ -408,6 +408,7 @@ export const ModelName = {
   Item: 'Item',
   Invoice: 'Invoice',
   InvoiceLine: 'InvoiceLine',
+  InvoiceDeduction: 'InvoiceDeduction',
   Payment: 'Payment',
   PaymentAllocation: 'PaymentAllocation',
   AuditLog: 'AuditLog'
@@ -426,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "companySettings" | "account" | "fiscalYear" | "journalEntry" | "journalLine" | "serial" | "party" | "item" | "invoice" | "invoiceLine" | "payment" | "paymentAllocation" | "auditLog"
+    modelProps: "user" | "companySettings" | "account" | "fiscalYear" | "journalEntry" | "journalLine" | "serial" | "party" | "item" | "invoice" | "invoiceLine" | "invoiceDeduction" | "payment" | "paymentAllocation" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1244,6 +1245,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InvoiceDeduction: {
+      payload: Prisma.$InvoiceDeductionPayload<ExtArgs>
+      fields: Prisma.InvoiceDeductionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InvoiceDeductionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InvoiceDeductionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>
+        }
+        findFirst: {
+          args: Prisma.InvoiceDeductionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InvoiceDeductionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>
+        }
+        findMany: {
+          args: Prisma.InvoiceDeductionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>[]
+        }
+        create: {
+          args: Prisma.InvoiceDeductionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>
+        }
+        createMany: {
+          args: Prisma.InvoiceDeductionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InvoiceDeductionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>[]
+        }
+        delete: {
+          args: Prisma.InvoiceDeductionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>
+        }
+        update: {
+          args: Prisma.InvoiceDeductionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>
+        }
+        deleteMany: {
+          args: Prisma.InvoiceDeductionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InvoiceDeductionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InvoiceDeductionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>[]
+        }
+        upsert: {
+          args: Prisma.InvoiceDeductionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvoiceDeductionPayload>
+        }
+        aggregate: {
+          args: Prisma.InvoiceDeductionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvoiceDeduction>
+        }
+        groupBy: {
+          args: Prisma.InvoiceDeductionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceDeductionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InvoiceDeductionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoiceDeductionCountAggregateOutputType> | number
+        }
+      }
+    }
     Payment: {
       payload: Prisma.$PaymentPayload<ExtArgs>
       fields: Prisma.PaymentFieldRefs
@@ -1700,6 +1775,21 @@ export const InvoiceLineScalarFieldEnum = {
 export type InvoiceLineScalarFieldEnum = (typeof InvoiceLineScalarFieldEnum)[keyof typeof InvoiceLineScalarFieldEnum]
 
 
+export const InvoiceDeductionScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  reason: 'reason',
+  amountFils: 'amountFils',
+  notes: 'notes',
+  journalEntryId: 'journalEntryId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceDeductionScalarFieldEnum = (typeof InvoiceDeductionScalarFieldEnum)[keyof typeof InvoiceDeductionScalarFieldEnum]
+
+
 export const PaymentScalarFieldEnum = {
   id: 'id',
   paymentNo: 'paymentNo',
@@ -2057,6 +2147,20 @@ export type ListEnumInvoicePaymentStatusFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'DeductionReason'
+ */
+export type EnumDeductionReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeductionReason'>
+    
+
+
+/**
+ * Reference to a field of type 'DeductionReason[]'
+ */
+export type ListEnumDeductionReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeductionReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'PaymentType'
  */
 export type EnumPaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentType'>
@@ -2287,6 +2391,7 @@ export type GlobalOmitConfig = {
   item?: Prisma.ItemOmit
   invoice?: Prisma.InvoiceOmit
   invoiceLine?: Prisma.InvoiceLineOmit
+  invoiceDeduction?: Prisma.InvoiceDeductionOmit
   payment?: Prisma.PaymentOmit
   paymentAllocation?: Prisma.PaymentAllocationOmit
   auditLog?: Prisma.AuditLogOmit

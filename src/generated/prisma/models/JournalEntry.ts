@@ -269,6 +269,7 @@ export type JournalEntryWhereInput = {
   lines?: Prisma.JournalLineListRelationFilter
   invoiceFor?: Prisma.XOR<Prisma.InvoiceNullableScalarRelationFilter, Prisma.InvoiceWhereInput> | null
   paymentFor?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
+  invoiceDeductionFor?: Prisma.XOR<Prisma.InvoiceDeductionNullableScalarRelationFilter, Prisma.InvoiceDeductionWhereInput> | null
 }
 
 export type JournalEntryOrderByWithRelationInput = {
@@ -294,6 +295,7 @@ export type JournalEntryOrderByWithRelationInput = {
   lines?: Prisma.JournalLineOrderByRelationAggregateInput
   invoiceFor?: Prisma.InvoiceOrderByWithRelationInput
   paymentFor?: Prisma.PaymentOrderByWithRelationInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionOrderByWithRelationInput
 }
 
 export type JournalEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -322,6 +324,7 @@ export type JournalEntryWhereUniqueInput = Prisma.AtLeast<{
   lines?: Prisma.JournalLineListRelationFilter
   invoiceFor?: Prisma.XOR<Prisma.InvoiceNullableScalarRelationFilter, Prisma.InvoiceWhereInput> | null
   paymentFor?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
+  invoiceDeductionFor?: Prisma.XOR<Prisma.InvoiceDeductionNullableScalarRelationFilter, Prisma.InvoiceDeductionWhereInput> | null
 }, "id" | "entryNo" | "idempotencyKey" | "reversesEntryId">
 
 export type JournalEntryOrderByWithAggregationInput = {
@@ -386,6 +389,7 @@ export type JournalEntryCreateInput = {
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateInput = {
@@ -408,6 +412,7 @@ export type JournalEntryUncheckedCreateInput = {
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUpdateInput = {
@@ -430,6 +435,7 @@ export type JournalEntryUpdateInput = {
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateInput = {
@@ -452,6 +458,7 @@ export type JournalEntryUncheckedUpdateInput = {
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryCreateManyInput = {
@@ -753,6 +760,22 @@ export type JournalEntryUpdateOneWithoutInvoiceForNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.JournalEntryUpdateToOneWithWhereWithoutInvoiceForInput, Prisma.JournalEntryUpdateWithoutInvoiceForInput>, Prisma.JournalEntryUncheckedUpdateWithoutInvoiceForInput>
 }
 
+export type JournalEntryCreateNestedOneWithoutInvoiceDeductionForInput = {
+  create?: Prisma.XOR<Prisma.JournalEntryCreateWithoutInvoiceDeductionForInput, Prisma.JournalEntryUncheckedCreateWithoutInvoiceDeductionForInput>
+  connectOrCreate?: Prisma.JournalEntryCreateOrConnectWithoutInvoiceDeductionForInput
+  connect?: Prisma.JournalEntryWhereUniqueInput
+}
+
+export type JournalEntryUpdateOneWithoutInvoiceDeductionForNestedInput = {
+  create?: Prisma.XOR<Prisma.JournalEntryCreateWithoutInvoiceDeductionForInput, Prisma.JournalEntryUncheckedCreateWithoutInvoiceDeductionForInput>
+  connectOrCreate?: Prisma.JournalEntryCreateOrConnectWithoutInvoiceDeductionForInput
+  upsert?: Prisma.JournalEntryUpsertWithoutInvoiceDeductionForInput
+  disconnect?: Prisma.JournalEntryWhereInput | boolean
+  delete?: Prisma.JournalEntryWhereInput | boolean
+  connect?: Prisma.JournalEntryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JournalEntryUpdateToOneWithWhereWithoutInvoiceDeductionForInput, Prisma.JournalEntryUpdateWithoutInvoiceDeductionForInput>, Prisma.JournalEntryUncheckedUpdateWithoutInvoiceDeductionForInput>
+}
+
 export type JournalEntryCreateNestedOneWithoutPaymentForInput = {
   create?: Prisma.XOR<Prisma.JournalEntryCreateWithoutPaymentForInput, Prisma.JournalEntryUncheckedCreateWithoutPaymentForInput>
   connectOrCreate?: Prisma.JournalEntryCreateOrConnectWithoutPaymentForInput
@@ -788,6 +811,7 @@ export type JournalEntryCreateWithoutCreatedByInput = {
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutCreatedByInput = {
@@ -809,6 +833,7 @@ export type JournalEntryUncheckedCreateWithoutCreatedByInput = {
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutCreatedByInput = {
@@ -877,6 +902,7 @@ export type JournalEntryCreateWithoutFiscalYearInput = {
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutFiscalYearInput = {
@@ -898,6 +924,7 @@ export type JournalEntryUncheckedCreateWithoutFiscalYearInput = {
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutFiscalYearInput = {
@@ -945,6 +972,7 @@ export type JournalEntryCreateWithoutReversedByInput = {
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutReversedByInput = {
@@ -966,6 +994,7 @@ export type JournalEntryUncheckedCreateWithoutReversedByInput = {
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutReversedByInput = {
@@ -992,6 +1021,7 @@ export type JournalEntryCreateWithoutReversesEntryInput = {
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutReversesEntryInput = {
@@ -1013,6 +1043,7 @@ export type JournalEntryUncheckedCreateWithoutReversesEntryInput = {
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutReversesEntryInput = {
@@ -1050,6 +1081,7 @@ export type JournalEntryUpdateWithoutReversedByInput = {
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutReversedByInput = {
@@ -1071,6 +1103,7 @@ export type JournalEntryUncheckedUpdateWithoutReversedByInput = {
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUpsertWithoutReversesEntryInput = {
@@ -1103,6 +1136,7 @@ export type JournalEntryUpdateWithoutReversesEntryInput = {
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutReversesEntryInput = {
@@ -1124,6 +1158,7 @@ export type JournalEntryUncheckedUpdateWithoutReversesEntryInput = {
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryCreateWithoutLinesInput = {
@@ -1145,6 +1180,7 @@ export type JournalEntryCreateWithoutLinesInput = {
   reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutLinesInput = {
@@ -1166,6 +1202,7 @@ export type JournalEntryUncheckedCreateWithoutLinesInput = {
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutLinesInput = {
@@ -1203,6 +1240,7 @@ export type JournalEntryUpdateWithoutLinesInput = {
   reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutLinesInput = {
@@ -1224,6 +1262,7 @@ export type JournalEntryUncheckedUpdateWithoutLinesInput = {
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryCreateWithoutInvoiceForInput = {
@@ -1245,6 +1284,7 @@ export type JournalEntryCreateWithoutInvoiceForInput = {
   reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutInvoiceForInput = {
@@ -1266,6 +1306,7 @@ export type JournalEntryUncheckedCreateWithoutInvoiceForInput = {
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutInvoiceForInput = {
@@ -1303,6 +1344,7 @@ export type JournalEntryUpdateWithoutInvoiceForInput = {
   reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutInvoiceForInput = {
@@ -1323,6 +1365,111 @@ export type JournalEntryUncheckedUpdateWithoutInvoiceForInput = {
   reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
+  paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
+}
+
+export type JournalEntryCreateWithoutInvoiceDeductionForInput = {
+  id?: string
+  entryNo: string
+  date: Date | string
+  narration?: string | null
+  narrationAr?: string | null
+  status?: $Enums.JournalStatus
+  sourceType?: $Enums.EntrySource
+  sourceId?: string | null
+  postedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  idempotencyKey?: string | null
+  fiscalYear?: Prisma.FiscalYearCreateNestedOneWithoutEntriesInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedEntriesInput
+  reversesEntry?: Prisma.JournalEntryCreateNestedOneWithoutReversedByInput
+  reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
+  lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
+  invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
+  paymentFor?: Prisma.PaymentCreateNestedOneWithoutJournalEntryInput
+}
+
+export type JournalEntryUncheckedCreateWithoutInvoiceDeductionForInput = {
+  id?: string
+  entryNo: string
+  date: Date | string
+  narration?: string | null
+  narrationAr?: string | null
+  status?: $Enums.JournalStatus
+  sourceType?: $Enums.EntrySource
+  sourceId?: string | null
+  fiscalYearId?: string | null
+  createdById: string
+  postedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  idempotencyKey?: string | null
+  reversesEntryId?: string | null
+  reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
+  lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
+  invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
+  paymentFor?: Prisma.PaymentUncheckedCreateNestedOneWithoutJournalEntryInput
+}
+
+export type JournalEntryCreateOrConnectWithoutInvoiceDeductionForInput = {
+  where: Prisma.JournalEntryWhereUniqueInput
+  create: Prisma.XOR<Prisma.JournalEntryCreateWithoutInvoiceDeductionForInput, Prisma.JournalEntryUncheckedCreateWithoutInvoiceDeductionForInput>
+}
+
+export type JournalEntryUpsertWithoutInvoiceDeductionForInput = {
+  update: Prisma.XOR<Prisma.JournalEntryUpdateWithoutInvoiceDeductionForInput, Prisma.JournalEntryUncheckedUpdateWithoutInvoiceDeductionForInput>
+  create: Prisma.XOR<Prisma.JournalEntryCreateWithoutInvoiceDeductionForInput, Prisma.JournalEntryUncheckedCreateWithoutInvoiceDeductionForInput>
+  where?: Prisma.JournalEntryWhereInput
+}
+
+export type JournalEntryUpdateToOneWithWhereWithoutInvoiceDeductionForInput = {
+  where?: Prisma.JournalEntryWhereInput
+  data: Prisma.XOR<Prisma.JournalEntryUpdateWithoutInvoiceDeductionForInput, Prisma.JournalEntryUncheckedUpdateWithoutInvoiceDeductionForInput>
+}
+
+export type JournalEntryUpdateWithoutInvoiceDeductionForInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  entryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  narration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  narrationAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJournalStatusFieldUpdateOperationsInput | $Enums.JournalStatus
+  sourceType?: Prisma.EnumEntrySourceFieldUpdateOperationsInput | $Enums.EntrySource
+  sourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.FiscalYearUpdateOneWithoutEntriesNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEntriesNestedInput
+  reversesEntry?: Prisma.JournalEntryUpdateOneWithoutReversedByNestedInput
+  reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
+  lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
+  invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
+  paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+}
+
+export type JournalEntryUncheckedUpdateWithoutInvoiceDeductionForInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  entryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  narration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  narrationAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJournalStatusFieldUpdateOperationsInput | $Enums.JournalStatus
+  sourceType?: Prisma.EnumEntrySourceFieldUpdateOperationsInput | $Enums.EntrySource
+  sourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  postedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversesEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
+  lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
+  invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
@@ -1345,6 +1492,7 @@ export type JournalEntryCreateWithoutPaymentForInput = {
   reversedBy?: Prisma.JournalEntryCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryUncheckedCreateWithoutPaymentForInput = {
@@ -1366,6 +1514,7 @@ export type JournalEntryUncheckedCreateWithoutPaymentForInput = {
   reversedBy?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutReversesEntryInput
   lines?: Prisma.JournalLineUncheckedCreateNestedManyWithoutEntryInput
   invoiceFor?: Prisma.InvoiceUncheckedCreateNestedOneWithoutJournalEntryInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedCreateNestedOneWithoutJournalEntryInput
 }
 
 export type JournalEntryCreateOrConnectWithoutPaymentForInput = {
@@ -1403,6 +1552,7 @@ export type JournalEntryUpdateWithoutPaymentForInput = {
   reversedBy?: Prisma.JournalEntryUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutPaymentForInput = {
@@ -1424,6 +1574,7 @@ export type JournalEntryUncheckedUpdateWithoutPaymentForInput = {
   reversedBy?: Prisma.JournalEntryUncheckedUpdateOneWithoutReversesEntryNestedInput
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryCreateManyCreatedByInput = {
@@ -1462,6 +1613,7 @@ export type JournalEntryUpdateWithoutCreatedByInput = {
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutCreatedByInput = {
@@ -1483,6 +1635,7 @@ export type JournalEntryUncheckedUpdateWithoutCreatedByInput = {
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateManyWithoutCreatedByInput = {
@@ -1538,6 +1691,7 @@ export type JournalEntryUpdateWithoutFiscalYearInput = {
   lines?: Prisma.JournalLineUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateWithoutFiscalYearInput = {
@@ -1559,6 +1713,7 @@ export type JournalEntryUncheckedUpdateWithoutFiscalYearInput = {
   lines?: Prisma.JournalLineUncheckedUpdateManyWithoutEntryNestedInput
   invoiceFor?: Prisma.InvoiceUncheckedUpdateOneWithoutJournalEntryNestedInput
   paymentFor?: Prisma.PaymentUncheckedUpdateOneWithoutJournalEntryNestedInput
+  invoiceDeductionFor?: Prisma.InvoiceDeductionUncheckedUpdateOneWithoutJournalEntryNestedInput
 }
 
 export type JournalEntryUncheckedUpdateManyWithoutFiscalYearInput = {
@@ -1632,6 +1787,7 @@ export type JournalEntrySelect<ExtArgs extends runtime.Types.Extensions.Internal
   lines?: boolean | Prisma.JournalEntry$linesArgs<ExtArgs>
   invoiceFor?: boolean | Prisma.JournalEntry$invoiceForArgs<ExtArgs>
   paymentFor?: boolean | Prisma.JournalEntry$paymentForArgs<ExtArgs>
+  invoiceDeductionFor?: boolean | Prisma.JournalEntry$invoiceDeductionForArgs<ExtArgs>
   _count?: boolean | Prisma.JournalEntryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["journalEntry"]>
 
@@ -1704,6 +1860,7 @@ export type JournalEntryInclude<ExtArgs extends runtime.Types.Extensions.Interna
   lines?: boolean | Prisma.JournalEntry$linesArgs<ExtArgs>
   invoiceFor?: boolean | Prisma.JournalEntry$invoiceForArgs<ExtArgs>
   paymentFor?: boolean | Prisma.JournalEntry$paymentForArgs<ExtArgs>
+  invoiceDeductionFor?: boolean | Prisma.JournalEntry$invoiceDeductionForArgs<ExtArgs>
   _count?: boolean | Prisma.JournalEntryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type JournalEntryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1730,6 +1887,7 @@ export type $JournalEntryPayload<ExtArgs extends runtime.Types.Extensions.Intern
     lines: Prisma.$JournalLinePayload<ExtArgs>[]
     invoiceFor: Prisma.$InvoicePayload<ExtArgs> | null
     paymentFor: Prisma.$PaymentPayload<ExtArgs> | null
+    invoiceDeductionFor: Prisma.$InvoiceDeductionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2152,6 +2310,7 @@ export interface Prisma__JournalEntryClient<T, Null = never, ExtArgs extends run
   lines<T extends Prisma.JournalEntry$linesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JournalEntry$linesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JournalLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invoiceFor<T extends Prisma.JournalEntry$invoiceForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JournalEntry$invoiceForArgs<ExtArgs>>): Prisma.Prisma__InvoiceClient<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   paymentFor<T extends Prisma.JournalEntry$paymentForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JournalEntry$paymentForArgs<ExtArgs>>): Prisma.Prisma__PaymentClient<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  invoiceDeductionFor<T extends Prisma.JournalEntry$invoiceDeductionForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JournalEntry$invoiceDeductionForArgs<ExtArgs>>): Prisma.Prisma__InvoiceDeductionClient<runtime.Types.Result.GetResult<Prisma.$InvoiceDeductionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2713,6 +2872,25 @@ export type JournalEntry$paymentForArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.PaymentInclude<ExtArgs> | null
   where?: Prisma.PaymentWhereInput
+}
+
+/**
+ * JournalEntry.invoiceDeductionFor
+ */
+export type JournalEntry$invoiceDeductionForArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InvoiceDeduction
+   */
+  select?: Prisma.InvoiceDeductionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InvoiceDeduction
+   */
+  omit?: Prisma.InvoiceDeductionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvoiceDeductionInclude<ExtArgs> | null
+  where?: Prisma.InvoiceDeductionWhereInput
 }
 
 /**

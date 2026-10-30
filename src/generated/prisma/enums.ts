@@ -126,6 +126,17 @@ export const InvoicePaymentStatus = {
 export type InvoicePaymentStatus = (typeof InvoicePaymentStatus)[keyof typeof InvoicePaymentStatus]
 
 
+export const DeductionReason = {
+  SHORTAGE: 'SHORTAGE',
+  DAMAGE: 'DAMAGE',
+  DISCOUNT: 'DISCOUNT',
+  RETURN: 'RETURN',
+  OTHER: 'OTHER'
+} as const
+
+export type DeductionReason = (typeof DeductionReason)[keyof typeof DeductionReason]
+
+
 export const PaymentType = {
   RECEIPT: 'RECEIPT',
   PAYMENT: 'PAYMENT',

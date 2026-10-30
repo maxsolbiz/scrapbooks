@@ -37,6 +37,8 @@ export const COA: CoaRow[] = [
   { code: "5400", nameEn: "Utilities", nameAr: "المرافق", type: "EXPENSE", normalBalance: "DEBIT", parentCode: "5000", cashFlow: "OPERATING" },
   { code: "5500", nameEn: "Fuel & Transport", nameAr: "الوقود والنقل", type: "EXPENSE", normalBalance: "DEBIT", parentCode: "5000", cashFlow: "OPERATING" },
   { code: "5600", nameEn: "Bank Charges", nameAr: "مصاريف بنكية", type: "EXPENSE", normalBalance: "DEBIT", parentCode: "5000", cashFlow: "OPERATING" },
+  { code: "5700", nameEn: "Sales Deductions", nameAr: "خصومات المبيعات", type: "EXPENSE", normalBalance: "DEBIT", parentCode: "5000", cashFlow: "OPERATING" },
+  { code: "5800", nameEn: "Purchase Deductions", nameAr: "خصومات المشتريات", type: "INCOME", normalBalance: "CREDIT", parentCode: "4000", cashFlow: "OPERATING" },
   { code: "5900", nameEn: "Miscellaneous Expense", nameAr: "مصروفات متنوعة", type: "EXPENSE", normalBalance: "DEBIT", parentCode: "5000", cashFlow: "OPERATING" },
 ];
 export type { CoaRow };

@@ -31,6 +31,7 @@ model User {
   createdEntries       JournalEntry[]  @relation("JournalEntryCreator")
   createdInvoices      Invoice[]       @relation("InvoiceCreator")
   createdPayments      Payment[]       @relation("PaymentCreator")
+  invoiceDeductionsCreated InvoiceDeduction[] @relation("InvoiceDeductionCreator")
 }
 
 // ─── Company settings (singleton) ─────────────────────────────────────────────
@@ -159,6 +160,7 @@ model JournalEntry {
   lines         JournalLine[]
   invoiceFor    Invoice?      @relation("InvoiceToJournalEntry")
   paymentFor    Payment?      @relation("PaymentToJournalEntry")
+  invoiceDeductionFor InvoiceDeduction? @relation("InvoiceDeductionToJournalEntry")
 
   @@index([date])
   @@index([status])
@@ -295,6 +297,7 @@ model Invoice {
 
   lines           InvoiceLine[]
   allocations     PaymentAllocation[]
+  deductions      InvoiceDeduction[]
 
   @@index([date])
   @@index([partyId])
@@ -322,6 +325,34 @@ model InvoiceLine {
   wbtNo          String?
 
   @@index([invoiceId])
+}
+
+// ─── Invoice deductions (debit notes; do not mutate original invoice totals) ──
+
+enum DeductionReason {
+  SHORTAGE
+  DAMAGE
+  DISCOUNT
+  RETURN
+  OTHER
+}
+
+model InvoiceDeduction {
+  id              String          @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  reason          DeductionReason
+  amountFils      BigInt
+  notes           String?         @db.Text
+  journalEntryId  String?         @unique
+  journalEntry    JournalEntry?   @relation("InvoiceDeductionToJournalEntry", fields: [journalEntryId], references: [id], onDelete: SetNull)
+  createdById     String
+  createdBy       User            @relation("InvoiceDeductionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([invoiceId])
+  @@index([createdAt])
 }
 
 // ─── Payments / receipts ─────────────────────────────────────────────────────

@@ -73,6 +73,11 @@ export type Invoice = Prisma.InvoiceModel
  */
 export type InvoiceLine = Prisma.InvoiceLineModel
 /**
+ * Model InvoiceDeduction
+ * 
+ */
+export type InvoiceDeduction = Prisma.InvoiceDeductionModel
+/**
  * Model Payment
  * 
  */

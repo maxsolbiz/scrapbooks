@@ -213,6 +213,7 @@ export type UserWhereInput = {
   createdEntries?: Prisma.JournalEntryListRelationFilter
   createdInvoices?: Prisma.InvoiceListRelationFilter
   createdPayments?: Prisma.PaymentListRelationFilter
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -228,6 +229,7 @@ export type UserOrderByWithRelationInput = {
   createdEntries?: Prisma.JournalEntryOrderByRelationAggregateInput
   createdInvoices?: Prisma.InvoiceOrderByRelationAggregateInput
   createdPayments?: Prisma.PaymentOrderByRelationAggregateInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -246,6 +248,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdEntries?: Prisma.JournalEntryListRelationFilter
   createdInvoices?: Prisma.InvoiceListRelationFilter
   createdPayments?: Prisma.PaymentListRelationFilter
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -291,6 +294,7 @@ export type UserCreateInput = {
   createdEntries?: Prisma.JournalEntryCreateNestedManyWithoutCreatedByInput
   createdInvoices?: Prisma.InvoiceCreateNestedManyWithoutCreatedByInput
   createdPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -306,6 +310,7 @@ export type UserUncheckedCreateInput = {
   createdEntries?: Prisma.JournalEntryUncheckedCreateNestedManyWithoutCreatedByInput
   createdInvoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
   createdPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUpdateInput = {
@@ -321,6 +326,7 @@ export type UserUpdateInput = {
   createdEntries?: Prisma.JournalEntryUpdateManyWithoutCreatedByNestedInput
   createdInvoices?: Prisma.InvoiceUpdateManyWithoutCreatedByNestedInput
   createdPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -336,6 +342,7 @@ export type UserUncheckedUpdateInput = {
   createdEntries?: Prisma.JournalEntryUncheckedUpdateManyWithoutCreatedByNestedInput
   createdInvoices?: Prisma.InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
   createdPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -457,6 +464,20 @@ export type UserUpdateOneRequiredWithoutCreatedInvoicesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedInvoicesInput, Prisma.UserUpdateWithoutCreatedInvoicesInput>, Prisma.UserUncheckedUpdateWithoutCreatedInvoicesInput>
 }
 
+export type UserCreateNestedOneWithoutInvoiceDeductionsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvoiceDeductionsCreatedInput, Prisma.UserUncheckedCreateWithoutInvoiceDeductionsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvoiceDeductionsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutInvoiceDeductionsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvoiceDeductionsCreatedInput, Prisma.UserUncheckedCreateWithoutInvoiceDeductionsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvoiceDeductionsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutInvoiceDeductionsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvoiceDeductionsCreatedInput, Prisma.UserUpdateWithoutInvoiceDeductionsCreatedInput>, Prisma.UserUncheckedUpdateWithoutInvoiceDeductionsCreatedInput>
+}
+
 export type UserCreateNestedOneWithoutCreatedPaymentsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedPaymentsInput, Prisma.UserUncheckedCreateWithoutCreatedPaymentsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedPaymentsInput
@@ -483,6 +504,7 @@ export type UserCreateWithoutCreatedEntriesInput = {
   updatedAt?: Date | string
   createdInvoices?: Prisma.InvoiceCreateNestedManyWithoutCreatedByInput
   createdPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEntriesInput = {
@@ -497,6 +519,7 @@ export type UserUncheckedCreateWithoutCreatedEntriesInput = {
   updatedAt?: Date | string
   createdInvoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
   createdPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEntriesInput = {
@@ -527,6 +550,7 @@ export type UserUpdateWithoutCreatedEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdInvoices?: Prisma.InvoiceUpdateManyWithoutCreatedByNestedInput
   createdPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEntriesInput = {
@@ -541,6 +565,7 @@ export type UserUncheckedUpdateWithoutCreatedEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdInvoices?: Prisma.InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
   createdPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutCreatedInvoicesInput = {
@@ -555,6 +580,7 @@ export type UserCreateWithoutCreatedInvoicesInput = {
   updatedAt?: Date | string
   createdEntries?: Prisma.JournalEntryCreateNestedManyWithoutCreatedByInput
   createdPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedInvoicesInput = {
@@ -569,6 +595,7 @@ export type UserUncheckedCreateWithoutCreatedInvoicesInput = {
   updatedAt?: Date | string
   createdEntries?: Prisma.JournalEntryUncheckedCreateNestedManyWithoutCreatedByInput
   createdPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedInvoicesInput = {
@@ -599,6 +626,7 @@ export type UserUpdateWithoutCreatedInvoicesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdEntries?: Prisma.JournalEntryUpdateManyWithoutCreatedByNestedInput
   createdPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedInvoicesInput = {
@@ -612,6 +640,83 @@ export type UserUncheckedUpdateWithoutCreatedInvoicesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdEntries?: Prisma.JournalEntryUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserCreateWithoutInvoiceDeductionsCreatedInput = {
+  id?: string
+  name: string
+  email: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdEntries?: Prisma.JournalEntryCreateNestedManyWithoutCreatedByInput
+  createdInvoices?: Prisma.InvoiceCreateNestedManyWithoutCreatedByInput
+  createdPayments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutInvoiceDeductionsCreatedInput = {
+  id?: string
+  name: string
+  email: string
+  passwordHash: string
+  role?: $Enums.Role
+  isActive?: boolean
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdEntries?: Prisma.JournalEntryUncheckedCreateNestedManyWithoutCreatedByInput
+  createdInvoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+  createdPayments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutInvoiceDeductionsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvoiceDeductionsCreatedInput, Prisma.UserUncheckedCreateWithoutInvoiceDeductionsCreatedInput>
+}
+
+export type UserUpsertWithoutInvoiceDeductionsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInvoiceDeductionsCreatedInput, Prisma.UserUncheckedUpdateWithoutInvoiceDeductionsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvoiceDeductionsCreatedInput, Prisma.UserUncheckedCreateWithoutInvoiceDeductionsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInvoiceDeductionsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInvoiceDeductionsCreatedInput, Prisma.UserUncheckedUpdateWithoutInvoiceDeductionsCreatedInput>
+}
+
+export type UserUpdateWithoutInvoiceDeductionsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdEntries?: Prisma.JournalEntryUpdateManyWithoutCreatedByNestedInput
+  createdInvoices?: Prisma.InvoiceUpdateManyWithoutCreatedByNestedInput
+  createdPayments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInvoiceDeductionsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  permissions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdEntries?: Prisma.JournalEntryUncheckedUpdateManyWithoutCreatedByNestedInput
+  createdInvoices?: Prisma.InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
   createdPayments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
@@ -627,6 +732,7 @@ export type UserCreateWithoutCreatedPaymentsInput = {
   updatedAt?: Date | string
   createdEntries?: Prisma.JournalEntryCreateNestedManyWithoutCreatedByInput
   createdInvoices?: Prisma.InvoiceCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedPaymentsInput = {
@@ -641,6 +747,7 @@ export type UserUncheckedCreateWithoutCreatedPaymentsInput = {
   updatedAt?: Date | string
   createdEntries?: Prisma.JournalEntryUncheckedCreateNestedManyWithoutCreatedByInput
   createdInvoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedPaymentsInput = {
@@ -671,6 +778,7 @@ export type UserUpdateWithoutCreatedPaymentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdEntries?: Prisma.JournalEntryUpdateManyWithoutCreatedByNestedInput
   createdInvoices?: Prisma.InvoiceUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedPaymentsInput = {
@@ -685,6 +793,7 @@ export type UserUncheckedUpdateWithoutCreatedPaymentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdEntries?: Prisma.JournalEntryUncheckedUpdateManyWithoutCreatedByNestedInput
   createdInvoices?: Prisma.InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+  invoiceDeductionsCreated?: Prisma.InvoiceDeductionUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 
@@ -696,12 +805,14 @@ export type UserCountOutputType = {
   createdEntries: number
   createdInvoices: number
   createdPayments: number
+  invoiceDeductionsCreated: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdEntries?: boolean | UserCountOutputTypeCountCreatedEntriesArgs
   createdInvoices?: boolean | UserCountOutputTypeCountCreatedInvoicesArgs
   createdPayments?: boolean | UserCountOutputTypeCountCreatedPaymentsArgs
+  invoiceDeductionsCreated?: boolean | UserCountOutputTypeCountInvoiceDeductionsCreatedArgs
 }
 
 /**
@@ -735,6 +846,13 @@ export type UserCountOutputTypeCountCreatedPaymentsArgs<ExtArgs extends runtime.
   where?: Prisma.PaymentWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInvoiceDeductionsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvoiceDeductionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -749,6 +867,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdEntries?: boolean | Prisma.User$createdEntriesArgs<ExtArgs>
   createdInvoices?: boolean | Prisma.User$createdInvoicesArgs<ExtArgs>
   createdPayments?: boolean | Prisma.User$createdPaymentsArgs<ExtArgs>
+  invoiceDeductionsCreated?: boolean | Prisma.User$invoiceDeductionsCreatedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -793,6 +912,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdEntries?: boolean | Prisma.User$createdEntriesArgs<ExtArgs>
   createdInvoices?: boolean | Prisma.User$createdInvoicesArgs<ExtArgs>
   createdPayments?: boolean | Prisma.User$createdPaymentsArgs<ExtArgs>
+  invoiceDeductionsCreated?: boolean | Prisma.User$invoiceDeductionsCreatedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -804,6 +924,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdEntries: Prisma.$JournalEntryPayload<ExtArgs>[]
     createdInvoices: Prisma.$InvoicePayload<ExtArgs>[]
     createdPayments: Prisma.$PaymentPayload<ExtArgs>[]
+    invoiceDeductionsCreated: Prisma.$InvoiceDeductionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1212,6 +1333,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   createdEntries<T extends Prisma.User$createdEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JournalEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdInvoices<T extends Prisma.User$createdInvoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdPayments<T extends Prisma.User$createdPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invoiceDeductionsCreated<T extends Prisma.User$invoiceDeductionsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invoiceDeductionsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoiceDeductionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1712,6 +1834,30 @@ export type User$createdPaymentsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
+}
+
+/**
+ * User.invoiceDeductionsCreated
+ */
+export type User$invoiceDeductionsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InvoiceDeduction
+   */
+  select?: Prisma.InvoiceDeductionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InvoiceDeduction
+   */
+  omit?: Prisma.InvoiceDeductionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvoiceDeductionInclude<ExtArgs> | null
+  where?: Prisma.InvoiceDeductionWhereInput
+  orderBy?: Prisma.InvoiceDeductionOrderByWithRelationInput | Prisma.InvoiceDeductionOrderByWithRelationInput[]
+  cursor?: Prisma.InvoiceDeductionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvoiceDeductionScalarFieldEnum | Prisma.InvoiceDeductionScalarFieldEnum[]
 }
 
 /**

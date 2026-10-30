@@ -538,6 +538,23 @@ export type EnumInvoicePaymentStatusWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumInvoicePaymentStatusFilter<$PrismaModel>
 }
 
+export type EnumDeductionReasonFilter<$PrismaModel = never> = {
+  equals?: $Enums.DeductionReason | Prisma.EnumDeductionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDeductionReasonFilter<$PrismaModel> | $Enums.DeductionReason
+}
+
+export type EnumDeductionReasonWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DeductionReason | Prisma.EnumDeductionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDeductionReasonWithAggregatesFilter<$PrismaModel> | $Enums.DeductionReason
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDeductionReasonFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDeductionReasonFilter<$PrismaModel>
+}
+
 export type EnumPaymentTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.PaymentType | Prisma.EnumPaymentTypeFieldRefInput<$PrismaModel>
   in?: $Enums.PaymentType[] | Prisma.ListEnumPaymentTypeFieldRefInput<$PrismaModel>
@@ -1114,6 +1131,23 @@ export type NestedEnumInvoicePaymentStatusWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumInvoicePaymentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumInvoicePaymentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDeductionReasonFilter<$PrismaModel = never> = {
+  equals?: $Enums.DeductionReason | Prisma.EnumDeductionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDeductionReasonFilter<$PrismaModel> | $Enums.DeductionReason
+}
+
+export type NestedEnumDeductionReasonWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DeductionReason | Prisma.EnumDeductionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DeductionReason[] | Prisma.ListEnumDeductionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDeductionReasonWithAggregatesFilter<$PrismaModel> | $Enums.DeductionReason
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDeductionReasonFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDeductionReasonFilter<$PrismaModel>
 }
 
 export type NestedEnumPaymentTypeFilter<$PrismaModel = never> = {

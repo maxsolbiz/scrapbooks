@@ -7,6 +7,7 @@ import type { InvoiceDirection } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { ApplyCreditDialog } from "./ApplyCreditDialog";
+import { AddDeductionDialog } from "./AddDeductionDialog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -39,6 +40,7 @@ export async function InvoiceDetailView({
       party: true,
       lines: { orderBy: { id: "asc" } },
       allocations: { include: { payment: { select: { paymentNo: true, id: true, status: true } } } },
+      deductions: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!invoice) notFound();
@@ -48,6 +50,10 @@ export async function InvoiceDetailView({
   const totalDue = invoice.totalFils - invoice.allocations
     .filter((a) => a.payment.status !== "VOID")
     .reduce((sum, a) => sum + a.amountFils, 0n);
+  const totalDeductions = invoice.deductions.reduce((sum, d) => sum + d.amountFils, 0n);
+  const outstanding = totalDue - totalDeductions;
+  const canDeduct =
+    invoice.status === "POSTED" && outstanding > 0n;
 
   const canVoid =
     (await moduleCan(user, direction === "SALES" ? "sales-invoices" : "purchase-invoices", "write")) &&
@@ -122,6 +128,14 @@ export async function InvoiceDetailView({
               onSuccess={() => window.location.reload()}
             />
           )}
+          {canDeduct && (
+            <AddDeductionDialog
+              invoiceId={invoice.id}
+              outstanding={outstanding}
+              dict={t}
+              onSuccess={() => window.location.reload()}
+            />
+          )}
         </div>
       </div>
 
@@ -186,6 +200,22 @@ export async function InvoiceDetailView({
             .filter((a) => a.payment.status !== "VOID")
             .map((a) => `${a.payment.paymentNo} — ${formatAED(a.amountFils)} AED`)
             .join(" · ")}
+        </div>
+      )}
+
+      {invoice.deductions.length > 0 && (
+        <div className="rounded-md border p-4 space-y-2">
+          <h3 className="text-sm font-semibold">{t.invoices.deductions}</h3>
+          <div className="text-sm text-muted-foreground">
+            {invoice.deductions.map((d) => (
+              <div key={d.id} className="flex justify-between">
+                <span>
+                  {d.reason} {d.notes ? `— ${d.notes}` : ""}
+                </span>
+                <span className="tabular-nums">{formatAED(d.amountFils)} AED</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

@@ -425,3 +425,48 @@ export async function agingReport(direction: "SALES" | "PURCHASE"): Promise<Agin
   }
   return out;
 }
+
+export interface AuditTrailFilter {
+  fromDate?: Date;
+  toDate?: Date;
+  userEmail?: string;
+  action?: string;
+}
+
+export interface AuditTrailRow {
+  id: string;
+  createdAt: Date;
+  userEmail: string;
+  action: string;
+  entityType: string | null;
+  entityId: string | null;
+  detail: string | null;
+}
+
+export async function getAuditTrail(filters: AuditTrailFilter): Promise<AuditTrailRow[]> {
+  const where: any = {};
+  if (filters.fromDate || filters.toDate) {
+    where.createdAt = {};
+    if (filters.fromDate) where.createdAt.gte = filters.fromDate;
+    if (filters.toDate) where.createdAt.lte = filters.toDate;
+  }
+  if (filters.userEmail && filters.userEmail.trim() !== "") {
+    where.userEmail = { contains: filters.userEmail.trim(), mode: "insensitive" };
+  }
+  if (filters.action && filters.action.trim() !== "" && filters.action !== "All") {
+    where.action = filters.action.trim();
+  }
+  return prisma.auditLog.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      createdAt: true,
+      userEmail: true,
+      action: true,
+      entityType: true,
+      entityId: true,
+      detail: true,
+    },
+  }) as AuditTrailRow[];
+}

@@ -287,6 +287,18 @@ const en = {
     downloadPDF: "Download PDF",
   },
   reports: {
+    auditTrail: {
+      title: "Audit Trail",
+      filters: "Filters",
+      fromDate: "From Date",
+      toDate: "To Date",
+      userEmail: "User",
+      action: "Action",
+      entityType: "Entity Type",
+      entityId: "Entity ID",
+      detail: "Detail",
+      exportCsv: "Export CSV",
+    },
     invoiceRegister: {
       title: "Invoice Register",
       filters: "Filters",
@@ -637,6 +649,18 @@ paymentStatus: "حالة الدفع",
     downloadPDF: "تحميل PDF",
   },
   reports: {
+    auditTrail: {
+      title: "سجل التدقيق",
+      filters: "تصفية",
+      fromDate: "من تاريخ",
+      toDate: "إلى تاريخ",
+      userEmail: "المستخدم",
+      action: "الإجراء",
+      entityType: "نوع الكيان",
+      entityId: "معرف الكيان",
+      detail: "التفاصيل",
+      exportCsv: "تصدير CSV",
+    },
     invoiceRegister: {
       title: "سجل الفواتير",
       filters: "تصفية",

@@ -25,8 +25,11 @@ export interface EmiratesInvoiceData {
     };
     deductions: {
       id: string;
-      reason: "SHORTAGE" | "DAMAGE" | "DISCOUNT" | "RETURN" | "OTHER";
-      amountFils: bigint;
+      reason: "SHORTAGE" | "DAMAGE" | "COMMERCIAL_DISCOUNT" | "RETURN" | "OTHER";
+      baseAmountFils: bigint;
+      vatRate: string | number | { toString(): string };
+      vatFils: bigint;
+      totalFils: bigint;
       notes: string | null;
       createdAt: Date;
       updatedAt: Date;
@@ -193,7 +196,7 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
     invoice.status === "VOID" && invoice.revisedBy && invoice.revisedBy.length > 0
       ? invoice.revisedBy[0].invoiceNo
       : null;
-  const totalDeductions = (invoice.deductions ?? []).reduce((a, d) => a + d.amountFils, 0n);
+  const totalDeductions = (invoice.deductions ?? []).reduce((a, d) => a + d.totalFils, 0n);
 
   const fromBlock =
     invoice.direction === "SALES"

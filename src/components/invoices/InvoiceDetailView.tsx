@@ -53,8 +53,11 @@ export async function InvoiceDetailView({
   const totalDue = invoice.totalFils - invoice.allocations
     .filter((a) => a.payment.status !== "VOID")
     .reduce((sum, a) => sum + a.amountFils, 0n);
-  const totalDeductions = invoice.deductions.reduce((sum, d) => sum + d.amountFils, 0n);
+  const totalDeductions = invoice.deductions.reduce((sum, d) => sum + d.totalFils, 0n);
   const outstanding = totalDue - totalDeductions;
+  // D1: compute the invoice's effective VAT rate for deduction prefill / VAT calc.
+  const effectiveVatRateFromInvoice =
+    invoice.subtotalFils > 0n ? Math.round((Number(invoice.vatFils) / Number(invoice.subtotalFils)) * 10000) / 10000 : 0;
   const canDeduct =
     invoice.status === "POSTED" && outstanding > 0n;
 
@@ -183,6 +186,7 @@ export async function InvoiceDetailView({
             <AddDeductionDialog
               invoiceId={invoice.id}
               outstanding={outstanding}
+              vatRate={effectiveVatRateFromInvoice}
               deduction={null}
               dict={t}
             />
@@ -263,11 +267,12 @@ export async function InvoiceDetailView({
                 <span>
                   {d.reason} {d.notes ? `— ${d.notes}` : ""}
                 </span>
-                <span className="tabular-nums">{formatAED(d.amountFils)} AED</span>
+                <span className="tabular-nums">{formatAED(d.totalFils)} AED</span>
                 <AddDeductionDialog
                   invoiceId={invoice.id}
                   outstanding={outstanding}
-                  deduction={d}
+                  vatRate={effectiveVatRateFromInvoice}
+                  deduction={{ id: d.id, reason: d.reason, baseAmountFils: d.baseAmountFils, vatRate: String(d.vatRate ?? effectiveVatRateFromInvoice), notes: d.notes }}
                   dict={t}
                 />
               </div>

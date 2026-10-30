@@ -333,14 +333,14 @@ export async function getInvoiceRegister(filters: InvoiceRegisterFilter): Promis
         where: { payment: { status: "POSTED" } },
         select: { amountFils: true },
       },
-      deductions: { select: { amountFils: true } },
+      deductions: { select: { totalFils: true } },
     },
   });
 
   const result: InvoiceRegisterRow[] = [];
   for (const inv of invoices) {
     const paidFils = inv.allocations.reduce((sum, a) => sum + a.amountFils, 0n);
-    const deductionFils = inv.deductions.reduce((sum, d) => sum + d.amountFils, 0n);
+    const deductionFils = inv.deductions.reduce((sum, d) => sum + d.totalFils, 0n);
     const netSettled = paidFils + deductionFils;
     const outstandingFils = inv.totalFils - netSettled;
     const status = await import("@/lib/invoice-status").then((m) => m.derivePaymentStatus(inv.totalFils, netSettled, inv.dueDate));

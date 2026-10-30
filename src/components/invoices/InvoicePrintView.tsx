@@ -32,8 +32,11 @@ export interface InvoicePrintData {
     party: { nameEn: string; nameAr: string; trn: string | null; addressEn: string | null; addressAr: string | null };
     deductions: {
       id: string;
-      reason: "SHORTAGE" | "DAMAGE" | "DISCOUNT" | "RETURN" | "OTHER";
-      amountFils: bigint;
+      reason: "SHORTAGE" | "DAMAGE" | "COMMERCIAL_DISCOUNT" | "RETURN" | "OTHER";
+      baseAmountFils: bigint;
+      vatRate: string | number | { toString(): string };
+      vatFils: bigint;
+      totalFils: bigint;
       notes: string | null;
       createdAt: Date;
       updatedAt: Date;
@@ -56,7 +59,7 @@ export function InvoicePrintView({
   const title = isTaxInvoice ? "TAX INVOICE / فاتورة ضريبية" : invoice.direction === "SALES" ? "DELIVERY NOTE / سند تسليم" : "TAX INVOICE / فاتورة ضريبية";
   const revisionNo = invoice.revisionNumber ?? 0;
   const supersededBy = invoice.status === "VOID" && invoice.revisedBy && invoice.revisedBy.length > 0 ? invoice.revisedBy[0].invoiceNo : null;
-  const totalDeductions = (invoice.deductions ?? []).reduce((a, d) => a + d.amountFils, 0n);
+  const totalDeductions = (invoice.deductions ?? []).reduce((a, d) => a + d.totalFils, 0n);
 
   return (
     <div className="ivp mx-auto max-w-3xl rounded-md bg-white text-black shadow-sm print:rounded-none print:shadow-none dark:shadow-lg" dir="ltr">
@@ -164,7 +167,7 @@ export function InvoicePrintView({
                   <tr key={d.id}>
                     <td className="border border-neutral-400 p-1.5">{d.reason}</td>
                     <td className="border border-neutral-400 p-1.5">{d.notes ?? ""}</td>
-                    <td className="border border-neutral-400 p-1.5 text-end tabular-nums">-{money(d.amountFils)}</td>
+                    <td className="border border-neutral-400 p-1.5 text-end tabular-nums">                    -{money(d.totalFils)}</td>
                   </tr>
                 ))}
               </tbody>

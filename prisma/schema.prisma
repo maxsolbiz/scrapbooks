@@ -335,6 +335,14 @@ enum PaymentType {
 enum PaymentMethod {
   CASH
   BANK
+  PDC_IN
+  PDC_OUT
+}
+
+enum PDCStatus {
+  PENDING
+  CLEARED
+  BOUNCED
 }
 
 enum PaymentStatus {
@@ -355,6 +363,10 @@ model Payment {
   amountFils     BigInt
   reference      String? // cheque no / transfer ref
   referenceAr    String?
+  chequeNo       String? // PDC cheque number
+  bankName       String? // PDC bank name
+  clearanceDate  DateTime? // PDC expected clearance date
+  pdcStatus      PDCStatus? @default(PENDING)
   notes          String?       @db.Text
   journalEntryId String?       @unique
   journalEntry   JournalEntry? @relation("PaymentToJournalEntry", fields: [journalEntryId], references: [id], onDelete: SetNull)

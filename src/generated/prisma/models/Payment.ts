@@ -45,6 +45,10 @@ export type PaymentMinAggregateOutputType = {
   amountFils: bigint | null
   reference: string | null
   referenceAr: string | null
+  chequeNo: string | null
+  bankName: string | null
+  clearanceDate: Date | null
+  pdcStatus: $Enums.PDCStatus | null
   notes: string | null
   journalEntryId: string | null
   createdById: string | null
@@ -64,6 +68,10 @@ export type PaymentMaxAggregateOutputType = {
   amountFils: bigint | null
   reference: string | null
   referenceAr: string | null
+  chequeNo: string | null
+  bankName: string | null
+  clearanceDate: Date | null
+  pdcStatus: $Enums.PDCStatus | null
   notes: string | null
   journalEntryId: string | null
   createdById: string | null
@@ -83,6 +91,10 @@ export type PaymentCountAggregateOutputType = {
   amountFils: number
   reference: number
   referenceAr: number
+  chequeNo: number
+  bankName: number
+  clearanceDate: number
+  pdcStatus: number
   notes: number
   journalEntryId: number
   createdById: number
@@ -112,6 +124,10 @@ export type PaymentMinAggregateInputType = {
   amountFils?: true
   reference?: true
   referenceAr?: true
+  chequeNo?: true
+  bankName?: true
+  clearanceDate?: true
+  pdcStatus?: true
   notes?: true
   journalEntryId?: true
   createdById?: true
@@ -131,6 +147,10 @@ export type PaymentMaxAggregateInputType = {
   amountFils?: true
   reference?: true
   referenceAr?: true
+  chequeNo?: true
+  bankName?: true
+  clearanceDate?: true
+  pdcStatus?: true
   notes?: true
   journalEntryId?: true
   createdById?: true
@@ -150,6 +170,10 @@ export type PaymentCountAggregateInputType = {
   amountFils?: true
   reference?: true
   referenceAr?: true
+  chequeNo?: true
+  bankName?: true
+  clearanceDate?: true
+  pdcStatus?: true
   notes?: true
   journalEntryId?: true
   createdById?: true
@@ -256,6 +280,10 @@ export type PaymentGroupByOutputType = {
   amountFils: bigint
   reference: string | null
   referenceAr: string | null
+  chequeNo: string | null
+  bankName: string | null
+  clearanceDate: Date | null
+  pdcStatus: $Enums.PDCStatus | null
   notes: string | null
   journalEntryId: string | null
   createdById: string
@@ -298,6 +326,10 @@ export type PaymentWhereInput = {
   amountFils?: Prisma.BigIntFilter<"Payment"> | bigint | number
   reference?: Prisma.StringNullableFilter<"Payment"> | string | null
   referenceAr?: Prisma.StringNullableFilter<"Payment"> | string | null
+  chequeNo?: Prisma.StringNullableFilter<"Payment"> | string | null
+  bankName?: Prisma.StringNullableFilter<"Payment"> | string | null
+  clearanceDate?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
+  pdcStatus?: Prisma.EnumPDCStatusNullableFilter<"Payment"> | $Enums.PDCStatus | null
   notes?: Prisma.StringNullableFilter<"Payment"> | string | null
   journalEntryId?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdById?: Prisma.StringFilter<"Payment"> | string
@@ -321,6 +353,10 @@ export type PaymentOrderByWithRelationInput = {
   amountFils?: Prisma.SortOrder
   reference?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceAr?: Prisma.SortOrderInput | Prisma.SortOrder
+  chequeNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  clearanceDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdcStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   journalEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -349,6 +385,10 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   amountFils?: Prisma.BigIntFilter<"Payment"> | bigint | number
   reference?: Prisma.StringNullableFilter<"Payment"> | string | null
   referenceAr?: Prisma.StringNullableFilter<"Payment"> | string | null
+  chequeNo?: Prisma.StringNullableFilter<"Payment"> | string | null
+  bankName?: Prisma.StringNullableFilter<"Payment"> | string | null
+  clearanceDate?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
+  pdcStatus?: Prisma.EnumPDCStatusNullableFilter<"Payment"> | $Enums.PDCStatus | null
   notes?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdById?: Prisma.StringFilter<"Payment"> | string
   createdAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
@@ -370,6 +410,10 @@ export type PaymentOrderByWithAggregationInput = {
   amountFils?: Prisma.SortOrder
   reference?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceAr?: Prisma.SortOrderInput | Prisma.SortOrder
+  chequeNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  clearanceDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  pdcStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   journalEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -397,6 +441,10 @@ export type PaymentScalarWhereWithAggregatesInput = {
   amountFils?: Prisma.BigIntWithAggregatesFilter<"Payment"> | bigint | number
   reference?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   referenceAr?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
+  chequeNo?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
+  bankName?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
+  clearanceDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
+  pdcStatus?: Prisma.EnumPDCStatusNullableWithAggregatesFilter<"Payment"> | $Enums.PDCStatus | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   journalEntryId?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Payment"> | string
@@ -415,6 +463,10 @@ export type PaymentCreateInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -436,6 +488,10 @@ export type PaymentUncheckedCreateInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -455,6 +511,10 @@ export type PaymentUpdateInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -476,6 +536,10 @@ export type PaymentUncheckedUpdateInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -496,6 +560,10 @@ export type PaymentCreateManyInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -514,6 +582,10 @@ export type PaymentUpdateManyMutationInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -531,6 +603,10 @@ export type PaymentUncheckedUpdateManyInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -565,6 +641,10 @@ export type PaymentCountOrderByAggregateInput = {
   amountFils?: Prisma.SortOrder
   reference?: Prisma.SortOrder
   referenceAr?: Prisma.SortOrder
+  chequeNo?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  clearanceDate?: Prisma.SortOrder
+  pdcStatus?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   journalEntryId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -588,6 +668,10 @@ export type PaymentMaxOrderByAggregateInput = {
   amountFils?: Prisma.SortOrder
   reference?: Prisma.SortOrder
   referenceAr?: Prisma.SortOrder
+  chequeNo?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  clearanceDate?: Prisma.SortOrder
+  pdcStatus?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   journalEntryId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -607,6 +691,10 @@ export type PaymentMinOrderByAggregateInput = {
   amountFils?: Prisma.SortOrder
   reference?: Prisma.SortOrder
   referenceAr?: Prisma.SortOrder
+  chequeNo?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  clearanceDate?: Prisma.SortOrder
+  pdcStatus?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   journalEntryId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -752,6 +840,10 @@ export type EnumPaymentStatusFieldUpdateOperationsInput = {
   set?: $Enums.PaymentStatus
 }
 
+export type NullableEnumPDCStatusFieldUpdateOperationsInput = {
+  set?: $Enums.PDCStatus | null
+}
+
 export type PaymentCreateNestedOneWithoutAllocationsInput = {
   create?: Prisma.XOR<Prisma.PaymentCreateWithoutAllocationsInput, Prisma.PaymentUncheckedCreateWithoutAllocationsInput>
   connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutAllocationsInput
@@ -776,6 +868,10 @@ export type PaymentCreateWithoutCreatedByInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -796,6 +892,10 @@ export type PaymentUncheckedCreateWithoutCreatedByInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdAt?: Date | string
@@ -844,6 +944,10 @@ export type PaymentScalarWhereInput = {
   amountFils?: Prisma.BigIntFilter<"Payment"> | bigint | number
   reference?: Prisma.StringNullableFilter<"Payment"> | string | null
   referenceAr?: Prisma.StringNullableFilter<"Payment"> | string | null
+  chequeNo?: Prisma.StringNullableFilter<"Payment"> | string | null
+  bankName?: Prisma.StringNullableFilter<"Payment"> | string | null
+  clearanceDate?: Prisma.DateTimeNullableFilter<"Payment"> | Date | string | null
+  pdcStatus?: Prisma.EnumPDCStatusNullableFilter<"Payment"> | $Enums.PDCStatus | null
   notes?: Prisma.StringNullableFilter<"Payment"> | string | null
   journalEntryId?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdById?: Prisma.StringFilter<"Payment"> | string
@@ -862,6 +966,10 @@ export type PaymentCreateWithoutJournalEntryInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -882,6 +990,10 @@ export type PaymentUncheckedCreateWithoutJournalEntryInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   createdById: string
   createdAt?: Date | string
@@ -916,6 +1028,10 @@ export type PaymentUpdateWithoutJournalEntryInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -936,6 +1052,10 @@ export type PaymentUncheckedUpdateWithoutJournalEntryInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -954,6 +1074,10 @@ export type PaymentCreateWithoutPartyInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -973,6 +1097,10 @@ export type PaymentUncheckedCreateWithoutPartyInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -1018,6 +1146,10 @@ export type PaymentCreateWithoutAllocationsInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1038,6 +1170,10 @@ export type PaymentUncheckedCreateWithoutAllocationsInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -1072,6 +1208,10 @@ export type PaymentUpdateWithoutAllocationsInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1092,6 +1232,10 @@ export type PaymentUncheckedUpdateWithoutAllocationsInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1111,6 +1255,10 @@ export type PaymentCreateManyCreatedByInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdAt?: Date | string
@@ -1128,6 +1276,10 @@ export type PaymentUpdateWithoutCreatedByInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1148,6 +1300,10 @@ export type PaymentUncheckedUpdateWithoutCreatedByInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1167,6 +1323,10 @@ export type PaymentUncheckedUpdateManyWithoutCreatedByInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1184,6 +1344,10 @@ export type PaymentCreateManyPartyInput = {
   amountFils: bigint | number
   reference?: string | null
   referenceAr?: string | null
+  chequeNo?: string | null
+  bankName?: string | null
+  clearanceDate?: Date | string | null
+  pdcStatus?: $Enums.PDCStatus | null
   notes?: string | null
   journalEntryId?: string | null
   createdById: string
@@ -1202,6 +1366,10 @@ export type PaymentUpdateWithoutPartyInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1221,6 +1389,10 @@ export type PaymentUncheckedUpdateWithoutPartyInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1240,6 +1412,10 @@ export type PaymentUncheckedUpdateManyWithoutPartyInput = {
   amountFils?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceAr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chequeNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearanceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdcStatus?: Prisma.NullableEnumPDCStatusFieldUpdateOperationsInput | $Enums.PDCStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   journalEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1290,6 +1466,10 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   amountFils?: boolean
   reference?: boolean
   referenceAr?: boolean
+  chequeNo?: boolean
+  bankName?: boolean
+  clearanceDate?: boolean
+  pdcStatus?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -1314,6 +1494,10 @@ export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   amountFils?: boolean
   reference?: boolean
   referenceAr?: boolean
+  chequeNo?: boolean
+  bankName?: boolean
+  clearanceDate?: boolean
+  pdcStatus?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -1336,6 +1520,10 @@ export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   amountFils?: boolean
   reference?: boolean
   referenceAr?: boolean
+  chequeNo?: boolean
+  bankName?: boolean
+  clearanceDate?: boolean
+  pdcStatus?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -1358,6 +1546,10 @@ export type PaymentSelectScalar = {
   amountFils?: boolean
   reference?: boolean
   referenceAr?: boolean
+  chequeNo?: boolean
+  bankName?: boolean
+  clearanceDate?: boolean
+  pdcStatus?: boolean
   notes?: boolean
   journalEntryId?: boolean
   createdById?: boolean
@@ -1366,7 +1558,7 @@ export type PaymentSelectScalar = {
   idempotencyKey?: boolean
 }
 
-export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentNo" | "type" | "method" | "date" | "partyId" | "status" | "amountFils" | "reference" | "referenceAr" | "notes" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt" | "idempotencyKey", ExtArgs["result"]["payment"]>
+export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentNo" | "type" | "method" | "date" | "partyId" | "status" | "amountFils" | "reference" | "referenceAr" | "chequeNo" | "bankName" | "clearanceDate" | "pdcStatus" | "notes" | "journalEntryId" | "createdById" | "createdAt" | "updatedAt" | "idempotencyKey", ExtArgs["result"]["payment"]>
 export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   party?: boolean | Prisma.Payment$partyArgs<ExtArgs>
   journalEntry?: boolean | Prisma.Payment$journalEntryArgs<ExtArgs>
@@ -1404,6 +1596,10 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     amountFils: bigint
     reference: string | null
     referenceAr: string | null
+    chequeNo: string | null
+    bankName: string | null
+    clearanceDate: Date | null
+    pdcStatus: $Enums.PDCStatus | null
     notes: string | null
     journalEntryId: string | null
     createdById: string
@@ -1847,6 +2043,10 @@ export interface PaymentFieldRefs {
   readonly amountFils: Prisma.FieldRef<"Payment", 'BigInt'>
   readonly reference: Prisma.FieldRef<"Payment", 'String'>
   readonly referenceAr: Prisma.FieldRef<"Payment", 'String'>
+  readonly chequeNo: Prisma.FieldRef<"Payment", 'String'>
+  readonly bankName: Prisma.FieldRef<"Payment", 'String'>
+  readonly clearanceDate: Prisma.FieldRef<"Payment", 'DateTime'>
+  readonly pdcStatus: Prisma.FieldRef<"Payment", 'PDCStatus'>
   readonly notes: Prisma.FieldRef<"Payment", 'String'>
   readonly journalEntryId: Prisma.FieldRef<"Payment", 'String'>
   readonly createdById: Prisma.FieldRef<"Payment", 'String'>

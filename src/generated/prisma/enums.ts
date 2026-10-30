@@ -137,10 +137,21 @@ export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType]
 
 export const PaymentMethod = {
   CASH: 'CASH',
-  BANK: 'BANK'
+  BANK: 'BANK',
+  PDC_IN: 'PDC_IN',
+  PDC_OUT: 'PDC_OUT'
 } as const
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+
+
+export const PDCStatus = {
+  PENDING: 'PENDING',
+  CLEARED: 'CLEARED',
+  BOUNCED: 'BOUNCED'
+} as const
+
+export type PDCStatus = (typeof PDCStatus)[keyof typeof PDCStatus]
 
 
 export const PaymentStatus = {

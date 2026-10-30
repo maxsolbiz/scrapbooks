@@ -3,9 +3,14 @@ import { prisma } from "@/lib/db";
 import { clearPDC, bouncePDC } from "@/lib/pdc-actions";
 
 describe("P2.5 PDC Workflows", () => {
+  let testPartyId: string;
+
   beforeEach(async () => {
-    // Clean up test data
     await prisma.auditLog.deleteMany({ where: { action: { in: ["CLEAR_PDC", "BOUNCE_PDC"] } } });
+    const party = await prisma.party.create({
+      data: { code: "TEST-PDC", type: "CUSTOMER", nameEn: "Test PDC", nameAr: "اختبار" },
+    });
+    testPartyId = party.id;
   });
 
   it("clearPDC creates a journal entry and updates status to CLEARED", async () => {
@@ -18,7 +23,7 @@ describe("P2.5 PDC Workflows", () => {
         date: new Date(),
         status: "POSTED",
         amountFils: 50000n,
-        partyId: "cmvu17yst001qy40gbqno15zr",
+        partyId: testPartyId,
         pdcStatus: "PENDING",
         createdById: "user-test",
       },
@@ -44,7 +49,7 @@ describe("P2.5 PDC Workflows", () => {
         date: new Date(),
         status: "POSTED",
         amountFils: 30000n,
-        partyId: "cmvu17yst001qy40gbqno15zr",
+        partyId: testPartyId,
         pdcStatus: "PENDING",
         createdById: "user-test",
       },

@@ -58,8 +58,8 @@ export default async function ChequeRegisterPage() {
                     <td className="text-right px-4 py-3 font-mono">{formatAED(BigInt(p.amountFils))}</td>
                     <td className="px-4 py-3">{p.clearanceDate ? p.clearanceDate.toISOString().slice(0, 10) : "—"}</td>
                     <td className="px-4 py-3">
-                      <Badge variant={p.pdcStatus === "BUNCED" ? "destructive" : p.pdcStatus === "CLEARED" ? "outline" : "secondary"}>
-                        {p.pdcStatus === "PENDING" ? t.payments.pending : p.pdcStatus === "CLEARED" ? t.payments.cleared : t.payments.bounced}
+                      <Badge variant={String(p.pdcStatus) === "BUNCED" ? "destructive" : String(p.pdcStatus) === "CLEARED" ? "outline" : "secondary"}>
+                        {String(p.pdcStatus || "PENDING") === "PENDING" ? (t.payments.pending ?? "Pending") : String(p.pdcStatus) === "CLEARED" ? (t.payments.cleared ?? "Cleared") : (t.payments.bounced ?? "Bounced")}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">

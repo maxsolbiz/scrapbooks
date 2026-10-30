@@ -85,7 +85,7 @@ describe("P5.2: Invoice Register + CSV Export", () => {
         tx,
         invoiceId: invoice.id,
         reason: "SHORTAGE" as DeductionReason,
-        amountFils: 20000n,
+        baseAmountFils: 20000n,
         createdById: ctx.userId,
       })
     );
@@ -93,8 +93,8 @@ describe("P5.2: Invoice Register + CSV Export", () => {
     const after = await getInvoiceRegister({});
     const afterRow = after.find((r) => r.id === invoice.id);
     expect(afterRow).toBeDefined();
-    // paid 52500 + deduction 20000 = net settled 72500; outstanding = 105000 - 72500 = 32500
-    expect(afterRow!.outstandingFils).toBe(invoice.totalFils - 72500n);
+    // paid 52500 + deduction total (base 20000 + VAT 1000 = 21000) = 73500; outstanding = 105000 - 73500 = 31500
+    expect(afterRow!.outstandingFils).toBe(31500n);
   });
 
   it("generates CSV with BOM, headers, and escaped party names", async () => {

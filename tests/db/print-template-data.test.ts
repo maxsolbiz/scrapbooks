@@ -103,7 +103,7 @@ describe("P3.3: print template data (getPrintInvoice)", () => {
         tx: t as Tx,
         invoiceId: invoice.id,
         reason: "SHORTAGE",
-        amountFils: 2000n,
+        baseAmountFils: 2000n,
         notes: "weighbridge short",
         createdById: ctx.userId,
       }),
@@ -113,7 +113,7 @@ describe("P3.3: print template data (getPrintInvoice)", () => {
         tx: t as Tx,
         invoiceId: invoice.id,
         reason: "DAMAGE",
-        amountFils: 1500n,
+        baseAmountFils: 1500n,
         notes: null,
         createdById: ctx.userId,
       }),
@@ -135,10 +135,15 @@ describe("P3.3: print template data (getPrintInvoice)", () => {
       second.deduction!.id,
     ]);
     expect(printData!.deductions[0].reason).toBe("SHORTAGE");
-    expect(printData!.deductions[0].amountFils).toBe(2000n);
+    expect(printData!.deductions[0].baseAmountFils).toBe(2000n);
+    expect(printData!.deductions[0].totalFils).toBe(2100n); // 5% VAT
+    expect(printData!.deductions[0].vatRate).not.toBeNull();
+    expect(printData!.deductions[0].vatFils).toBe(100n);
     expect(printData!.deductions[0].notes).toBe("weighbridge short");
     expect(printData!.deductions[1].reason).toBe("DAMAGE");
-    expect(printData!.deductions[1].amountFils).toBe(1500n);
+    expect(printData!.deductions[1].baseAmountFils).toBe(1500n);
+    expect(printData!.deductions[1].totalFils).toBe(1575n);
+    expect(printData!.deductions[1].vatFils).toBe(75n);
   });
 
   it("direction filter: PURCHASE invoices are only returned for PURCHASE lookups", async () => {

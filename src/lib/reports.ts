@@ -471,3 +471,69 @@ export async function getAuditTrail(filters: AuditTrailFilter): Promise<AuditTra
   }) as AuditTrailRow[];
   return result;
 }
+
+export interface DeductionsSummaryFilter {
+  fromDate?: Date;
+  toDate?: Date;
+  reason?: string;
+  partyId?: string;
+  direction?: "SALES" | "PURCHASE" | "ALL";
+}
+
+export interface DeductionSummaryRow {
+  id: string;
+  invoiceNo: string;
+  invoiceDate: Date;
+  direction: "SALES" | "PURCHASE";
+  partyId: string;
+  partyName: string;
+  reason: string;
+  baseAmountFils: bigint;
+  vatFils: bigint;
+  totalFils: bigint;
+  notes: string | null;
+  createdAt: Date;
+}
+
+export async function getDeductionsSummary(filters: DeductionsSummaryFilter): Promise<DeductionSummaryRow[]> {
+  const where: any = {
+    invoice: { status: "POSTED" },
+  };
+  if (filters.fromDate || filters.toDate) {
+    where.invoice.date = {};
+    if (filters.fromDate) where.invoice.date.gte = filters.fromDate;
+    if (filters.toDate) where.invoice.date.lte = filters.toDate;
+  }
+  if (filters.direction && filters.direction !== "ALL") {
+    where.invoice.direction = filters.direction;
+  }
+  if (filters.partyId) {
+    where.invoice.partyId = filters.partyId;
+  }
+  if (filters.reason && filters.reason !== "ALL") {
+    where.reason = filters.reason as any;
+  }
+
+  const rows = await prisma.invoiceDeduction.findMany({
+    where,
+    orderBy: [{ createdAt: "desc" }],
+    include: {
+      invoice: { include: { party: { select: { nameEn: true, nameAr: true } } }, select: { invoiceNo: true, date: true, direction: true, partyId: true, status: true } },
+    },
+  }) as (any & { invoice: { invoiceNo: string; date: Date; direction: string; partyId: string; status: string; party: { nameEn: string; nameAr: string } } })[];
+
+  return rows.map((d) => ({
+    id: d.id,
+    invoiceNo: d.invoice.invoiceNo,
+    invoiceDate: d.invoice.date,
+    direction: d.invoice.direction as "SALES" | "PURCHASE",
+    partyId: d.invoice.partyId,
+    partyName: d.invoice.party.nameEn,
+    reason: d.reason,
+    baseAmountFils: d.baseAmountFils,
+    vatFils: d.vatFils,
+    totalFils: d.totalFils,
+    notes: d.notes,
+    createdAt: d.createdAt,
+  }));
+}

@@ -16,7 +16,16 @@ beforeEach(async () => {
 
 describe("P5.9: Audit trail report", () => {
   it("filters by action and returns only matching audit rows", async () => {
-    const invoice = await seedPostedSalesInvoice();
+    const invoice = await prisma.$transaction(async (tx) =>
+      createInvoice({
+        tx: tx as Tx,
+        direction: "SALES",
+        date: new Date("2026-06-01"),
+        partyId: ctx.customerId,
+        lines: [{ description: "test", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
+        createdById: ctx.userId,
+      })
+    );
     await prisma.$transaction(async (tx) =>
       revisePostedInvoice({
         originalInvoiceId: invoice.id,
@@ -38,7 +47,16 @@ describe("P5.9: Audit trail report", () => {
   });
 
   it("filters by user email and date range", async () => {
-    const invoice = await seedPostedSalesInvoice();
+    const invoice = await prisma.$transaction(async (tx) =>
+      createInvoice({
+        tx: tx as Tx,
+        direction: "SALES",
+        date: new Date("2026-06-01"),
+        partyId: ctx.customerId,
+        lines: [{ description: "test", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
+        createdById: ctx.userId,
+      })
+    );
     await prisma.$transaction(async (tx) =>
       revisePostedInvoice({
         originalInvoiceId: invoice.id,
@@ -62,7 +80,16 @@ describe("P5.9: Audit trail report", () => {
   });
 
   it("CSV export includes BOM header and properly escapes commas/quotes in detail", async () => {
-    const invoice = await seedPostedSalesInvoice();
+    const invoice = await prisma.$transaction(async (tx) =>
+      createInvoice({
+        tx: tx as Tx,
+        direction: "SALES",
+        date: new Date("2026-06-01"),
+        partyId: ctx.customerId,
+        lines: [{ description: "test", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
+        createdById: ctx.userId,
+      })
+    );
     await prisma.$transaction(async (tx) =>
       revisePostedInvoice({
         originalInvoiceId: invoice.id,

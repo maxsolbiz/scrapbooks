@@ -456,7 +456,7 @@ export async function getAuditTrail(filters: AuditTrailFilter): Promise<AuditTra
   if (filters.action && filters.action.trim() !== "" && filters.action !== "All") {
     where.action = filters.action.trim();
   }
-  return prisma.auditLog.findMany({
+  const result = await prisma.auditLog.findMany({
     where,
     orderBy: { createdAt: "desc" },
     select: {
@@ -469,4 +469,5 @@ export async function getAuditTrail(filters: AuditTrailFilter): Promise<AuditTra
       detail: true,
     },
   }) as AuditTrailRow[];
+  return result;
 }

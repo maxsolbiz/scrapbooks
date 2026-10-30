@@ -42,7 +42,7 @@ export default async function AuditTrailPage({
                 <Input type="date" id="fromDate" name="fromDate" defaultValue={params.fromDate ?? ""} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="toDate">{t.common.dueDate}</Label>
+                <Label htmlFor="toDate">{t.invoices.dueDate}</Label>
                 <Input type="date" id="toDate" name="toDate" defaultValue={params.toDate ?? ""} />
               </div>
               <div className="space-y-1.5">
@@ -55,7 +55,7 @@ export default async function AuditTrailPage({
               </div>
             </div>
             <div className="flex gap-2">
-              <Button type="submit" variant="outline">{t.reports.filters || "Filter"}</Button>
+              <Button type="submit" variant="outline">{t.reports.auditTrail.filters || "Filter"}</Button>
               <Button type="button" variant="outline" onClick={() => {
                 const url = "/api/reports/audit-trail/csv";
                 fetch(url, {

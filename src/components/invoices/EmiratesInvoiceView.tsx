@@ -31,6 +31,8 @@ export interface EmiratesInvoiceData {
       createdAt: Date;
       updatedAt: Date;
     }[];
+    revisesInvoice: { invoiceNo: string } | null;
+    revisedBy: { invoiceNo: string }[];
   };
   company: {
     nameEn: string;
@@ -178,6 +180,7 @@ const CERT_CSS = `
 .emv.modern .totrow td { background: #1f4e79; color: #fff; }
 .emv.modern .mrow.grand { background: #1f4e79; color: #fff; }
 .emv.modern .mrow.grand b, .emv.modern .mrow.grand .aed, .emv.modern .mrow.grand .mamt { color: #fff; }
+.emv .void-note { border: 1.5px solid #b00020; color: #b00020; font-weight: bold; text-align: center; font-size: 10.5pt; padding: 3px 6px; margin: 0 0 6px; }
 `;
 
 export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
@@ -185,6 +188,12 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
   const lines = invoice.lines;
   const vatFils = invoice.vatFils;
   const allZeroVat = lines.every((l) => Number(l.vatRate) === 0);
+  const revisionNo = invoice.revisionNumber ?? 0;
+  const supersededBy =
+    invoice.status === "VOID" && invoice.revisedBy && invoice.revisedBy.length > 0
+      ? invoice.revisedBy[0].invoiceNo
+      : null;
+  const totalDeductions = (invoice.deductions ?? []).reduce((a, d) => a + d.amountFils, 0n);
 
   const fromBlock =
     invoice.direction === "SALES"
@@ -221,7 +230,12 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
           { co: false, text: "UNITED ARAB EMIRATES" },
         ];
   const rowBlocks = [
-    { left: "Invoice No.", right: "Dated", leftVal: invoice.invoiceNo, rightVal: fmtDate(invoice.date) },
+    {
+      left: "Invoice No.",
+      right: "Dated",
+      leftVal: revisionNo > 0 ? `${invoice.invoiceNo} (Rev ${revisionNo})` : invoice.invoiceNo,
+      rightVal: fmtDate(invoice.date),
+    },
     { left: "Supplier's Ref", right: "Date of Supply", leftVal: invoice.supplierRef || "", rightVal: "" },
     { left: "Purchase Order", right: "Mode/Terms of Payment", leftVal: invoice.purchaseOrder || "", rightVal: invoice.modeOfPayment || "" },
     { left: "Delivery Note", right: "Delivery Note Date", leftVal: invoice.deliveryNote || "", rightVal: invoice.deliveryNoteDate ? fmtDate(new Date(invoice.deliveryNoteDate)) : "" },
@@ -235,6 +249,11 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
       <style>{CERT_CSS}</style>
       <div className="emv-page">
         <h1 className="inv-title">TAX INVOICE</h1>
+        {supersededBy ? (
+          <div className="void-note">
+            VOID — Superseded by {supersededBy} / ملغي — استُبدل بـ {supersededBy}
+          </div>
+        ) : null}
         <div className="sheet">
           <div className="head-grid">
             <div className="h-left">
@@ -361,11 +380,18 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
                 <span className="mamt">{centsComma(invoice.totalFils)}</span>
               </div>
               {invoice.deductions && invoice.deductions.length > 0 ? (
-                <div className="mrow">
-                  <b>Deductions / خصومات</b>
-                  <span className="aed">AED</span>
-                  <span className="mamt">{centsComma(0n - invoice.deductions.reduce((a, d) => a + d.amountFils, 0n))}</span>
-                </div>
+                <>
+                  <div className="mrow">
+                    <b>Deductions / خصومات</b>
+                    <span className="aed">AED</span>
+                    <span className="mamt">{centsComma(0n - totalDeductions)}</span>
+                  </div>
+                  <div className="mrow">
+                    <b>Net Amount Due / الصافي المستحق</b>
+                    <span className="aed">AED</span>
+                    <span className="mamt">{centsComma(invoice.totalFils - totalDeductions)}</span>
+                  </div>
+                </>
               ) : null}
             </div>
           </div>

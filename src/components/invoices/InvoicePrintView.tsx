@@ -38,6 +38,8 @@ export interface InvoicePrintData {
       createdAt: Date;
       updatedAt: Date;
     }[];
+    revisesInvoice: { invoiceNo: string } | null;
+    revisedBy: { invoiceNo: string }[];
   };
   company: { nameEn: string; nameAr: string; trn: string; addressEn: string; addressAr: string; phone: string; email: string; bankDetailsEn: string; bankDetailsAr: string };
 }
@@ -52,6 +54,9 @@ export function InvoicePrintView({
   const { invoice, company } = data;
   const invNo = invoice.invoiceNo;
   const title = isTaxInvoice ? "TAX INVOICE / فاتورة ضريبية" : invoice.direction === "SALES" ? "DELIVERY NOTE / سند تسليم" : "TAX INVOICE / فاتورة ضريبية";
+  const revisionNo = invoice.revisionNumber ?? 0;
+  const supersededBy = invoice.status === "VOID" && invoice.revisedBy && invoice.revisedBy.length > 0 ? invoice.revisedBy[0].invoiceNo : null;
+  const totalDeductions = (invoice.deductions ?? []).reduce((a, d) => a + d.amountFils, 0n);
 
   return (
     <div className="ivp mx-auto max-w-3xl rounded-md bg-white text-black shadow-sm print:rounded-none print:shadow-none dark:shadow-lg" dir="ltr">
@@ -78,7 +83,14 @@ export function InvoicePrintView({
         {/* Title + meta */}
         <div className="flex justify-between items-center py-3 border-b border-neutral-400">
           <span className="text-base font-bold">{title}</span>
-          <span className="font-mono">{invNo}</span>
+          <span>
+            <span className="font-mono">{invNo}</span>
+            {revisionNo > 0 ? (
+              <span className="ml-2 inline-block rounded border border-black px-1.5 py-0.5 align-middle text-[10px] font-bold">
+                Revision {revisionNo} / مراجعة {revisionNo}
+              </span>
+            ) : null}
+          </span>
         </div>
         <div className="grid grid-cols-2 gap-4 py-3 text-xs">
           <div>
@@ -92,8 +104,16 @@ export function InvoicePrintView({
           <div className="text-right">
             <p>Date: {invoice.date.toISOString().slice(0, 10)}</p>
             <p>Status: {invoice.status}</p>
+            {invoice.revisesInvoice ? (
+              <p>Revision of {invoice.revisesInvoice.invoiceNo} / مراجعة لـ {invoice.revisesInvoice.invoiceNo}</p>
+            ) : null}
           </div>
         </div>
+        {supersededBy ? (
+          <div className="border border-red-800 bg-red-50 px-2 py-1 text-xs font-bold text-red-900">
+            VOID — Superseded by {supersededBy} / ملغي — استُبدل بـ {supersededBy}
+          </div>
+        ) : null}
 
         {/* Lines */}
         <table className="w-full border-collapse text-xs">
@@ -128,6 +148,40 @@ export function InvoicePrintView({
           </tbody>
         </table>
 
+        {/* Deductions (P2.6/P3.3) — before totals so the net-due math flows */}
+        {invoice.deductions && invoice.deductions.length > 0 && (
+          <div className="mt-3">
+            <table className="w-full border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-100">
+                  <th className="border border-neutral-400 p-1.5 text-start">Reason / السبب</th>
+                  <th className="border border-neutral-400 p-1.5 text-start">Notes / ملاحظات</th>
+                  <th className="border border-neutral-400 p-1.5 text-end">Amount (AED)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.deductions.map((d) => (
+                  <tr key={d.id}>
+                    <td className="border border-neutral-400 p-1.5">{d.reason}</td>
+                    <td className="border border-neutral-400 p-1.5">{d.notes ?? ""}</td>
+                    <td className="border border-neutral-400 p-1.5 text-end tabular-nums">-{money(d.amountFils)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={2} className="border border-neutral-400 p-1.5 text-end font-bold">
+                    Total Deductions / إجمالي الخصومات
+                  </td>
+                  <td className="border border-neutral-400 p-1.5 text-end tabular-nums font-bold">
+                    -{money(totalDeductions)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+
         {/* Totals + VAT summary */}
         <div className="mt-3 flex flex-col items-end gap-2">
           <div className="w-56 text-xs">
@@ -148,30 +202,24 @@ export function InvoicePrintView({
               <span className="text-sm font-bold">الإجمالي</span>
               <span className="tabular-nums text-sm font-bold">{money(invoice.totalFils)}</span>
             </div>
+            {totalDeductions > 0n ? (
+              <>
+                <div className="flex justify-between border-b border-neutral-300 py-0.5">
+                  <span>Less: Deductions / خصومات</span>
+                  <span className="tabular-nums">-{money(totalDeductions)}</span>
+                </div>
+                <div className="flex justify-between py-1 text-sm font-bold">
+                  <span>Net Amount Due (AED)</span>
+                  <span className="tabular-nums">{money(invoice.totalFils - totalDeductions)}</span>
+                </div>
+                <div className="flex justify-between" dir="rtl">
+                  <span className="text-sm font-bold">الصافي المستحق</span>
+                  <span className="tabular-nums text-sm font-bold">{money(invoice.totalFils - totalDeductions)}</span>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
-
-        {/* Deductions / خصومات */}
-        {invoice.deductions && invoice.deductions.length > 0 && (
-          <div className="mt-3">
-            <div className="w-56 text-xs">
-              <div className="font-bold pb-1">Deductions / الخصومات</div>
-              {invoice.deductions.map((d) => (
-                <div key={d.id} className="flex justify-between border-b border-neutral-300 py-0.5">
-                  <span>
-                    {d.reason}
-                    {d.notes ? ` — ${d.notes}` : ""}
-                  </span>
-                  <span className="tabular-nums">-{money(d.amountFils)}</span>
-                </div>
-              ))}
-              <div className="flex justify-between py-1 text-sm font-bold">
-                <span>Total Deductions</span>
-                <span className="tabular-nums">-{money(invoice.deductions.reduce((a, d) => a + d.amountFils, 0n))}</span>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Footer */}
         <div className="mt-4 border-t border-neutral-400 pt-2 text-[10px] text-neutral-700">

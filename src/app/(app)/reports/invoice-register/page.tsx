@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ExportCsvButton } from "@/components/reports/ExportCsvButton";
 
 export default async function InvoiceRegisterPage({
   searchParams,
@@ -35,7 +36,7 @@ export default async function InvoiceRegisterPage({
 
   return (
     <div className="space-y-4">
-      <PageHeader title={t.invoices.statementTitle || "Invoice Register"} />
+      <PageHeader title={t.reports.invoiceRegister.title} />
       
       <Card>
         <CardContent>
@@ -74,9 +75,16 @@ export default async function InvoiceRegisterPage({
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">Filter</Button>
-              <Button asChild variant="outline">
-                <a href="/api/reports/invoice-register/csv?fromDate=...">Export CSV</a>
-              </Button>
+              <ExportCsvButton
+                filters={{
+                  fromDate: params.fromDate ?? undefined,
+                  toDate: params.toDate ?? undefined,
+                  partyId: params.partyId ?? undefined,
+                  direction: (params.direction as string) || "ALL",
+                  status: (params.status as string) || "ALL",
+                }}
+                exportCsvLabel={t.reports.invoiceRegister.exportCsv}
+              />
             </div>
           </form>
         </CardContent>

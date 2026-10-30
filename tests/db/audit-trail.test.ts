@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, type MockInstance } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi, type MockInstance } from "vitest";
 import { prisma } from "@/lib/db";
 import { createInvoice } from "@/lib/invoices";
 import { revisePostedInvoice } from "@/lib/invoice-revision";
@@ -20,6 +20,10 @@ let ctx: TestContext;
 beforeEach(async () => {
   await truncateAll(prisma);
   ctx = await seedTestData(prisma);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("P5.9: Audit trail report", () => {
@@ -267,7 +271,7 @@ describe("P5.9: Audit trail report", () => {
       expect(json.error).toBe("Forbidden");
     });
 
-    it("marks the CSV export truncated when total exceeds the cap", async () => {
+    it("refuses the CSV export with 413 when total exceeds the cap", async () => {
       const mockAuth = vi.mocked(auth) as unknown as MockInstance<
         () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
       >;
@@ -277,15 +281,7 @@ describe("P5.9: Audit trail report", () => {
 
       const getAuditTrailMock = vi.spyOn(reportsModule, "getAuditTrail");
       getAuditTrailMock.mockResolvedValue({
-        rows: Array.from({ length: 50000 }, (_, i) => ({
-          id: `row-${i}`,
-          createdAt: new Date(),
-          userEmail: "x@test.local",
-          action: "TEST_ACTION",
-          entityType: null,
-          entityId: null,
-          detail: null,
-        })),
+        rows: [],
         total: 50001,
       });
 
@@ -296,12 +292,78 @@ describe("P5.9: Audit trail report", () => {
           body: JSON.stringify({}),
         }),
       );
-      expect(res.status).toBe(200);
-      expect(res.headers.get("X-Export-Truncated")).toBe("true");
-      const body = await res.text();
-      // 1 header row + exactly 50000 data rows (capped at EXPORT_ROW_CAP)
-      expect(body.split("\n").length).toBe(50000 + 1);
+      expect(res.status).toBe(413);
+      const json = await res.json();
+      expect(json.ok).toBe(false);
+      expect(json.error).toContain("Too many rows");
       getAuditTrailMock.mockRestore();
+    });
+
+    it("escapes CSV cells that start with formula prefixes", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "admin-1", email: "admin@test.local", role: "ADMIN" },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          userEmail: "formula@test.local",
+          action: "TEST_ACTION",
+          detail: "=1+1",
+          createdAt: new Date(),
+        },
+      });
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.text();
+      // The formula cell must be prefixed with a single quote so Excel treats it as text.
+      expect(body).toContain("'=1+1");
+      // It must NOT start a new line with =1+1 unquoted.
+      expect(body).not.toContain("\n=1+1");
+    });
+
+    it("writes an AUDIT_EXPORTED audit row on successful export", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "admin-1", email: "admin@test.local", role: "ADMIN" },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          userEmail: "admin@test.local",
+          action: "INVOICE_REVISE",
+          detail: "some detail",
+          createdAt: new Date(),
+        },
+      });
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(200);
+
+      const exported = await prisma.auditLog.findFirst({
+        where: { action: "AUDIT_EXPORTED" },
+      });
+      expect(exported).toBeTruthy();
+      expect(exported?.userEmail).toBe("admin@test.local");
+      expect(exported?.entityType).toBe("AuditLog");
+      expect(exported?.detail).toContain("Exported 1 audit rows");
     });
   });
 });

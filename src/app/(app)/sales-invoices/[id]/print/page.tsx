@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireModule } from "@/lib/guard";
+import { getPrintInvoice } from "@/lib/print-data";
 import { InvoicePrintView } from "@/components/invoices/InvoicePrintView";
 import { EmiratesInvoiceView } from "@/components/invoices/EmiratesInvoiceView";
 import { InvoiceTemplateSelect } from "@/components/invoices/InvoiceTemplateSelect";
@@ -20,14 +21,7 @@ export default async function PrintInvoicePage({
   const { id } = await params;
   const sp = await searchParams;
   const rawTemplate = Array.isArray(sp.template) ? sp.template[0] : sp.template;
-  const invoice = await prisma.invoice.findFirst({
-    where: { id, direction: "SALES" },
-    include: {
-      lines: { orderBy: { id: "asc" } },
-      party: { select: { nameEn: true, nameAr: true, trn: true, addressEn: true, addressAr: true, phone: true, email: true } },
-      deductions: { orderBy: { createdAt: "asc" } },
-    },
-  });
+  const invoice = await getPrintInvoice(id, "SALES");
   if (!invoice) notFound();
   const company = await prisma.companySettings.findFirstOrThrow();
   const wanted = rawTemplate || company.defaultInvoiceTemplate || "app";

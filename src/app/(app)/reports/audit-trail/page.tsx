@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuditCsvButton } from "@/components/reports/AuditCsvButton";
 
 export default async function AuditTrailPage({
   searchParams,
@@ -56,27 +57,7 @@ export default async function AuditTrailPage({
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">{t.reports.auditTrail.filters || "Filter"}</Button>
-              <Button type="button" variant="outline" onClick={() => {
-                const url = "/api/reports/audit-trail/csv";
-                fetch(url, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    fromDate: params.fromDate || undefined,
-                    toDate: params.toDate || undefined,
-                    userEmail: params.userEmail || undefined,
-                    action: params.action || undefined,
-                  }),
-                }).then(async (r) => {
-                  if (!r.ok) { const e = await r.json(); alert(e.error || "Failed"); return; }
-                  const blob = await r.blob();
-                  const href = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = href; a.download = `audit_trail_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(href);
-                }).catch((e) => alert(e instanceof Error ? e.message : "Failed"));
-              }}>
-                {t.reports.auditTrail?.exportCsv || "Export CSV"}
-              </Button>
+              <AuditCsvButton filters={{ fromDate: params.fromDate || undefined, toDate: params.toDate || undefined, userEmail: params.userEmail || undefined, action: params.action || undefined }} />
             </div>
           </form>
         </CardContent>

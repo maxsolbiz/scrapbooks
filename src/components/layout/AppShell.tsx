@@ -76,7 +76,12 @@ const GROUPS: NavGroup[] = [
   },
   {
     labelKey: "INSIGHTS",
-    items: [{ href: "/reports", key: "reports", icon: ChartColumnBig, prefetch: false, module: "reports" }],
+    items: [
+      { href: "/reports", key: "reports", icon: ChartColumnBig, prefetch: false, module: "reports" },
+      { href: "/reports/vat-201", key: "vat201Return", icon: FileText, prefetch: false, module: "reports" },
+      { href: "/reports/invoice-register", key: "invoiceRegister", icon: FileText, prefetch: false, module: "reports" },
+      { href: "/reports/audit-trail", key: "auditTrail", icon: ShieldCheck, prefetch: false, module: "reports" },
+    ],
   },
   {
     labelKey: "ADMIN",

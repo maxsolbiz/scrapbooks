@@ -3,6 +3,7 @@ import { partyLedgerHref, partyLedgerLabelKey } from "@/lib/party-ledger-kind";
 import { prisma } from "@/lib/db";
 import type { Account, FiscalYear } from "@/generated/prisma/client";
 import { signFor } from "@/lib/accounting";
+import { formatAED } from "@/lib/money";
 
 export interface TrialBalanceRow {
   id: string;
@@ -332,14 +333,17 @@ export async function getInvoiceRegister(filters: InvoiceRegisterFilter): Promis
         where: { payment: { status: "POSTED" } },
         select: { amountFils: true },
       },
+      deductions: { select: { amountFils: true } },
     },
   });
 
   const result: InvoiceRegisterRow[] = [];
   for (const inv of invoices) {
     const paidFils = inv.allocations.reduce((sum, a) => sum + a.amountFils, 0n);
-    const outstandingFils = inv.totalFils - paidFils;
-    const status = await import("@/lib/invoice-status").then((m) => m.derivePaymentStatus(inv.totalFils, paidFils, inv.dueDate));
+    const deductionFils = inv.deductions.reduce((sum, d) => sum + d.amountFils, 0n);
+    const netSettled = paidFils + deductionFils;
+    const outstandingFils = inv.totalFils - netSettled;
+    const status = await import("@/lib/invoice-status").then((m) => m.derivePaymentStatus(inv.totalFils, netSettled, inv.dueDate));
     result.push({
       id: inv.id,
       invoiceNo: inv.invoiceNo,
@@ -354,6 +358,39 @@ export async function getInvoiceRegister(filters: InvoiceRegisterFilter): Promis
     });
   }
   return result;
+}
+
+export function invoiceRegisterToCsv(rows: InvoiceRegisterRow[]): string {
+  const BOM = "\uFEFF";
+  const headers = [
+    "Date",
+    "Invoice No",
+    "Party",
+    "Direction",
+    "Total (AED)",
+    "Paid (AED)",
+    "Outstanding (AED)",
+    "Payment Status",
+    "Status",
+  ];
+  const escape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+  const lines = [headers.map((h) => escape(h)).join(",")];
+  for (const r of rows) {
+    lines.push(
+      [
+        r.date.toISOString().slice(0, 10),
+        escape(r.invoiceNo),
+        escape(r.partyName),
+        r.direction,
+        formatAED(r.totalFils),
+        formatAED(r.paidFils),
+        formatAED(r.outstandingFils),
+        r.paymentStatus,
+        r.status,
+      ].join(","),
+    );
+  }
+  return BOM + lines.join("\n");
 }
 
 export async function agingReport(direction: "SALES" | "PURCHASE"): Promise<AgingEntry[]> {

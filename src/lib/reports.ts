@@ -518,7 +518,7 @@ export async function getDeductionsSummary(filters: DeductionsSummaryFilter): Pr
     where,
     orderBy: [{ createdAt: "desc" }],
     include: {
-      invoice: { include: { party: { select: { nameEn: true, nameAr: true } } }, select: { invoiceNo: true, date: true, direction: true, partyId: true, status: true } },
+      invoice: { select: { invoiceNo: true, date: true, direction: true, partyId: true, status: true, party: { select: { nameEn: true, nameAr: true } } } },
     },
   }) as (any & { invoice: { invoiceNo: string; date: Date; direction: string; partyId: string; status: string; party: { nameEn: string; nameAr: string } } })[];
 

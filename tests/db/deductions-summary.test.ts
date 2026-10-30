@@ -59,10 +59,12 @@ describe("P5.5: Deductions summary (D1 VAT split aggregation)", () => {
       direction: "SALES",
     });
     expect(all.length).toBe(2);
-    expect(all[0].baseAmountFils).toBe(10000n);
-    expect(all[0].totalFils).toBe(10500n); // 5% VAT
-    expect(all[1].baseAmountFils).toBe(5000n);
-    expect(all[1].totalFils).toBe(5250n);
+    const shortage = all.find((r) => r.reason === "SHORTAGE");
+    const discount = all.find((r) => r.reason === "COMMERCIAL_DISCOUNT");
+    expect(shortage?.baseAmountFils).toBe(10000n);
+    expect(shortage?.totalFils).toBe(10500n); // 5% VAT
+    expect(discount?.baseAmountFils).toBe(5000n);
+    expect(discount?.totalFils).toBe(5250n);
   });
 
   it("date range excludes deductions outside the period", async () => {

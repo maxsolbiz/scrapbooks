@@ -25,6 +25,7 @@ export default async function PrintInvoicePage({
     include: {
       lines: { orderBy: { id: "asc" } },
       party: { select: { nameEn: true, nameAr: true, trn: true, addressEn: true, addressAr: true, phone: true, email: true } },
+      deductions: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!invoice) notFound();

@@ -23,6 +23,14 @@ export interface EmiratesInvoiceData {
       phone: string | null;
       email: string | null;
     };
+    deductions: {
+      id: string;
+      reason: "SHORTAGE" | "DAMAGE" | "DISCOUNT" | "RETURN" | "OTHER";
+      amountFils: bigint;
+      notes: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
   };
   company: {
     nameEn: string;
@@ -352,6 +360,13 @@ export function EmiratesInvoiceView({ data }: { data: EmiratesInvoiceData }) {
                 <span className="aed">AED</span>
                 <span className="mamt">{centsComma(invoice.totalFils)}</span>
               </div>
+              {invoice.deductions && invoice.deductions.length > 0 ? (
+                <div className="mrow">
+                  <b>Deductions / خصومات</b>
+                  <span className="aed">AED</span>
+                  <span className="mamt">{centsComma(0n - invoice.deductions.reduce((a, d) => a + d.amountFils, 0n))}</span>
+                </div>
+              ) : null}
             </div>
           </div>
           {bankLines.length > 0 ? (

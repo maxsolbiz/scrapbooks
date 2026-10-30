@@ -30,6 +30,14 @@ export interface InvoicePrintData {
       lineTotalFils: bigint;
     }[];
     party: { nameEn: string; nameAr: string; trn: string | null; addressEn: string | null; addressAr: string | null };
+    deductions: {
+      id: string;
+      reason: "SHORTAGE" | "DAMAGE" | "DISCOUNT" | "RETURN" | "OTHER";
+      amountFils: bigint;
+      notes: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
   };
   company: { nameEn: string; nameAr: string; trn: string; addressEn: string; addressAr: string; phone: string; email: string; bankDetailsEn: string; bankDetailsAr: string };
 }
@@ -142,6 +150,28 @@ export function InvoicePrintView({
             </div>
           </div>
         </div>
+
+        {/* Deductions / خصومات */}
+        {invoice.deductions && invoice.deductions.length > 0 && (
+          <div className="mt-3">
+            <div className="w-56 text-xs">
+              <div className="font-bold pb-1">Deductions / الخصومات</div>
+              {invoice.deductions.map((d) => (
+                <div key={d.id} className="flex justify-between border-b border-neutral-300 py-0.5">
+                  <span>
+                    {d.reason}
+                    {d.notes ? ` — ${d.notes}` : ""}
+                  </span>
+                  <span className="tabular-nums">-{money(d.amountFils)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between py-1 text-sm font-bold">
+                <span>Total Deductions</span>
+                <span className="tabular-nums">-{money(invoice.deductions.reduce((a, d) => a + d.amountFils, 0n))}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-4 border-t border-neutral-400 pt-2 text-[10px] text-neutral-700">

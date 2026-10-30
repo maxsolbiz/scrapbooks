@@ -295,6 +295,16 @@ model Invoice {
   idempotencyKey  String?          @unique
   paymentStatus   InvoicePaymentStatus @default(UNPAID)
 
+  /// P3.2 amend flow: links this invoice to the original it revises (original is
+  /// reversed + VOID, never mutated). Restrict keeps the original row for audit.
+  revisesInvoiceId String?
+  revisesInvoice   Invoice?         @relation("InvoiceRevision", fields: [revisesInvoiceId], references: [id], onDelete: Restrict)
+  /// Backside: the revision that supersedes THIS invoice (at most one in practice,
+  /// enforced by revisePostedInvoice requiring the original to be POSTED).
+  revisedBy        Invoice[]        @relation("InvoiceRevision")
+  /// 0 = original, 1+ = revisions.
+  revisionNumber   Int              @default(0)
+
   lines           InvoiceLine[]
   allocations     PaymentAllocation[]
   deductions      InvoiceDeduction[]
@@ -304,6 +314,7 @@ model Invoice {
   @@index([direction, status])
   @@index([dueDate])
   @@index([paymentStatus, dueDate])
+  @@index([revisesInvoiceId])
   @@unique([partyId, supplierRef], name: "purchase_invoice_supplier_ref_unique", map: "purchase_invoice_supplier_ref_unique", where: raw("\"direction\" = 'PURCHASE' AND \"supplierRef\" IS NOT NULL"))
 }
 

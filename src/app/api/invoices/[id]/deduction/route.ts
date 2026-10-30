@@ -5,8 +5,10 @@ import { createDeduction } from "@/lib/deduction-actions";
 import { z } from "zod";
 
 const schema = z.object({
-  reason: z.enum(["SHORTAGE", "DAMAGE", "DISCOUNT", "RETURN", "OTHER"]),
-  amountFils: z.coerce.bigint().positive(),
+  reason: z.enum(["SHORTAGE", "DAMAGE", "COMMERCIAL_DISCOUNT", "RETURN", "OTHER"]),
+  // D1: VAT-exclusive base amount; the server derives VAT from the rate.
+  baseAmountFils: z.coerce.bigint().positive(),
+  vatRate: z.coerce.number().nonnegative().optional(),
   notes: z.string().optional(),
 });
 
@@ -29,9 +31,11 @@ export async function POST(
         tx,
         invoiceId: id,
         reason: parsed.data.reason,
-        amountFils: parsed.data.amountFils,
+        baseAmountFils: parsed.data.baseAmountFils,
+        vatRate: parsed.data.vatRate ?? null,
         notes: parsed.data.notes ?? null,
         createdById: user.id,
+        createdByEmail: user.email,
       })
     );
 
@@ -46,7 +50,10 @@ export async function POST(
         id: created.id,
         invoiceId: created.invoiceId,
         reason: created.reason,
-        amountFils: created.amountFils.toString(),
+        baseAmountFils: created.baseAmountFils.toString(),
+        vatRate: created.vatRate.toString(),
+        vatFils: created.vatFils.toString(),
+        totalFils: created.totalFils.toString(),
         notes: created.notes ?? null,
         journalEntryId: created.journalEntryId ?? null,
         createdAt: created.createdAt,

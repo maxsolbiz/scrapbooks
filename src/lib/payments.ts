@@ -25,6 +25,9 @@ export interface CreatePaymentInput {
   reference?: string | null;
   referenceAr?: string | null;
   notes?: string | null;
+  chequeNo?: string | null;
+  bankName?: string | null;
+  clearanceDate?: Date | null;
   allocations?: PaymentAllocationInput[];
   createdById: string;
   tx: Tx;
@@ -204,6 +207,10 @@ export async function createPayment(input: CreatePaymentInput) {
       reference: input.reference || null,
       referenceAr: input.referenceAr || null,
       notes: input.notes || null,
+      chequeNo: input.chequeNo || null,
+      bankName: input.bankName || null,
+      clearanceDate: input.clearanceDate || null,
+      pdcStatus: (input.method === "PDC_IN" || input.method === "PDC_OUT") ? "PENDING" : null,
       journalEntryId: jeId,
       createdById,
       idempotencyKey: input.idempotencyKey || null,

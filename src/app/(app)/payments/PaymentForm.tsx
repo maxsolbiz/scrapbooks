@@ -49,7 +49,10 @@ export function PaymentForm({
   const t = dict;
   const router = useRouter();
   const [type, setType] = useState<"RECEIPT" | "PAYMENT" | "CONTRA">("RECEIPT");
-  const [method, setMethod] = useState<"CASH" | "BANK">("CASH");
+  const [method, setMethod] = useState<"CASH" | "BANK" | "PDC_IN" | "PDC_OUT">("CASH");
+  const [chequeNo, setChequeNo] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [clearanceDate, setClearanceDate] = useState("");
   const [partyId, setPartyId] = useState("");
   const [date, setDate] = useState(today);
   const [amount, setAmount] = useState("");
@@ -113,6 +116,9 @@ export function PaymentForm({
       amount,
       reference,
       notes,
+      chequeNo: method === "PDC_IN" || method === "PDC_OUT" ? chequeNo : undefined,
+      bankName: method === "PDC_IN" || method === "PDC_OUT" ? bankName : undefined,
+      clearanceDate: method === "PDC_IN" || method === "PDC_OUT" ? clearanceDate : undefined,
       allocations: allocs.filter((a) => a.amount && Number(a.amount) > 0),
     });
     setSubmitting(false);
@@ -153,13 +159,22 @@ export function PaymentForm({
               <Label>
                 {type === "CONTRA" ? t.payments.fromAccount : t.payments.method}
               </Label>
-              <Select value={method} onValueChange={(v) => setMethod(v as "CASH" | "BANK")}>
+              <Select value={method} onValueChange={(v) => {
+                setMethod(v as typeof method);
+                if (v !== "PDC_IN" && v !== "PDC_OUT") {
+                  setChequeNo("");
+                  setBankName("");
+                  setClearanceDate("");
+                }
+              }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CASH">{t.payments.cash}</SelectItem>
                   <SelectItem value="BANK">{t.payments.bank}</SelectItem>
+                  <SelectItem value="PDC_IN">{t.payments.pdcIn}</SelectItem>
+                  <SelectItem value="PDC_OUT">{t.payments.pdcOut}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -184,6 +199,23 @@ export function PaymentForm({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {(method === "PDC_IN" || method === "PDC_OUT") && (
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>{t.payments.chequeNo}</Label>
+                <Input value={chequeNo} onChange={(e) => setChequeNo(e.target.value)} placeholder="e.g. 123456" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.payments.bankName}</Label>
+                <Input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="Bank name" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t.payments.clearanceDate}</Label>
+                <Input type="date" value={clearanceDate} onChange={(e) => setClearanceDate(e.target.value)} />
+              </div>
             </div>
           )}
 

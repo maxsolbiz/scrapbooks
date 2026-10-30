@@ -16,12 +16,15 @@ export type ActionResult<T = undefined> =
 
 const schema = z.object({
   type: z.enum(["RECEIPT", "PAYMENT", "CONTRA"]),
-  method: z.enum(["CASH", "BANK"]),
+  method: z.enum(["CASH", "BANK", "PDC_IN", "PDC_OUT"]),
   date: z.string().min(1),
   partyId: z.string().optional(),
   amount: z.string().min(1),
   reference: z.string().optional(),
   notes: z.string().optional(),
+  chequeNo: z.string().optional(),
+  bankName: z.string().optional(),
+  clearanceDate: z.string().optional(),
   allocations: z
     .array(z.object({ invoiceId: z.string().min(1), amount: z.string().min(1) }))
     .optional(),
@@ -59,6 +62,9 @@ export async function createPaymentAction(
         amountFils: decimalStringToFils(v.amount),
         reference: v.reference || null,
         notes: v.notes || null,
+        chequeNo: v.chequeNo || null,
+        bankName: v.bankName || null,
+        clearanceDate: v.clearanceDate ? new Date(v.clearanceDate) : null,
         createdById: user.id,
         idempotencyKey: v.idempotencyKey,
         allocations: (v.allocations ?? []).map((a) => ({

@@ -14,6 +14,7 @@ const REPORTS = [
   { href: "/reports/ar-ap-aging", key: "arApAging" },
   { href: "/reports/aging", key: "agingReport" },
   { href: "/reports/invoice-register", key: "invoiceRegister" },
+  { href: "/reports/cheque-register", key: "chequeRegister" },
 ] as const;
 
 export default async function ReportsPage() {

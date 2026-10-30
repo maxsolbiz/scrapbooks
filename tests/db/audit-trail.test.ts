@@ -1,11 +1,19 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, type MockInstance } from "vitest";
 import { prisma } from "@/lib/db";
 import { createInvoice } from "@/lib/invoices";
 import { revisePostedInvoice } from "@/lib/invoice-revision";
-import { getAuditTrail } from "@/lib/reports";
+import { getAuditTrail, parseAuditTrailParams } from "@/lib/reports";
+import * as reportsModule from "@/lib/reports";
+import { getAuditAccess } from "@/lib/guard";
+import { auth } from "@/lib/auth";
+import { POST as csvExport } from "@/app/api/reports/audit-trail/csv/route";
 import { truncateAll } from "./helpers";
 import { seedTestData, type TestContext } from "./seed";
 import type { Tx } from "@/lib/tx";
+
+vi.mock("@/lib/auth", () => ({
+  auth: vi.fn(),
+}));
 
 let ctx: TestContext;
 
@@ -39,10 +47,10 @@ describe("P5.9: Audit trail report", () => {
         tx: tx as Tx,
       })
     );
-    const all = await getAuditTrail({});
+    const { rows: all } = await getAuditTrail({});
     expect(all.some((r) => r.action === "INVOICE_REVISE")).toBe(true);
 
-    const filtered = await getAuditTrail({ action: "INVOICE_REVISE" });
+    const { rows: filtered } = await getAuditTrail({ action: "INVOICE_REVISE" });
     expect(filtered.every((r) => r.action === "INVOICE_REVISE")).toBe(true);
   });
 
@@ -71,11 +79,11 @@ describe("P5.9: Audit trail report", () => {
         tx: tx as Tx,
       })
     );
-    const byEmail = await getAuditTrail({ userEmail: "range@test.local" });
+    const { rows: byEmail } = await getAuditTrail({ userEmail: "range@test.local" });
     expect(byEmail.length).toBeGreaterThan(0);
     expect(byEmail.every((r) => r.userEmail === "range@test.local")).toBe(true);
 
-    const future = await getAuditTrail({ fromDate: new Date("2099-01-01") });
+    const { rows: future } = await getAuditTrail({ fromDate: new Date("2099-01-01") });
     expect(future).toHaveLength(0);
   });
 
@@ -110,9 +118,190 @@ describe("P5.9: Audit trail report", () => {
     });
     // The CSV endpoint is an API route; testing via live HTTP is acceptable for this gate check,
     // but here we verify the CSV construction logic through getAuditTrail content (see CSV route code).
-    const rows = await getAuditTrail({ action: "INVOICE_REVISE" });
+    const { rows } = await getAuditTrail({ action: "INVOICE_REVISE" });
     expect(rows.length).toBeGreaterThan(0);
     const row = rows[0];
     expect(row.detail).toContain("CSV");
+  });
+
+  describe("audit trail data layer", () => {
+    it("treats 19:59:59.999Z and 20:00:00.000Z as different Dubai days", async () => {
+      await prisma.auditLog.createMany({
+        data: [
+          {
+            userEmail: "boundary@test.local",
+            action: "TEST_ACTION",
+            createdAt: new Date("2026-10-30T19:59:59.999Z"), // 2026-10-30 23:59:59.999 Dubai
+          },
+          {
+            userEmail: "boundary@test.local",
+            action: "TEST_ACTION",
+            createdAt: new Date("2026-10-30T20:00:00.000Z"), // 2026-10-31 00:00:00.000 Dubai
+          },
+        ],
+      });
+
+      const oct30 = parseAuditTrailParams({
+        fromDate: "2026-10-30",
+        toDate: "2026-10-30",
+        page: "1",
+        pageSize: "50",
+      });
+      const rows30 = (await getAuditTrail(oct30)).rows;
+      expect(rows30).toHaveLength(1);
+      expect(rows30[0].createdAt.getTime()).toBe(
+        new Date("2026-10-30T19:59:59.999Z").getTime(),
+      );
+
+      const oct31 = parseAuditTrailParams({
+        fromDate: "2026-10-31",
+        toDate: "2026-10-31",
+        page: "1",
+        pageSize: "50",
+      });
+      const rows31 = (await getAuditTrail(oct31)).rows;
+      expect(rows31).toHaveLength(1);
+      expect(rows31[0].createdAt.getTime()).toBe(
+        new Date("2026-10-30T20:00:00.000Z").getTime(),
+      );
+    });
+
+    it("clamps pageSize=1000 to 100 and rejects impossible dates per field", async () => {
+      await prisma.auditLog.createMany({
+        data: Array.from({ length: 150 }, () => ({
+          userEmail: "clamp@test.local",
+          action: "TEST_ACTION",
+          createdAt: new Date(),
+        })),
+      });
+
+      const parsed = parseAuditTrailParams({ pageSize: "1000" });
+      expect(parsed.pageSize).toBe(100);
+      const { rows } = await getAuditTrail(parsed);
+      expect(rows.length).toBe(100);
+
+      // An impossible date (2026-02-31) is rejected for that field only;
+      // the userEmail filter still applies and a valid toDate is honored.
+      const mixed = parseAuditTrailParams({
+        fromDate: "2026-02-31",
+        toDate: "2026-10-30",
+        userEmail: "clamp@test.local",
+      });
+      expect(mixed.fromDate).toBeUndefined();
+      expect(mixed.toDate).toBeDefined();
+      const byEmail = await getAuditTrail(mixed);
+      expect(byEmail.rows.length).toBeGreaterThan(0);
+      expect(byEmail.rows.every((r) => r.userEmail === "clamp@test.local")).toBe(
+        true,
+      );
+    });
+
+    it("pages 1 and 2 do not overlap with 150 rows", async () => {
+      await prisma.auditLog.createMany({
+        data: Array.from({ length: 150 }, () => ({
+          userEmail: "overlap@test.local",
+          action: "TEST_ACTION",
+          createdAt: new Date(),
+        })),
+      });
+      const p1 = await getAuditTrail({ page: 1, pageSize: 50 });
+      const p2 = await getAuditTrail({ page: 2, pageSize: 50 });
+      const ids1 = new Set(p1.rows.map((r) => r.id));
+      const ids2 = new Set(p2.rows.map((r) => r.id));
+      expect(p1.rows.length).toBe(50);
+      expect(p2.rows.length).toBe(50);
+      for (const id of ids2) {
+        expect(ids1.has(id)).toBe(false);
+      }
+    });
+
+    it("denies audit access to a VIEWER via the non-redirecting check", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "viewer-1", email: "viewer@test.local", role: "VIEWER" },
+      });
+      const user = await getAuditAccess();
+      expect(user).toBeNull();
+    });
+
+    it("allows audit access to an ACCOUNTANT via the non-redirecting check", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "acc-1", email: "acc@test.local", role: "ACCOUNTANT" },
+      });
+      const user = await getAuditAccess();
+      expect(user).toBeTruthy();
+      expect(user?.role).toBe("ACCOUNTANT");
+    });
+
+    it("denies audit access when there is no session", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue(null);
+      const user = await getAuditAccess();
+      expect(user).toBeNull();
+    });
+
+    it("returns 403 from the CSV route for a VIEWER", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "viewer-1", email: "viewer@test.local", role: "VIEWER" },
+      });
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(403);
+      const json = await res.json();
+      expect(json.ok).toBe(false);
+      expect(json.error).toBe("Forbidden");
+    });
+
+    it("marks the CSV export truncated when total exceeds the cap", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "admin-1", email: "admin@test.local", role: "ADMIN" },
+      });
+
+      const getAuditTrailMock = vi.spyOn(reportsModule, "getAuditTrail");
+      getAuditTrailMock.mockResolvedValue({
+        rows: Array.from({ length: 50000 }, (_, i) => ({
+          id: `row-${i}`,
+          createdAt: new Date(),
+          userEmail: "x@test.local",
+          action: "TEST_ACTION",
+          entityType: null,
+          entityId: null,
+          detail: null,
+        })),
+        total: 50001,
+      });
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(200);
+      expect(res.headers.get("X-Export-Truncated")).toBe("true");
+      const body = await res.text();
+      // 1 header row + exactly 50000 data rows (capped at EXPORT_ROW_CAP)
+      expect(body.split("\n").length).toBe(50000 + 1);
+      getAuditTrailMock.mockRestore();
+    });
   });
 });

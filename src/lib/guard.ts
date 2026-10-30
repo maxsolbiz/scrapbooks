@@ -106,6 +106,35 @@ export async function requireAdmin(): Promise<SessionUser> {
   return user;
 }
 
+/** Read audit logs: ADMIN, ACCOUNTANT, and SUPER_ADMIN only; deny by default. */
+export async function requireAuditAccess(): Promise<SessionUser> {
+  const user = await requireUser();
+  if (
+    user.role !== "ADMIN" &&
+    user.role !== "ACCOUNTANT" &&
+    user.role !== "SUPER_ADMIN"
+  ) {
+    redirect("/dashboard");
+  }
+  return user;
+}
+
+/** Non-redirecting audit-access check for API routes: returns the session user
+ * when allowed, or null otherwise (no session, or insufficient role). */
+export async function getAuditAccess(): Promise<SessionUser | null> {
+  const session = await auth();
+  const user = session?.user;
+  if (!user) return null;
+  if (
+    user.role !== "ADMIN" &&
+    user.role !== "ACCOUNTANT" &&
+    user.role !== "SUPER_ADMIN"
+  ) {
+    return null;
+  }
+  return { id: user.id, name: user.name, email: user.email, role: user.role ?? null };
+}
+
 /** Only SUPER_ADMIN passes; everyone else is redirected to /dashboard. */
 export async function requireSuperAdmin(): Promise<SessionUser> {
   const user = await requireUser();

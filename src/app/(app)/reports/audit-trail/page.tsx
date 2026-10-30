@@ -1,10 +1,12 @@
-"use server";
-
-import { requireModule } from "@/lib/guard";
+import { requireAuditAccess } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
-import { getAuditTrail, type AuditTrailFilter } from "@/lib/reports";
+import {
+  getAuditTrail,
+  parseAuditTrailParams,
+  formatDubaiDate,
+  formatDubaiDateTime,
+} from "@/lib/reports";
 import { PageHeader } from "@/components/layout/PageHeader";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,19 +19,13 @@ export default async function AuditTrailPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireModule("reports", "read");
+  await requireAuditAccess();
   const locale = await getServerLocale();
   const t = getDictionary(locale);
   const params = await searchParams;
+  const parsed = parseAuditTrailParams(params);
 
-  const filters: AuditTrailFilter = {
-    fromDate: params.fromDate ? new Date(params.fromDate) : undefined,
-    toDate: params.toDate ? new Date(params.toDate) : undefined,
-    userEmail: params.userEmail || undefined,
-    action: params.action && params.action !== "All" ? params.action : undefined,
-  };
-
-  const rows = await getAuditTrail(filters);
+  const { rows, total } = await getAuditTrail(parsed);
 
   return (
     <div className="space-y-4">
@@ -39,12 +35,22 @@ export default async function AuditTrailPage({
           <form action="/reports/audit-trail" method="get" className="space-y-4">
             <div className="grid gap-3 md:grid-cols-4">
               <div className="space-y-1.5">
-                <Label htmlFor="fromDate">{t.invoices.aging}</Label>
-                <Input type="date" id="fromDate" name="fromDate" defaultValue={params.fromDate ?? ""} />
+                <Label htmlFor="fromDate">{t.reports.auditTrail?.fromDate || "From Date"}</Label>
+                <Input
+                  type="date"
+                  id="fromDate"
+                  name="fromDate"
+                  defaultValue={parsed.fromDate ? formatDubaiDate(parsed.fromDate) : ""}
+                />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="toDate">{t.invoices.dueDate}</Label>
-                <Input type="date" id="toDate" name="toDate" defaultValue={params.toDate ?? ""} />
+                <Label htmlFor="toDate">{t.reports.auditTrail?.toDate || "To Date"}</Label>
+                <Input
+                  type="date"
+                  id="toDate"
+                  name="toDate"
+                  defaultValue={parsed.toDate ? formatDubaiDate(parsed.toDate) : ""}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="userEmail">{t.reports.auditTrail?.userEmail || "User"}</Label>
@@ -57,7 +63,14 @@ export default async function AuditTrailPage({
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">{t.reports.auditTrail.filters || "Filter"}</Button>
-              <AuditCsvButton filters={{ fromDate: params.fromDate || undefined, toDate: params.toDate || undefined, userEmail: params.userEmail || undefined, action: params.action || undefined }} />
+              <AuditCsvButton
+                filters={{
+                  fromDate: params.fromDate || undefined,
+                  toDate: params.toDate || undefined,
+                  userEmail: params.userEmail || undefined,
+                  action: params.action || undefined,
+                }}
+              />
             </div>
           </form>
         </CardContent>
@@ -76,9 +89,16 @@ export default async function AuditTrailPage({
               </tr>
             </thead>
             <tbody>
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-4 text-center text-muted-foreground">
+                    {t.common.empty || "No records found"}
+                  </td>
+                </tr>
+              )}
               {rows.map((r) => (
                 <tr key={r.id} className="border-b">
-                  <td className="py-2">{r.createdAt.toISOString().slice(0, 10)}</td>
+                  <td className="py-2">{formatDubaiDateTime(r.createdAt)}</td>
                   <td className="py-2 font-mono text-xs">{r.userEmail}</td>
                   <td className="py-2"><Badge variant="outline">{r.action}</Badge></td>
                   <td className="py-2 text-xs">{r.entityType ?? "—"}</td>
@@ -88,6 +108,11 @@ export default async function AuditTrailPage({
               ))}
             </tbody>
           </table>
+          <p className="text-xs text-muted-foreground">
+            {(t.reports.auditTrail?.showing || "Showing {count} of {total} records")
+              .replace("{count}", String(rows.length))
+              .replace("{total}", String(total))}
+          </p>
         </CardContent>
       </Card>
     </div>

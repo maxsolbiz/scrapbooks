@@ -300,6 +300,7 @@ const en = {
       entityId: "Entity ID",
       detail: "Detail",
       exportCsv: "Export CSV",
+      showing: "Showing {count} of {total} records",
     },
     vat201: {
       title: "VAT 201 Return",
@@ -696,6 +697,7 @@ paymentStatus: "حالة الدفع",
       entityId: "معرف الكيان",
       detail: "التفاصيل",
       exportCsv: "تصدير CSV",
+      showing: "يتم عرض {count} من {total} سجل",
     },
     vat201: {
       title: "إقرار ضريبة القيمة المضافة 201",

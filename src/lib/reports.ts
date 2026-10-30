@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import type { Account, FiscalYear } from "@/generated/prisma/client";
 import { signFor } from "@/lib/accounting";
 import { formatAED } from "@/lib/money";
+import { z } from "zod";
 
 export interface TrialBalanceRow {
   id: string;
@@ -426,11 +427,169 @@ export async function agingReport(direction: "SALES" | "PURCHASE"): Promise<Agin
   return out;
 }
 
+// Asia/Dubai is UTC+4 year-round (no DST). Audit timestamps are stored in UTC;
+// date-picker values are calendar dates in the viewer's local Dubai day, so we
+// convert day boundaries to UTC instants before querying.
+const DUBAI_OFFSET_MS = 4 * 60 * 60 * 1000;
+
+function dubaiStartOfDayUtc(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 0, 0, 0, 0) - DUBAI_OFFSET_MS);
+}
+function dubaiEndOfDayUtc(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999) - DUBAI_OFFSET_MS);
+}
+function dubaiTodayString(): string {
+  return new Date(Date.now() + DUBAI_OFFSET_MS).toISOString().slice(0, 10);
+}
+function dubaiDaysAgo(n: number): string {
+  const d = new Date(Date.now() + DUBAI_OFFSET_MS);
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+export function formatDubaiDate(date: Date): string {
+  return new Date(date.getTime() + DUBAI_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+export function formatDubaiDateTime(date: Date): string {
+  return new Date(date.getTime() + DUBAI_OFFSET_MS).toISOString().slice(0, 16).replace("T", " ");
+}
+
+function isRealDate(d: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+  if (!m) return false;
+  const [, y, mo, da] = m.map(Number);
+  const parsed = new Date(Date.UTC(y, mo - 1, da));
+  return (
+    parsed.getUTCFullYear() === y &&
+    parsed.getUTCMonth() + 1 === mo &&
+    parsed.getUTCDate() === da
+  );
+}
+
+const dateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isRealDate, "Invalid date");
+
+function coerceField<T>(schema: z.ZodType<T>, value: string | undefined, fallback: T): T {
+  const result = schema.safeParse(value);
+  return result.success ? result.data : fallback;
+}
+
+export type AuditTrailSort = "createdAt" | "action" | "userEmail" | "entityType";
+
+export interface ParsedAuditTrailParams {
+  fromDate?: Date;
+  toDate?: Date;
+  userEmail?: string;
+  action?: string;
+  page: number;
+  pageSize: number;
+  sort: AuditTrailSort;
+  order: "asc" | "desc";
+}
+
+export function parseAuditTrailParams(raw: Record<string, string | undefined>): ParsedAuditTrailParams {
+  // Validate each field independently so one bad field (e.g. an impossible date
+  // like 2026-02-31) doesn't silently wipe the user's other filters.
+  const fromDateStr = coerceField(dateField, raw.fromDate, undefined);
+  const toDateStr = coerceField(dateField, raw.toDate, undefined);
+  const userEmail = coerceField(z.string().max(255), raw.userEmail, undefined);
+  const action = coerceField(z.string().max(100), raw.action, undefined);
+  const pageRaw = coerceField(z.coerce.number().int().positive(), raw.page, 1);
+  const pageSizeRaw = coerceField(z.coerce.number().int().positive(), raw.pageSize, 25);
+  const sort = coerceField(z.enum(["createdAt", "action", "userEmail", "entityType"]), raw.sort, "createdAt");
+  const order = coerceField(z.enum(["asc", "desc"]), raw.order, "desc");
+
+  // Clamp (don't reject): pageSize=1000 becomes 100, page=99999999999 becomes 100000,
+  // non-numeric falls back to default.
+  const page = Math.min(100000, Math.max(1, pageRaw));
+  const pageSize = Math.min(100, Math.max(1, pageSizeRaw));
+
+  let fromDate: Date | undefined;
+  let toDate: Date | undefined;
+  if (fromDateStr || toDateStr) {
+    fromDate = fromDateStr ? dubaiStartOfDayUtc(fromDateStr) : undefined;
+    toDate = toDateStr ? dubaiEndOfDayUtc(toDateStr) : undefined;
+  } else {
+    // Default: last 30 days in Dubai time, inclusive of today.
+    fromDate = dubaiStartOfDayUtc(dubaiDaysAgo(29));
+    toDate = dubaiEndOfDayUtc(dubaiTodayString());
+  }
+
+  return {
+    fromDate,
+    toDate,
+    userEmail,
+    action,
+    page,
+    pageSize,
+    sort,
+    order,
+  };
+}
+
 export interface AuditTrailFilter {
   fromDate?: Date;
   toDate?: Date;
   userEmail?: string;
   action?: string;
+}
+
+export interface AuditTrailResult {
+  rows: AuditTrailRow[];
+  total: number;
+}
+
+export async function getAuditTrail(
+  filters: AuditTrailFilter & {
+    page?: number;
+    pageSize?: number;
+    sort?: AuditTrailSort;
+    order?: "asc" | "desc";
+  },
+): Promise<AuditTrailResult> {
+  const page = Math.min(100000, Math.max(1, filters.page ?? 1));
+  const pageSize = Math.min(50000, Math.max(1, filters.pageSize ?? 25));
+  const skip = (page - 1) * pageSize;
+  const sortBy: string = filters.sort ?? "createdAt";
+  const orderDir: "asc" | "desc" = filters.order ?? "desc";
+
+  const where: Record<string, unknown> = {};
+  if (filters.fromDate) where.createdAt = { ...(where.createdAt as Record<string, unknown>), gte: filters.fromDate };
+  if (filters.toDate) where.createdAt = { ...(where.createdAt as Record<string, unknown>), lte: filters.toDate };
+  if (filters.userEmail && filters.userEmail.trim() !== "") {
+    where.userEmail = { contains: filters.userEmail.trim(), mode: "insensitive" };
+  }
+  if (filters.action && filters.action.trim() !== "" && filters.action !== "All") {
+    where.action = filters.action.trim();
+  }
+
+  const orderBy: { [key: string]: "asc" | "desc" }[] = [
+    { [sortBy]: orderDir },
+    { id: orderDir },
+  ];
+
+  const [rows, total] = await prisma.$transaction([
+    prisma.auditLog.findMany({
+      where,
+      orderBy,
+      skip,
+      take: pageSize,
+      select: {
+        id: true,
+        createdAt: true,
+        userEmail: true,
+        action: true,
+        entityType: true,
+        entityId: true,
+        detail: true,
+      },
+    }),
+    prisma.auditLog.aggregate({ where, _count: true }),
+  ]) as [AuditTrailRow[], { _count: number }];
+
+  return { rows, total: total._count };
 }
 
 export interface AuditTrailRow {
@@ -441,35 +600,6 @@ export interface AuditTrailRow {
   entityType: string | null;
   entityId: string | null;
   detail: string | null;
-}
-
-export async function getAuditTrail(filters: AuditTrailFilter): Promise<AuditTrailRow[]> {
-  const where: any = {};
-  if (filters.fromDate || filters.toDate) {
-    where.createdAt = {};
-    if (filters.fromDate) where.createdAt.gte = filters.fromDate;
-    if (filters.toDate) where.createdAt.lte = filters.toDate;
-  }
-  if (filters.userEmail && filters.userEmail.trim() !== "") {
-    where.userEmail = { contains: filters.userEmail.trim(), mode: "insensitive" };
-  }
-  if (filters.action && filters.action.trim() !== "" && filters.action !== "All") {
-    where.action = filters.action.trim();
-  }
-  const result = await prisma.auditLog.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      createdAt: true,
-      userEmail: true,
-      action: true,
-      entityType: true,
-      entityId: true,
-      detail: true,
-    },
-  }) as AuditTrailRow[];
-  return result;
 }
 
 export interface DeductionsSummaryFilter {

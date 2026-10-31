@@ -4,7 +4,15 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDate?: string; userEmail?: string; action?: string } }) {
+export function AuditCsvButton({
+  filters,
+  exportSuccess,
+  exportError,
+}: {
+  filters: { fromDate?: string; toDate?: string; userEmail?: string; action?: string };
+  exportSuccess?: string;
+  exportError?: string;
+}) {
   const [submitting, setSubmitting] = useState(false);
   return (
     <Button variant="outline" onClick={async () => {
@@ -21,7 +29,7 @@ export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDa
           }),
         });
         if (!res.ok) {
-          let errorMsg = "Failed to export audit CSV";
+          let errorMsg = exportError || "Failed to export audit CSV";
           try {
             const err = await res.json();
             if (err.error) errorMsg = err.error;
@@ -49,9 +57,9 @@ export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDa
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(href);
-        toast.success("Audit trail exported");
+        toast.success(exportSuccess || "Audit trail exported");
       } catch {
-        toast.error("Failed to export audit CSV");
+        toast.error(exportError || "Failed to export audit CSV");
       } finally {
         setSubmitting(false);
       }

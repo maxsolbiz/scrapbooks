@@ -34,19 +34,24 @@ export function AuditRow({ row, severity }: AuditRowProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <tr
         key={row.id}
-        tabIndex={0}
-        role="button"
-        aria-label="View audit detail"
         onClick={() => setOpen(true)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setOpen(true);
-          }
-        }}
-        className="border-b cursor-pointer hover:bg-muted/50 transition-colors"
+        className="border-b hover:bg-muted/50 transition-colors"
       >
-        <td className="py-2">{row.createdAtLabel}</td>
+        <td className="py-2">
+          <button
+            type="button"
+            className="w-full text-left text-xs hover:underline focus:underline"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setOpen(true);
+              }
+            }}
+          >
+            {row.createdAtLabel}
+          </button>
+        </td>
         <td className="py-2 font-mono text-xs">{row.userEmail}</td>
         <td className="py-2"><Badge variant={badgeVariant}>{row.action}</Badge></td>
         <td className="py-2 text-xs">{row.entityType ?? "—"}</td>

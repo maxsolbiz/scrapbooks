@@ -77,12 +77,12 @@ export default async function AuditTrailPage({
 
   const dateRangeLabel =
     parsed.fromDate && parsed.toDate
-      ? `${formatDubaiDate(parsed.fromDate)} \u2013 ${formatDubaiDate(parsed.toDate)}`
+      ? `${t.reports.auditTrail?.from || "From"} ${formatDubaiDate(parsed.fromDate)} \u2013 ${t.reports.auditTrail?.to || "To"} ${formatDubaiDate(parsed.toDate)}`
       : parsed.fromDate
-        ? `From ${formatDubaiDate(parsed.fromDate)}`
+        ? `${t.reports.auditTrail?.from || "From"} ${formatDubaiDate(parsed.fromDate)}`
         : parsed.toDate
-          ? `To ${formatDubaiDate(parsed.toDate)}`
-          : t.reports.auditTrail?.last30Days || "Last 30 days";
+          ? `${t.reports.auditTrail?.to || "To"} ${formatDubaiDate(parsed.toDate)}`
+          : "";
 
   return (
     <div className="space-y-4">
@@ -161,6 +161,8 @@ export default async function AuditTrailPage({
                   userEmail: params.userEmail || undefined,
                   action: params.action || undefined,
                 }}
+                exportSuccess={t.reports.auditTrail?.exportSuccess || "Audit trail exported"}
+                exportError={t.reports.auditTrail?.exportError || "Failed to export audit CSV"}
               />
             </div>
           </form>

@@ -41,8 +41,13 @@ export default async function AuditTrailPage({
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   const rowsWithLabels = rows.map((r) => ({
-    ...r,
+    id: r.id,
     createdAtLabel: formatDubaiDateTime(r.createdAt),
+    userEmail: r.userEmail,
+    action: r.action,
+    entityType: r.entityType,
+    entityId: r.entityId,
+    detail: r.detail,
   }));
 
   const buildUrl = (overrides: Record<string, string | string[] | undefined>): string => {
@@ -189,7 +194,12 @@ export default async function AuditTrailPage({
                 </thead>
                 <tbody>
                   {rowsWithLabels.map((r) => (
-                    <AuditRow key={r.id} row={r} severity={AUDIT_ACTION_SEVERITY} />
+                    <AuditRow
+                      key={r.id}
+                      row={r}
+                      severity={AUDIT_ACTION_SEVERITY}
+                      dialogTitle={t.reports.auditTrail?.detailDialogTitle || "Audit detail"}
+                    />
                   ))}
                 </tbody>
               </table>

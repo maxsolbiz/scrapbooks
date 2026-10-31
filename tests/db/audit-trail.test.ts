@@ -91,42 +91,67 @@ describe("P5.9: Audit trail report", () => {
     expect(future).toHaveLength(0);
   });
 
-  it("CSV export includes BOM header and properly escapes commas/quotes in detail", async () => {
-    const invoice = await prisma.$transaction(async (tx) =>
-      createInvoice({
-        tx: tx as Tx,
-        direction: "SALES",
-        date: new Date("2026-06-01"),
-        partyId: ctx.customerId,
-        lines: [{ description: "test", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
-        createdById: ctx.userId,
-      })
-    );
-    await prisma.$transaction(async (tx) =>
-      revisePostedInvoice({
-        originalInvoiceId: invoice.id,
-        direction: "SALES",
-        reason: "CSV, \"quoted\" detail",
-        updates: {
+    it("CSV export includes BOM header and properly escapes commas/quotes in detail", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue({
+        user: { id: "admin-1", email: "admin@test.local", role: "ADMIN" },
+      });
+
+      const invoice = await prisma.$transaction(async (tx) =>
+        createInvoice({
+          tx: tx as Tx,
+          direction: "SALES",
           date: new Date("2026-06-01"),
-          lines: [{ description: "line", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
-        },
-        createdById: ctx.userId,
-        tx: tx as Tx,
-      })
-    );
-    const res = await fetch("http://localhost:3000/api/reports/audit-trail/csv", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fromDate: new Date("2026-01-01").toISOString(), action: "INVOICE_REVISE" }),
+          partyId: ctx.customerId,
+          lines: [{ description: "test", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
+          createdById: ctx.userId,
+        })
+      );
+      await prisma.$transaction(async (tx) =>
+        revisePostedInvoice({
+          originalInvoiceId: invoice.id,
+          direction: "SALES",
+          reason: "CSV, \"quoted\" detail",
+          updates: {
+            date: new Date("2026-06-01"),
+            lines: [{ description: "line", qty: "1", unit: "KG", rateFils: 10000n, vatRate: 0 }],
+          },
+          createdById: ctx.userId,
+          tx: tx as Tx,
+        })
+      );
+
+      // Verify data exists in the database directly
+      const directResult = await getAuditTrail({
+        action: "INVOICE_REVISE",
+        fromDate: new Date("2026-01-01"),
+      });
+      expect(directResult.rows.length).toBeGreaterThan(0);
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fromDate: "2026-01-01", action: "INVOICE_REVISE" }),
+        }),
+      );
+      expect(res.status).toBe(200);
+      const body = await res.text();
+      const lines = body.split("\n");
+      // BOM + header + at least 1 data row
+      expect(lines.length).toBeGreaterThanOrEqual(2);
+      expect(lines[0]).toBe("Date,User,Action,Entity Type,Entity ID,Detail");
+      const cols = parseCsvLine(lines[1]);
+      expect(cols.length).toBe(6);
+      expect(cols.some((c) => c.includes("CSV"))).toBe(true);
+
+      const exported = await prisma.auditLog.findFirst({
+        where: { action: "AUDIT_EXPORTED" },
+      });
+      expect(exported).toBeTruthy();
     });
-    // The CSV endpoint is an API route; testing via live HTTP is acceptable for this gate check,
-    // but here we verify the CSV construction logic through getAuditTrail content (see CSV route code).
-    const { rows } = await getAuditTrail({ action: "INVOICE_REVISE" });
-    expect(rows.length).toBeGreaterThan(0);
-    const row = rows[0];
-    expect(row.detail).toContain("CSV");
-  });
 
   describe("audit trail data layer", () => {
     it("treats 19:59:59.999Z and 20:00:00.000Z as different Dubai days", async () => {
@@ -227,8 +252,9 @@ describe("P5.9: Audit trail report", () => {
       mockAuth.mockResolvedValue({
         user: { id: "viewer-1", email: "viewer@test.local", role: "VIEWER" },
       });
-      const user = await getAuditAccess();
-      expect(user).toBeNull();
+      const result = await getAuditAccess();
+      expect(result.ok).toBe(false);
+      expect((result as { ok: false; reason: "forbidden" }).reason).toBe("forbidden");
     });
 
     it("allows audit access to an ACCOUNTANT via the non-redirecting check", async () => {
@@ -238,9 +264,11 @@ describe("P5.9: Audit trail report", () => {
       mockAuth.mockResolvedValue({
         user: { id: "acc-1", email: "acc@test.local", role: "ACCOUNTANT" },
       });
-      const user = await getAuditAccess();
-      expect(user).toBeTruthy();
-      expect(user?.role).toBe("ACCOUNTANT");
+      const result = await getAuditAccess();
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.user.role).toBe("ACCOUNTANT");
+      }
     });
 
     it("denies audit access when there is no session", async () => {
@@ -248,8 +276,33 @@ describe("P5.9: Audit trail report", () => {
         () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
       >;
       mockAuth.mockResolvedValue(null);
-      const user = await getAuditAccess();
-      expect(user).toBeNull();
+      const result = await getAuditAccess();
+      expect(result.ok).toBe(false);
+      expect((result as { ok: false; reason: "unauthenticated" }).reason).toBe("unauthenticated");
+    });
+
+    it("returns 401 from the CSV route with no session and writes no audit row", async () => {
+      const mockAuth = vi.mocked(auth) as unknown as MockInstance<
+        () => Promise<{ user: { id: string; email?: string | null; role: string } | null } | null>
+      >;
+      mockAuth.mockResolvedValue(null);
+
+      const res = await csvExport(
+        new Request("http://localhost/api/reports/audit-trail/csv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+      );
+      expect(res.status).toBe(401);
+      const json = await res.json();
+      expect(json.ok).toBe(false);
+      expect(json.error).toBe("Unauthorized");
+
+      const denied = await prisma.auditLog.findFirst({
+        where: { action: "AUDIT_EXPORT_DENIED" },
+      });
+      expect(denied).toBeNull();
     });
 
     it("returns 403 from the CSV route for a VIEWER", async () => {
@@ -270,6 +323,12 @@ describe("P5.9: Audit trail report", () => {
       const json = await res.json();
       expect(json.ok).toBe(false);
       expect(json.error).toBe("Forbidden");
+
+      const denied = await prisma.auditLog.findFirst({
+        where: { action: "AUDIT_EXPORT_DENIED" },
+      });
+      expect(denied).toBeTruthy();
+      expect(denied?.detail).toContain("without audit-log read access");
     });
 
     it("refuses the CSV export with 413 when total exceeds the cap", async () => {

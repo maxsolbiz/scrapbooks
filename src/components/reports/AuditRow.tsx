@@ -23,9 +23,10 @@ interface AuditRowProps {
     detail: string | null;
   };
   severity: Record<string, BadgeVariant>;
+  dialogTitle: string;
 }
 
-export function AuditRow({ row, severity }: AuditRowProps) {
+export function AuditRow({ row, severity, dialogTitle }: AuditRowProps) {
   const [open, setOpen] = useState(false);
 
   const badgeVariant = severity[row.action] ?? "outline";
@@ -41,13 +42,7 @@ export function AuditRow({ row, severity }: AuditRowProps) {
           <button
             type="button"
             className="w-full text-left text-xs hover:underline focus:underline"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setOpen(true);
-              }
-            }}
+            onClick={() => setOpen(true)}
           >
             {row.createdAtLabel}
           </button>
@@ -60,7 +55,7 @@ export function AuditRow({ row, severity }: AuditRowProps) {
       </tr>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Audit detail</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{row.action}</DialogDescription>
         </DialogHeader>
         <div className="whitespace-pre-wrap break-words text-xs leading-relaxed">

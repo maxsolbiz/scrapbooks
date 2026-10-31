@@ -23,8 +23,11 @@ function escapeCsvCell(v: string | null): string {
 }
 
 export async function POST(request: Request) {
-  const user = await getAuditAccess();
-  if (!user) {
+  const access = await getAuditAccess();
+  if (access.ok === false) {
+    if (access.reason === "unauthenticated") {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
     await prisma.auditLog.create({
       data: {
         userId: null,
@@ -37,6 +40,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
   }
+  const user = access.user;
   try {
     const body = (await request.json()) as Record<string, string | undefined>;
     const parsed = parseAuditTrailParams(body);

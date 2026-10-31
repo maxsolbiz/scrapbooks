@@ -120,19 +120,25 @@ export async function requireAuditAccess(): Promise<SessionUser> {
 }
 
 /** Non-redirecting audit-access check for API routes: returns the session user
- * when allowed, or null otherwise (no session, or insufficient role). */
-export async function getAuditAccess(): Promise<SessionUser | null> {
+ * when allowed, or a denial reason otherwise. Callers decide how to respond:
+ * unauthenticated → 401 without writing an audit row; forbidden → 403 with
+ * an AUDIT_EXPORT_DENIED row so the denial itself is auditable. */
+export type AuditAccessResult =
+  | { ok: true; user: SessionUser }
+  | { ok: false; reason: "unauthenticated" | "forbidden" };
+
+export async function getAuditAccess(): Promise<AuditAccessResult> {
   const session = await auth();
   const user = session?.user;
-  if (!user) return null;
+  if (!user) return { ok: false, reason: "unauthenticated" };
   if (
     user.role !== "ADMIN" &&
     user.role !== "ACCOUNTANT" &&
     user.role !== "SUPER_ADMIN"
   ) {
-    return null;
+    return { ok: false, reason: "forbidden" };
   }
-  return { id: user.id, name: user.name, email: user.email, role: user.role ?? null };
+  return { ok: true, user: { id: user.id, name: user.name, email: user.email, role: user.role ?? null } };
 }
 
 /** Only SUPER_ADMIN passes; everyone else is redirected to /dashboard. */

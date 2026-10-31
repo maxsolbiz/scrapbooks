@@ -5,6 +5,7 @@ import {
   parseAuditTrailParams,
   formatDubaiDate,
   formatDubaiDateTime,
+  AUDIT_ACTIONS,
 } from "@/lib/reports";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AuditCsvButton } from "@/components/reports/AuditCsvButton";
+import Link from "next/link";
 
 export default async function AuditTrailPage({
   searchParams,
@@ -26,6 +35,31 @@ export default async function AuditTrailPage({
   const parsed = parseAuditTrailParams(params);
 
   const { rows, total } = await getAuditTrail(parsed);
+  const pageSize = parsed.pageSize;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const hasPrev = parsed.page > 1;
+  const hasNext = parsed.page < pageCount;
+
+  const buildUrl = (overrides: Record<string, string | string[] | undefined>): string => {
+    const search = new URLSearchParams();
+    if (params.fromDate) search.set("fromDate", params.fromDate);
+    if (params.toDate) search.set("toDate", params.toDate);
+    if (params.userEmail) search.set("userEmail", params.userEmail);
+    if (params.action) search.set("action", params.action);
+    if (params.sort) search.set("sort", params.sort);
+    if (params.order) search.set("order", params.order);
+    search.set("pageSize", String(pageSize));
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value === undefined || value === "") {
+        search.delete(key);
+      } else if (Array.isArray(value)) {
+        value.forEach((v) => search.append(key, v));
+      } else {
+        search.set(key, value);
+      }
+    }
+    return `/reports/audit-trail?${search.toString()}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -58,11 +92,29 @@ export default async function AuditTrailPage({
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="action">{t.reports.auditTrail?.action || "Action"}</Label>
-                <Input type="text" id="action" name="action" defaultValue={params.action ?? ""} placeholder="e.g. INVOICE_REVISE" />
+                <Select
+                  name="action"
+                  defaultValue={params.action && params.action !== "" ? params.action : undefined}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t.reports.auditTrail?.action || "Action"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t.common.all || "All"}</SelectItem>
+                    {AUDIT_ACTIONS.map((action) => (
+                      <SelectItem key={action} value={action}>
+                        {action}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">{t.reports.auditTrail.filters || "Filter"}</Button>
+              <Link href={buildUrl({})}>
+                <Button variant="outline">{t.reports.auditTrail.reset || "Reset"}</Button>
+              </Link>
               <AuditCsvButton
                 filters={{
                   fromDate: params.fromDate || undefined,
@@ -77,42 +129,70 @@ export default async function AuditTrailPage({
       </Card>
       <Card>
         <CardContent>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">{t.common.date || "Date"}</th>
-                <th className="text-left py-2">{t.reports.auditTrail?.userEmail || "User"}</th>
-                <th className="text-left py-2">{t.reports.auditTrail?.action || "Action"}</th>
-                <th className="text-left py-2">{t.reports.auditTrail?.entityType || "Entity"}</th>
-                <th className="text-left py-2">{t.reports.auditTrail?.entityId || "Entity ID"}</th>
-                <th className="text-left py-2">{t.reports.auditTrail?.detail || "Detail"}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="py-4 text-center text-muted-foreground">
-                    {t.common.empty || "No records found"}
-                  </td>
-                </tr>
-              )}
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b">
-                  <td className="py-2">{formatDubaiDateTime(r.createdAt)}</td>
-                  <td className="py-2 font-mono text-xs">{r.userEmail}</td>
-                  <td className="py-2"><Badge variant="outline">{r.action}</Badge></td>
-                  <td className="py-2 text-xs">{r.entityType ?? "—"}</td>
-                  <td className="py-2 font-mono text-xs">{r.entityId ?? "—"}</td>
-                  <td className="py-2 text-xs truncate max-w-xs">{r.detail ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-xs text-muted-foreground">
-            {(t.reports.auditTrail?.showing || "Showing {count} of {total} records")
-              .replace("{count}", String(rows.length))
-              .replace("{total}", String(total))}
-          </p>
+          {total === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+              <p>{t.common.empty || "No records found"}</p>
+            </div>
+          ) : (
+            <>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2">{t.common.date || "Date"}</th>
+                    <th className="text-left py-2">{t.reports.auditTrail?.userEmail || "User"}</th>
+                    <th className="text-left py-2">{t.reports.auditTrail?.action || "Action"}</th>
+                    <th className="text-left py-2">{t.reports.auditTrail?.entityType || "Entity"}</th>
+                    <th className="text-left py-2">{t.reports.auditTrail?.entityId || "Entity ID"}</th>
+                    <th className="text-left py-2">{t.reports.auditTrail?.detail || "Detail"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.id} className="border-b">
+                      <td className="py-2">{formatDubaiDateTime(r.createdAt)}</td>
+                      <td className="py-2 font-mono text-xs">{r.userEmail}</td>
+                      <td className="py-2"><Badge variant="outline">{r.action}</Badge></td>
+                      <td className="py-2 text-xs">{r.entityType ?? "—"}</td>
+                      <td className="py-2 font-mono text-xs">{r.entityId ?? "—"}</td>
+                      <td className="py-2 text-xs truncate max-w-xs">{r.detail ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex items-center justify-between gap-2 mt-2">
+                {hasPrev ? (
+                  <Link href={buildUrl({ page: String(parsed.page - 1) })}>
+                    <Button variant="outline" size="sm">
+                      {t.reports.auditTrail.prev || "Previous"}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
+                    {t.reports.auditTrail.prev || "Previous"}
+                  </Button>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {t.reports.auditTrail.page || "Page"} {parsed.page} {t.reports.auditTrail.of || "of"} {pageCount}
+                </span>
+                {hasNext ? (
+                  <Link href={buildUrl({ page: String(parsed.page + 1) })}>
+                    <Button variant="outline" size="sm">
+                      {t.reports.auditTrail.next || "Next"}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
+                    {t.reports.auditTrail.next || "Next"}
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {(t.reports.auditTrail?.showing || "Showing {count} of {total} records")
+                  .replace("{count}", String(rows.length))
+                  .replace("{total}", String(total))}
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

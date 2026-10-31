@@ -529,6 +529,23 @@ export function parseAuditTrailParams(raw: Record<string, string | undefined>): 
   };
 }
 
+// Audit action codes observed in auditLog.create() calls across the codebase.
+// Used to populate the action filter select; do not invent values not seen here.
+export const AUDIT_ACTIONS = [
+  "AUDIT_EXPORTED",
+  "AUDIT_EXPORT_DENIED",
+  "BOUNCE_PDC",
+  "CLEAR_PDC",
+  "DEDUCTION_POSTED",
+  "DEDUCTION_UPDATED",
+  "INVOICE_CREATE",
+  "INVOICE_PRINT_DETAILS_UPDATE",
+  "INVOICE_REVISE",
+  "INVOICE_VOID",
+] as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
 export interface AuditTrailFilter {
   fromDate?: Date;
   toDate?: Date;

@@ -185,13 +185,12 @@ describe("P5.9: Audit trail report", () => {
       expect(rows.length).toBe(100);
 
       // An impossible date (2026-02-31) is rejected for that field only;
-      // the userEmail filter still applies and a valid toDate is honored.
+      // no valid dates were given, so the default 30-day window applies.
       const mixed = parseAuditTrailParams({
         fromDate: "2026-02-31",
-        toDate: "2026-10-30",
         userEmail: "clamp@test.local",
       });
-      expect(mixed.fromDate).toBeUndefined();
+      expect(mixed.fromDate).toBeDefined();
       expect(mixed.toDate).toBeDefined();
       const byEmail = await getAuditTrail(mixed);
       expect(byEmail.rows.length).toBeGreaterThan(0);

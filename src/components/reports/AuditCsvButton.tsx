@@ -8,10 +8,16 @@ export function AuditCsvButton({
   filters,
   exportSuccess,
   exportError,
+  buttonLabel,
+  buttonExporting,
+  unexpectedMessage,
 }: {
   filters: { fromDate?: string; toDate?: string; userEmail?: string; action?: string };
   exportSuccess?: string;
   exportError?: string;
+  buttonLabel?: string;
+  buttonExporting?: string;
+  unexpectedMessage?: string;
 }) {
   const [submitting, setSubmitting] = useState(false);
   return (
@@ -41,7 +47,7 @@ export function AuditCsvButton({
         }
         const contentType = res.headers.get("content-type") ?? "";
         if (!contentType.includes("text/csv")) {
-          toast.error("Unexpected response from server");
+          toast.error(unexpectedMessage || "Unexpected response from server");
           return;
         }
         // Use the filename the server suggested (Dubai-formatted date).
@@ -64,7 +70,7 @@ export function AuditCsvButton({
         setSubmitting(false);
       }
     }} disabled={submitting}>
-      {submitting ? "Exporting…" : "Export CSV"}
+      {submitting ? (buttonExporting || "Exporting…") : (buttonLabel || "Export CSV")}
     </Button>
   );
 }

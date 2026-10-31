@@ -30,8 +30,8 @@ export async function POST(request: Request) {
     }
     await prisma.auditLog.create({
       data: {
-        userId: null,
-        userEmail: "unknown",
+        userId: access.user?.id ?? null,
+        userEmail: access.user?.email ?? "",
         action: "AUDIT_EXPORT_DENIED",
         entityType: "AuditLog",
         entityId: null,

@@ -123,13 +123,6 @@ describe("P5.9: Audit trail report", () => {
         })
       );
 
-      // Verify data exists in the database directly
-      const directResult = await getAuditTrail({
-        action: "INVOICE_REVISE",
-        fromDate: new Date("2026-01-01"),
-      });
-      expect(directResult.rows.length).toBeGreaterThan(0);
-
       const res = await csvExport(
         new Request("http://localhost/api/reports/audit-trail/csv", {
           method: "POST",
@@ -138,9 +131,14 @@ describe("P5.9: Audit trail report", () => {
         }),
       );
       expect(res.status).toBe(200);
+
+      // Assert UTF-8 BOM from raw bytes (res.text() strips it).
+      const bytes = new Uint8Array(await res.clone().arrayBuffer());
+      expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+
       const body = await res.text();
       const lines = body.split("\n");
-      // BOM + header + at least 1 data row
+      // Header + at least 1 data row
       expect(lines.length).toBeGreaterThanOrEqual(2);
       expect(lines[0]).toBe("Date,User,Action,Entity Type,Entity ID,Detail");
       const cols = parseCsvLine(lines[1]);
@@ -255,6 +253,9 @@ describe("P5.9: Audit trail report", () => {
       const result = await getAuditAccess();
       expect(result.ok).toBe(false);
       expect((result as { ok: false; reason: "forbidden" }).reason).toBe("forbidden");
+      if (!result.ok && result.reason === "forbidden" && result.user) {
+        expect(result.user.email).toBe("viewer@test.local");
+      }
     });
 
     it("allows audit access to an ACCOUNTANT via the non-redirecting check", async () => {
@@ -279,6 +280,7 @@ describe("P5.9: Audit trail report", () => {
       const result = await getAuditAccess();
       expect(result.ok).toBe(false);
       expect((result as { ok: false; reason: "unauthenticated" }).reason).toBe("unauthenticated");
+      expect(result.user).toBeUndefined();
     });
 
     it("returns 401 from the CSV route with no session and writes no audit row", async () => {
@@ -329,6 +331,8 @@ describe("P5.9: Audit trail report", () => {
       });
       expect(denied).toBeTruthy();
       expect(denied?.detail).toContain("without audit-log read access");
+      expect(denied?.userEmail).toBe("viewer@test.local");
+      expect(denied?.userId).toBe("viewer-1");
     });
 
     it("refuses the CSV export with 413 when total exceeds the cap", async () => {

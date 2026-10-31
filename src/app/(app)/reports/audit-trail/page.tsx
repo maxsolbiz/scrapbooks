@@ -168,6 +168,9 @@ export default async function AuditTrailPage({
                 }}
                 exportSuccess={t.reports.auditTrail?.exportSuccess || "Audit trail exported"}
                 exportError={t.reports.auditTrail?.exportError || "Failed to export audit CSV"}
+                buttonLabel={t.reports.auditTrail?.exportCsv || "Export CSV"}
+                buttonExporting={t.reports.auditTrail?.buttonExporting || "Exporting…"}
+                unexpectedMessage={t.reports.auditTrail?.unexpectedMessage || "Unexpected response from server"}
               />
             </div>
           </form>

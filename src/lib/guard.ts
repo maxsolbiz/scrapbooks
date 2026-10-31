@@ -125,7 +125,7 @@ export async function requireAuditAccess(): Promise<SessionUser> {
  * an AUDIT_EXPORT_DENIED row so the denial itself is auditable. */
 export type AuditAccessResult =
   | { ok: true; user: SessionUser }
-  | { ok: false; reason: "unauthenticated" | "forbidden" };
+  | { ok: false; reason: "unauthenticated" | "forbidden"; user?: SessionUser };
 
 export async function getAuditAccess(): Promise<AuditAccessResult> {
   const session = await auth();
@@ -136,7 +136,11 @@ export async function getAuditAccess(): Promise<AuditAccessResult> {
     user.role !== "ACCOUNTANT" &&
     user.role !== "SUPER_ADMIN"
   ) {
-    return { ok: false, reason: "forbidden" };
+    return {
+      ok: false,
+      reason: "forbidden",
+      user: { id: user.id, name: user.name, email: user.email, role: user.role ?? null },
+    };
   }
   return { ok: true, user: { id: user.id, name: user.name, email: user.email, role: user.role ?? null } };
 }

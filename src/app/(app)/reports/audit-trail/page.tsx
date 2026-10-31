@@ -42,6 +42,22 @@ export default async function AuditTrailPage({
   const hasPrev = clampedPage > 1;
   const hasNext = clampedPage < pageCount;
 
+  // Summary stats computed from the current page rows.
+  const actionCounts = rows.reduce(
+    (acc, r) => {
+      acc[r.action] = (acc[r.action] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+  const topAction = Object.entries(actionCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? "-";
+  const topActionCount = actionCounts[topAction ?? ""] ?? 0;
+
+  const dateRangeLabel =
+    parsed.fromDate && parsed.toDate
+      ? `${formatDubaiDate(parsed.fromDate)} \u2013 ${formatDubaiDate(parsed.toDate)}`
+      : t.reports.auditTrail?.last30Days || "Last 30 days";
+
   const buildUrl = (overrides: Record<string, string | string[] | undefined>): string => {
     const search = new URLSearchParams();
     if (params.fromDate) search.set("fromDate", params.fromDate);
@@ -66,6 +82,35 @@ export default async function AuditTrailPage({
   return (
     <div className="space-y-4">
       <PageHeader title={t.reports.auditTrail?.title || "Audit Trail"} />
+      <Card>
+        <CardContent className="grid gap-4 sm:grid-cols-4">
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {t.reports.auditTrail?.totalRecords || "Total records"}
+            </p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums font-mono">{total}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {t.reports.auditTrail?.pageRecords || "Records on this page"}
+            </p>
+            <p className="mt-1 text-2xl font-semibold tabular-nums font-mono">{rows.length}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {t.reports.auditTrail?.topAction || "Top action"}
+            </p>
+            <p className="mt-1 text-xl font-semibold truncate">{topAction}</p>
+            <p className="text-[10px] text-muted-foreground">{topActionCount}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {t.reports.auditTrail?.dateRange || "Date range"}
+            </p>
+            <p className="mt-1 text-sm truncate">{dateRangeLabel}</p>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardContent>
           <form action="/reports/audit-trail" method="get" className="space-y-4">

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi, type MockInstance } fr
 import { prisma } from "@/lib/db";
 import { createInvoice } from "@/lib/invoices";
 import { revisePostedInvoice } from "@/lib/invoice-revision";
-import { getAuditTrail, parseAuditTrailParams } from "@/lib/reports";
+import { getAuditTrail, parseAuditTrailParams, AUDIT_ACTIONS } from "@/lib/reports";
 import * as reportsModule from "@/lib/reports";
 import { getAuditAccess } from "@/lib/guard";
 import { auth } from "@/lib/auth";
@@ -185,12 +185,14 @@ describe("P5.9: Audit trail report", () => {
       expect(rows.length).toBe(100);
 
       // An impossible date (2026-02-31) is rejected for that field only;
-      // no valid dates were given, so the default 30-day window applies.
+      // a valid toDate is honored. The bad fromDate falls out of the filter,
+      // so the query is unbounded below but still returns rows.
       const mixed = parseAuditTrailParams({
         fromDate: "2026-02-31",
+        toDate: "2099-01-01",
         userEmail: "clamp@test.local",
       });
-      expect(mixed.fromDate).toBeDefined();
+      expect(mixed.fromDate).toBeUndefined();
       expect(mixed.toDate).toBeDefined();
       const byEmail = await getAuditTrail(mixed);
       expect(byEmail.rows.length).toBeGreaterThan(0);
@@ -431,6 +433,47 @@ describe("P5.9: Audit trail report", () => {
       });
       expect(denied).toBeTruthy();
       expect(denied?.detail).toContain("without audit-log read access");
+    });
+
+    it("AUDIT_ACTIONS covers every audit action literal in src", async () => {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const repoRoot = path.resolve(__dirname, "..", "..");
+      const srcDir = path.join(repoRoot, "src");
+
+      const walk = (dir: string): string[] => {
+        let files: string[] = [];
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            if (entry.name === "node_modules" || entry.name === "generated") continue;
+            files = files.concat(walk(full));
+          } else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
+            files.push(full);
+          }
+        }
+        return files;
+      };
+
+      const files = walk(srcDir);
+      const foundActions = new Set<string>();
+
+      const actionRe = /action:\s*"([A-Z][A-Z0-9_]*)"/g;
+      const logAuditRe = /logAudit\([^,]+,\s*"([A-Z][A-Z0-9_]*)"/g;
+
+      for (const file of files) {
+        const content = fs.readFileSync(file, "utf8");
+        for (const re of [actionRe, logAuditRe]) {
+          let match: RegExpExecArray | null;
+          while ((match = re.exec(content)) !== null) {
+            foundActions.add(match[1]);
+          }
+        }
+      }
+
+      const allowed = new Set<string>(AUDIT_ACTIONS as unknown as string[]);
+      const missing = [...foundActions].filter((a) => !allowed.has(a));
+      expect(missing).toEqual([]);
     });
   });
 });

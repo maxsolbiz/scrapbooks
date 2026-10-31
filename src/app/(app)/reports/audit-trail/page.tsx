@@ -37,8 +37,10 @@ export default async function AuditTrailPage({
   const { rows, total } = await getAuditTrail(parsed);
   const pageSize = parsed.pageSize;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  const hasPrev = parsed.page > 1;
-  const hasNext = parsed.page < pageCount;
+  // Clamp page to valid range so ?page=999 doesn't show an empty table.
+  const clampedPage = Math.min(Math.max(1, parsed.page), pageCount);
+  const hasPrev = clampedPage > 1;
+  const hasNext = clampedPage < pageCount;
 
   const buildUrl = (overrides: Record<string, string | string[] | undefined>): string => {
     const search = new URLSearchParams();
@@ -91,16 +93,16 @@ export default async function AuditTrailPage({
                 <Input type="text" id="userEmail" name="userEmail" defaultValue={params.userEmail ?? ""} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="action">{t.reports.auditTrail?.action || "Action"}</Label>
+                <Label>{t.reports.auditTrail?.action || "Action"}</Label>
                 <Select
                   name="action"
-                  defaultValue={params.action && params.action !== "" ? params.action : undefined}
+                  defaultValue={params.action && params.action !== "" && params.action !== "ALL" ? params.action : undefined}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t.reports.auditTrail?.action || "Action"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t.common.all || "All"}</SelectItem>
+                    <SelectItem value="ALL">{t.common.all || "All"}</SelectItem>
                     {AUDIT_ACTIONS.map((action) => (
                       <SelectItem key={action} value={action}>
                         {action}
@@ -112,9 +114,9 @@ export default async function AuditTrailPage({
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">{t.reports.auditTrail.filters || "Filter"}</Button>
-              <Link href={buildUrl({})}>
-                <Button variant="outline">{t.reports.auditTrail.reset || "Reset"}</Button>
-              </Link>
+              <Button asChild variant="outline">
+                <Link href="/reports/audit-trail">{t.reports.auditTrail.reset || "Reset"}</Link>
+              </Button>
               <AuditCsvButton
                 filters={{
                   fromDate: params.fromDate || undefined,
@@ -161,7 +163,7 @@ export default async function AuditTrailPage({
               </table>
               <div className="flex items-center justify-between gap-2 mt-2">
                 {hasPrev ? (
-                  <Link href={buildUrl({ page: String(parsed.page - 1) })}>
+                  <Link href={buildUrl({ page: String(clampedPage - 1) })}>
                     <Button variant="outline" size="sm">
                       {t.reports.auditTrail.prev || "Previous"}
                     </Button>
@@ -172,10 +174,10 @@ export default async function AuditTrailPage({
                   </Button>
                 )}
                 <span className="text-xs text-muted-foreground">
-                  {t.reports.auditTrail.page || "Page"} {parsed.page} {t.reports.auditTrail.of || "of"} {pageCount}
+                  {t.reports.auditTrail.page || "Page"} {clampedPage} {t.reports.auditTrail.of || "of"} {pageCount}
                 </span>
                 {hasNext ? (
-                  <Link href={buildUrl({ page: String(parsed.page + 1) })}>
+                  <Link href={buildUrl({ page: String(clampedPage + 1) })}>
                     <Button variant="outline" size="sm">
                       {t.reports.auditTrail.next || "Next"}
                     </Button>

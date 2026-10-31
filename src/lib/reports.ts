@@ -495,7 +495,8 @@ export function parseAuditTrailParams(raw: Record<string, string | undefined>): 
   const fromDateStr = coerceField(dateField, raw.fromDate, undefined);
   const toDateStr = coerceField(dateField, raw.toDate, undefined);
   const userEmail = coerceField(z.string().max(255), raw.userEmail, undefined);
-  const action = coerceField(z.string().max(100), raw.action, undefined);
+  let action = coerceField(z.string().max(100), raw.action, undefined);
+  if (action === "ALL") action = undefined;
   const pageRaw = coerceField(z.coerce.number().int().positive(), raw.page, 1);
   const pageSizeRaw = coerceField(z.coerce.number().int().positive(), raw.pageSize, 25);
   const sort = coerceField(z.enum(["createdAt", "action", "userEmail", "entityType"]), raw.sort, "createdAt");
@@ -531,17 +532,28 @@ export function parseAuditTrailParams(raw: Record<string, string | undefined>): 
 
 // Audit action codes observed in auditLog.create() calls across the codebase.
 // Used to populate the action filter select; do not invent values not seen here.
+// Kept in sync with every logAudit() / auditLog.create() call site.
+// A test in tests/db/audit-trail.test.ts fails if a literal action is missing.
 export const AUDIT_ACTIONS = [
   "AUDIT_EXPORTED",
   "AUDIT_EXPORT_DENIED",
   "BOUNCE_PDC",
   "CLEAR_PDC",
+  "COMPANY_UPDATE",
   "DEDUCTION_POSTED",
   "DEDUCTION_UPDATED",
+  "DEMO_RESET",
   "INVOICE_CREATE",
   "INVOICE_PRINT_DETAILS_UPDATE",
   "INVOICE_REVISE",
   "INVOICE_VOID",
+  "JOURNAL_CREATE",
+  "JOURNAL_VOID",
+  "PAYMENT_CREATE",
+  "PAYMENT_VOID",
+  "USER_CREATE",
+  "USER_DELETE",
+  "USER_UPDATE",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

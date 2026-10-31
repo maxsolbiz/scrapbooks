@@ -7,17 +7,15 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { formatDubaiDateTime } from "@/lib/reports";
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline" | "ghost" | "link";
 
 interface AuditRowProps {
   row: {
     id: string;
-    createdAt: Date;
+    createdAtLabel: string;
     userEmail: string;
     action: string;
     entityType: string | null;
@@ -33,28 +31,37 @@ export function AuditRow({ row, severity }: AuditRowProps) {
   const badgeVariant = severity[row.action] ?? "outline";
 
   return (
-    <>
-      <DialogTrigger asChild>
-        <tr key={row.id} className="border-b cursor-pointer hover:bg-muted/50 transition-colors">
-          <td className="py-2">{formatDubaiDateTime(row.createdAt)}</td>
-          <td className="py-2 font-mono text-xs">{row.userEmail}</td>
-          <td className="py-2"><Badge variant={badgeVariant}>{row.action}</Badge></td>
-          <td className="py-2 text-xs">{row.entityType ?? "—"}</td>
-          <td className="py-2 font-mono text-xs">{row.entityId ?? "—"}</td>
-          <td className="py-2 text-xs truncate max-w-xs">{row.detail ?? "—"}</td>
-        </tr>
-      </DialogTrigger>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Audit detail</DialogTitle>
-            <DialogDescription>{row.action}</DialogDescription>
-          </DialogHeader>
-          <div className="whitespace-pre-wrap break-words text-xs leading-relaxed">
-            {row.detail ?? "—"}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <tr
+        key={row.id}
+        tabIndex={0}
+        role="button"
+        aria-label="View audit detail"
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+        className="border-b cursor-pointer hover:bg-muted/50 transition-colors"
+      >
+        <td className="py-2">{row.createdAtLabel}</td>
+        <td className="py-2 font-mono text-xs">{row.userEmail}</td>
+        <td className="py-2"><Badge variant={badgeVariant}>{row.action}</Badge></td>
+        <td className="py-2 text-xs">{row.entityType ?? "—"}</td>
+        <td className="py-2 font-mono text-xs">{row.entityId ?? "—"}</td>
+        <td className="py-2 text-xs truncate max-w-xs">{row.detail ?? "—"}</td>
+      </tr>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Audit detail</DialogTitle>
+          <DialogDescription>{row.action}</DialogDescription>
+        </DialogHeader>
+        <div className="whitespace-pre-wrap break-words text-xs leading-relaxed">
+          {row.detail ?? "—"}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

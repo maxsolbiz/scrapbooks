@@ -36,11 +36,15 @@ export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDa
           toast.error("Unexpected response from server");
           return;
         }
+        // Use the filename the server suggested (Dubai-formatted date).
+        const disposition = res.headers.get("content-disposition") ?? "";
+        const match = disposition.match(/filename="([^"]+)"/);
+        const downloadName = match ? match[1] : `audit_trail_${new Date().toISOString().slice(0, 10)}.csv`;
         const blob = await res.blob();
         const href = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = href;
-        a.download = `audit_trail_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = downloadName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

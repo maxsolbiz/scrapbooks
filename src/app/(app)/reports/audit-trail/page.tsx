@@ -1,9 +1,11 @@
+import { redirect } from "next/navigation";
 import { requireAuditAccess } from "@/lib/guard";
 import { getServerLocale, getDictionary } from "@/lib/i18n";
 import {
   getAuditTrail,
   parseAuditTrailParams,
   formatDubaiDate,
+  formatDubaiDateTime,
   AUDIT_ACTIONS,
   AUDIT_ACTION_SEVERITY,
 } from "@/lib/reports";
@@ -37,26 +39,11 @@ export default async function AuditTrailPage({
   const { rows, total } = await getAuditTrail(parsed);
   const pageSize = parsed.pageSize;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  // Clamp page to valid range so ?page=999 doesn't show an empty table.
-  const clampedPage = Math.min(Math.max(1, parsed.page), pageCount);
-  const hasPrev = clampedPage > 1;
-  const hasNext = clampedPage < pageCount;
 
-  // Summary stats computed from the current page rows.
-  const actionCounts = rows.reduce(
-    (acc, r) => {
-      acc[r.action] = (acc[r.action] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-  const topAction = Object.entries(actionCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? "-";
-  const topActionCount = actionCounts[topAction ?? ""] ?? 0;
-
-  const dateRangeLabel =
-    parsed.fromDate && parsed.toDate
-      ? `${formatDubaiDate(parsed.fromDate)} \u2013 ${formatDubaiDate(parsed.toDate)}`
-      : t.reports.auditTrail?.last30Days || "Last 30 days";
+  const rowsWithLabels = rows.map((r) => ({
+    ...r,
+    createdAtLabel: formatDubaiDateTime(r.createdAt),
+  }));
 
   const buildUrl = (overrides: Record<string, string | string[] | undefined>): string => {
     const search = new URLSearchParams();
@@ -79,29 +66,34 @@ export default async function AuditTrailPage({
     return `/reports/audit-trail?${search.toString()}`;
   };
 
+  // Redirect to the last page when requested page is beyond range.
+  if (total > 0 && parsed.page > pageCount) {
+    redirect(buildUrl({ page: String(pageCount) }));
+  }
+
+  const clampedPage = Math.min(Math.max(1, parsed.page), pageCount);
+  const hasPrev = clampedPage > 1;
+  const hasNext = clampedPage < pageCount;
+
+  const dateRangeLabel =
+    parsed.fromDate && parsed.toDate
+      ? `${formatDubaiDate(parsed.fromDate)} \u2013 ${formatDubaiDate(parsed.toDate)}`
+      : parsed.fromDate
+        ? `From ${formatDubaiDate(parsed.fromDate)}`
+        : parsed.toDate
+          ? `To ${formatDubaiDate(parsed.toDate)}`
+          : t.reports.auditTrail?.last30Days || "Last 30 days";
+
   return (
     <div className="space-y-4">
       <PageHeader title={t.reports.auditTrail?.title || "Audit Trail"} />
       <Card>
-        <CardContent className="grid gap-4 sm:grid-cols-4">
+        <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border bg-card p-4">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               {t.reports.auditTrail?.totalRecords || "Total records"}
             </p>
             <p className="mt-1 text-2xl font-semibold tabular-nums font-mono">{total}</p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              {t.reports.auditTrail?.pageRecords || "Records on this page"}
-            </p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums font-mono">{rows.length}</p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              {t.reports.auditTrail?.topAction || "Top action"}
-            </p>
-            <p className="mt-1 text-xl font-semibold truncate">{topAction}</p>
-            <p className="text-[10px] text-muted-foreground">{topActionCount}</p>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -194,18 +186,18 @@ export default async function AuditTrailPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => (
+                  {rowsWithLabels.map((r) => (
                     <AuditRow key={r.id} row={r} severity={AUDIT_ACTION_SEVERITY} />
                   ))}
                 </tbody>
               </table>
               <div className="flex items-center justify-between gap-2 mt-2">
                 {hasPrev ? (
-                  <Link href={buildUrl({ page: String(clampedPage - 1) })}>
-                    <Button variant="outline" size="sm">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={buildUrl({ page: String(clampedPage - 1) })}>
                       {t.reports.auditTrail.prev || "Previous"}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
                     {t.reports.auditTrail.prev || "Previous"}
@@ -215,11 +207,11 @@ export default async function AuditTrailPage({
                   {t.reports.auditTrail.page || "Page"} {clampedPage} {t.reports.auditTrail.of || "of"} {pageCount}
                 </span>
                 {hasNext ? (
-                  <Link href={buildUrl({ page: String(clampedPage + 1) })}>
-                    <Button variant="outline" size="sm">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={buildUrl({ page: String(clampedPage + 1) })}>
                       {t.reports.auditTrail.next || "Next"}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 ) : (
                   <Button variant="outline" size="sm" disabled>
                     {t.reports.auditTrail.next || "Next"}

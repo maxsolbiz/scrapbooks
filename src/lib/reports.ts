@@ -574,7 +574,7 @@ export const AUDIT_ACTION_SEVERITY: Record<AuditAction, BadgeVariant> = {
   COMPANY_UPDATE: "outline",
   USER_UPDATE: "outline",
   USER_CREATE: "default",
-  USER_DELETE: "outline",
+  USER_DELETE: "destructive",
   DEMO_RESET: "destructive",
   JOURNAL_CREATE: "default",
   JOURNAL_VOID: "destructive",

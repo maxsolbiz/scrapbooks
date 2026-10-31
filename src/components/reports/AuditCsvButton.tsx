@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDate?: string; userEmail?: string; action?: string } }) {
@@ -20,8 +21,19 @@ export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDa
           }),
         });
         if (!res.ok) {
-          const e = await res.json();
-          alert(e.error || "Failed");
+          let errorMsg = "Failed to export audit CSV";
+          try {
+            const err = await res.json();
+            if (err.error) errorMsg = err.error;
+          } catch {
+            // ignore parse errors, use default message
+          }
+          toast.error(errorMsg);
+          return;
+        }
+        const contentType = res.headers.get("content-type") ?? "";
+        if (!contentType.includes("text/csv")) {
+          toast.error("Unexpected response from server");
           return;
         }
         const blob = await res.blob();
@@ -33,13 +45,14 @@ export function AuditCsvButton({ filters }: { filters: { fromDate?: string; toDa
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(href);
+        toast.success("Audit trail exported");
       } catch {
-        alert("Failed");
+        toast.error("Failed to export audit CSV");
       } finally {
         setSubmitting(false);
       }
     }} disabled={submitting}>
-      {submitting ? "Exporting..." : "Export CSV"}
+      {submitting ? "Exporting…" : "Export CSV"}
     </Button>
   );
 }

@@ -4,11 +4,10 @@ import {
   getAuditTrail,
   parseAuditTrailParams,
   formatDubaiDate,
-  formatDubaiDateTime,
   AUDIT_ACTIONS,
+  AUDIT_ACTION_SEVERITY,
 } from "@/lib/reports";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AuditCsvButton } from "@/components/reports/AuditCsvButton";
+import { AuditRow } from "@/components/reports/AuditRow";
 import Link from "next/link";
 
 export default async function AuditTrailPage({
@@ -150,14 +150,7 @@ export default async function AuditTrailPage({
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={r.id} className="border-b">
-                      <td className="py-2">{formatDubaiDateTime(r.createdAt)}</td>
-                      <td className="py-2 font-mono text-xs">{r.userEmail}</td>
-                      <td className="py-2"><Badge variant="outline">{r.action}</Badge></td>
-                      <td className="py-2 text-xs">{r.entityType ?? "—"}</td>
-                      <td className="py-2 font-mono text-xs">{r.entityId ?? "—"}</td>
-                      <td className="py-2 text-xs truncate max-w-xs">{r.detail ?? "—"}</td>
-                    </tr>
+                    <AuditRow key={r.id} row={r} severity={AUDIT_ACTION_SEVERITY} />
                   ))}
                 </tbody>
               </table>

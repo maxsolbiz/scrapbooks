@@ -533,7 +533,7 @@ export function parseAuditTrailParams(raw: Record<string, string | undefined>): 
 // Audit action codes observed in auditLog.create() calls across the codebase.
 // Used to populate the action filter select; do not invent values not seen here.
 // Kept in sync with every logAudit() / auditLog.create() call site.
-// A test in tests/db/audit-trail.test.ts fails if a literal action is missing.
+// A test in tests/db/audit-trail.test.ts fails if a literal action is missing from AUDIT_ACTIONS.
 export const AUDIT_ACTIONS = [
   "AUDIT_EXPORTED",
   "AUDIT_EXPORT_DENIED",
@@ -557,6 +557,30 @@ export const AUDIT_ACTIONS = [
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
+export type BadgeVariant = "default" | "secondary" | "destructive" | "outline" | "ghost" | "link";
+
+export const AUDIT_ACTION_SEVERITY: Record<AuditAction, BadgeVariant> = {
+  INVOICE_VOID: "destructive",
+  BOUNCE_PDC: "destructive",
+  AUDIT_EXPORT_DENIED: "destructive",
+  INVOICE_REVISE: "outline",
+  DEDUCTION_UPDATED: "outline",
+  INVOICE_PRINT_DETAILS_UPDATE: "outline",
+  INVOICE_CREATE: "default",
+  DEDUCTION_POSTED: "default",
+  CLEAR_PDC: "default",
+  AUDIT_EXPORTED: "secondary",
+  COMPANY_UPDATE: "outline",
+  USER_UPDATE: "outline",
+  USER_CREATE: "default",
+  USER_DELETE: "outline",
+  DEMO_RESET: "destructive",
+  JOURNAL_CREATE: "default",
+  JOURNAL_VOID: "destructive",
+  PAYMENT_CREATE: "default",
+  PAYMENT_VOID: "destructive",
+};
 
 export interface AuditTrailFilter {
   fromDate?: Date;
